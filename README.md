@@ -1,8 +1,46 @@
 # CodeWiki
 
-CodeWiki is a TypeScript npm CLI for a markdown-first, human-approved project wiki framework. It scaffolds `.codewiki/`, `raw/`, and `wiki/`, then provides thin commands that assemble context and proposals without silently mutating approved wiki knowledge.
+CodeWiki is a TypeScript npm CLI for bootstrapping a markdown-first project wiki that AI coding agents can read before modifying files and update only after human approval. It scaffolds a local `.codewiki/` schema plus `raw/` and `wiki/` folders, then helps agents produce human-reviewable wiki proposals instead of silently rewriting project knowledge.
 
-## Install / Develop
+## V1 principles
+
+- **Human approval is mandatory.** Commands may scaffold files or draft proposal artifacts, but wiki knowledge is not applied without an explicit human review step.
+- **Markdown is the system of record.** CodeWiki uses project-local markdown files instead of a database, server, vector index, or web UI.
+- **Tool adapters are thin.** Claude Code, Codex, Copilot, and OpenCode adapters translate the same verification loop into each tool's instruction or hook surface.
+- **Proposal output is honest.** `ingest`, `query`, and semantic lint review produce context bundles/checklists; they do not claim autonomous LLM synthesis or final verification.
+
+## Generated project layout
+
+After initialization, a project should contain:
+
+```text
+.codewiki/
+  config.yml
+  templates/
+    entity.md
+    decision.md
+    lesson.md
+    issue.md
+    source-summary.md
+  adapters/
+    claude-code/
+    codex/
+    copilot/
+    opencode/
+raw/
+wiki/
+  index.md
+  log.md
+  entities/
+  decisions/
+  lessons/
+  issues/
+  sources/
+```
+
+`raw/` is for immutable human-curated markdown sources. `wiki/` is for LLM-written, human-approved project knowledge. `.codewiki/` stores schema conventions, config, templates, and tool-specific adapter fragments.
+
+## Development
 
 ```bash
 npm install
@@ -12,41 +50,52 @@ npm test
 node dist/bin/codewiki.js --help
 ```
 
-The package exposes the `codewiki` binary from `./dist/bin/codewiki.js`. Runtime dependencies are intentionally zero; TypeScript and Node types are dev tooling only.
+The package compiles TypeScript from `src/` into `dist/` and runs Node's built-in test runner against compiled tests in `dist/test/`. Runtime dependencies are intentionally empty; `typescript` and `@types/node` are dev-only.
 
 ## Commands
 
 ```bash
-codewiki init
-codewiki init --tool claude-code,codex --name my-project
-codewiki ingest raw/api-redesign.md
-codewiki query "what retry lessons apply to api-client?"
+codewiki init [--tool claude-code,codex,copilot,opencode] [--name <project-name>] [--force]
+codewiki ingest <raw-markdown-path>
+codewiki query "<question>"
 codewiki lint
-codewiki prd "describe feature"
-codewiki tasks raw/<prd>.md
+codewiki prd "<description>"
+codewiki tasks <raw-prd-path>
 codewiki status
 ```
 
-## Human Approval Boundary
+| Command | Behavior |
+| --- | --- |
+| `init` | Creates the `.codewiki/`, `raw/`, and `wiki/` scaffold. It must refuse unsafe overwrites unless `--force` is supplied and must not claim tool auto-detection if none was performed. |
+| `ingest` | Accepts markdown sources, reads `wiki/index.md` when present, and emits a source-summary proposal plus related-update checklist. It must not write final wiki pages automatically. |
+| `query` | Reads `wiki/index.md` first, then matched wiki pages, and prints a referenced context bundle for an agent or human. It must not file new pages automatically. |
+| `lint` | Runs deterministic checks for required files, broken wikilinks, issue lifecycle metadata, orphan candidates, and entity file-hash drift. Semantic contradiction/stale-claim review is emitted as an agent-review checklist. |
+| `prd` | Creates a raw PRD draft marked human-review-needed. |
+| `tasks` | Creates a task-list artifact from a PRD and routes the work through the verification loop. |
+| `status` | Reports configured paths, page counts, last log entry, issue counts, and drift warning counts. |
 
-CodeWiki v1 is a deterministic scaffold/context/proposal generator. `ingest`, `query`, and `lint` print `PROPOSAL ONLY — no wiki files were modified without approval` and do not update `wiki/` content by default. Tests passing never auto-approves wiki writes; the agent proposes and the human approves.
+## Human approval boundary
 
-## Scaffold
+Tests passing never implies approval to mutate wiki pages. Ingest, query, and lint-derived updates are proposal-only and print:
 
-`codewiki init` creates:
+```text
+PROPOSAL ONLY — no wiki files were modified without approval
+```
 
-- `.codewiki/config.yml`
-- `.codewiki/templates/{entity,decision,lesson,issue,source-summary}.md`
-- `.codewiki/adapters/{claude-code,codex,copilot,opencode}/`
-- `raw/`
-- `wiki/{index.md,log.md,entities,decisions,lessons,issues,sources}`
+## Verification loop for wiki updates
 
-Use `--tool claude-code,codex,copilot,opencode` to select adapters. Unknown tools fail clearly. The CLI does not claim auto-detection unless a future implementation actually adds and tests it.
+1. Before modifying project files, an adapter can read `wiki/index.md` and matched issue/lesson/entity pages to inject relevant context.
+2. The agent makes the code change with that context.
+3. The agent runs relevant tests and summarizes files changed, wiki context used, and verification results.
+4. The agent stops for human review.
+5. Only after human approval may the agent propose or apply wiki updates such as lessons, entity updates, source summaries, or log entries.
 
-## Adapter Notes
+Read-only questions should use `codewiki query` explicitly instead of triggering pre-hook context injection automatically.
 
-Claude Code includes example hook wiring for file-write events only. Codex, Copilot, and OpenCode adapters are instruction-only in v1. Read-only tasks should use `codewiki query` explicitly; write tasks should read `wiki/index.md`, inspect matched pages, run tests, and ask for approval before wiki updates.
+## Adapter notes
 
-## V1 Non-Goals
+`init` can generate adapter fragments for Claude Code, Codex, Copilot, and OpenCode. Claude Code includes example hook wiring. Codex, Copilot, and OpenCode adapters are instruction-only unless you manually wire them into those tools. All adapters state that pre-hook behavior is file-modification-only and read-only tasks should call `codewiki query` explicitly when wiki context is helpful.
 
-No database, server, web UI, vector search, non-markdown ingestion, team workflow support, auto-verification, template migration CLI, or agent activity log ingestion is implemented in v1.
+## V1 non-goals
+
+CodeWiki v1 deliberately avoids agent activity-log ingestion as raw source, non-markdown ingestion, embeddings/vector search, team workflow management, auto-verification, template migration commands, a database, a server, and a web UI.
