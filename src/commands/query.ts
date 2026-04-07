@@ -1,34 +1,15 @@
-import { loadConfig } from "../core/config.js";
-import { findRelevantPages } from "../core/wiki-index.js";
-import { readTextRequired } from "../core/files.js";
-import { PROPOSAL_ONLY_BOUNDARY } from "../core/proposals.js";
+import { readConfig } from "../core/config.js";
+import { PROPOSAL_BOUNDARY } from "../core/proposals.js";
+import { findRelevantPages, readIndexFirst, readWikiPages } from "../core/wiki-index.js";
 
-export async function queryCommand(question: string, root = process.cwd()): Promise<string> {
+export async function runQuery(cwd: string, args: string[]): Promise<string> {
+  const question = args.join(" ").trim();
   if (!question) throw new Error("Usage: codewiki query <question>");
-  const config = await loadConfig(root);
-  const related = await findRelevantPages(root, config, question, 6);
-  const refs: string[] = [];
-  for (const match of related.matches) {
-    const markdown = await readTextRequired(root, match.path);
-    refs.push(`## ${match.path}\nMatched terms: ${match.matchedTerms.join(", ")}\n${markdown.slice(0, 2400)}`);
-  }
-  const noMatch = related.matches.length === 0 ? "\nNo matching wiki pages found. Do not hallucinate wiki context; answer from available evidence or ask the human for more sources.\n" : "";
-  return `${PROPOSAL_ONLY_BOUNDARY}
+  const config = await readConfig(cwd);
+  const index = await readIndexFirst(cwd, config.wiki.path);
+  const matches = await findRelevantPages(cwd, config.wiki.path, question);
+  const pages = await readWikiPages(cwd, matches);
+  const contexts = pages.map((page) => `## ${page.path}\nScore: ${page.score}\n\n${page.content}`).join("\n\n---\n\n");
 
-# CodeWiki Query Context Bundle
-
-Question: ${question}
-
-## Read Order
-1. ${related.readOrder.join("\n2. ")}
-
-## Matched Page References
-${related.matches.map((match) => `- ${match.path} — ${match.title}`).join("\n") || "- None"}
-${noMatch}
-## Context
-${refs.join("\n\n") || "No wiki page context selected."}
-
-## Synthesis Prompt
-Answer using the referenced wiki pages above. Cite relative wiki paths. Do not create or update wiki pages unless the human explicitly approves a later write.
-`;
+  return `# CodeWiki Query Context\n\nQuestion: ${question}\nRead order:\n1. \`${config.wiki.path.replace(/\/$/, "")}/index.md\`${index ? "" : " (missing)"}\n${pages.map((page, indexOffset) => `${indexOffset + 2}. \`${page.path}\``).join("\n")}\n\n${pages.length === 0 ? "No deterministic wiki pages matched this query. Do not hallucinate wiki context; answer from other evidence or ask the human to add approved wiki knowledge.\n" : `Matched page references:\n${pages.map((page) => `- \`${page.path}\` — ${page.excerpt}`).join("\n")}\n\n${contexts}\n`}\n## Synthesis prompt\nAnswer using only the matched wiki references above plus explicitly cited project evidence. If the answer should become durable knowledge, propose a wiki update for human approval. ${PROPOSAL_BOUNDARY}.\n`;
 }

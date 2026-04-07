@@ -11,61 +11,46 @@ export interface CodeWikiConfig {
   tools: SupportedTool[];
   wiki: {
     path: string;
-    rawPath: string;
+    raw_path: string;
   };
   verification: {
-    requireHumanApproval: boolean;
-    requireTests: boolean;
-    autoLog: boolean;
+    require_human_approval: boolean;
+    require_tests: boolean;
+    auto_log: boolean;
   };
   ingestion: {
     interactive: boolean;
-    maxPagesPerIngest: number;
+    max_pages_per_ingest: number;
   };
   lint: {
-    checkOrphans: boolean;
-    checkContradictions: boolean;
-    checkStaleIssues: boolean;
-    checkFileDrift: boolean;
+    check_orphans: boolean;
+    check_contradictions: boolean;
+    check_stale_issues: boolean;
+    check_file_drift: boolean;
   };
 }
 
-export type WriteKind = "applied" | "proposal";
+export type WriteKind = "applied" | "proposal-only";
 
-export interface FileWritePlan {
+export interface FileWriteRecord {
   kind: WriteKind;
   path: string;
   description: string;
 }
 
-export interface ProposalResult {
-  kind: "proposal";
+export interface ProposalBundle {
+  kind: "proposal-only";
   title: string;
-  boundary: string;
-  proposedWrites: FileWritePlan[];
+  source?: string;
+  relatedPages: string[];
   body: string;
 }
 
 export type LintSeverity = "error" | "warning" | "info";
-export type LintCategory =
-  | "missing-required"
-  | "broken-link"
-  | "issue-lifecycle"
-  | "orphan"
-  | "file-drift"
-  | "agent-review";
 
 export interface LintFinding {
   severity: LintSeverity;
-  category: LintCategory;
-  path: string;
+  category: "required-file" | "wikilink" | "issue-lifecycle" | "orphan" | "file-drift" | "agent-review";
+  path?: string;
   message: string;
-}
-
-export interface PageMatch {
-  path: string;
-  title: string;
-  score: number;
-  matchedTerms: string[];
-  summary: string;
 }

@@ -1,7 +1,7 @@
 {
   "name": "codewiki",
   "version": "0.1.0",
-  "description": "Markdown-first, human-approved project wiki framework CLI.",
+  "description": "Markdown-first CodeWiki framework CLI with human-approved wiki proposals.",
   "type": "module",
   "bin": {
     "codewiki": "./dist/bin/codewiki.js"
@@ -13,20 +13,21 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig.test.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
     "test": "npm run build && node --test \"dist/test/**/*.test.js\"",
-    "prepack": "npm run build"
+    "prepack": "npm run clean && npm run build && npm test"
   },
   "keywords": [
     "codewiki",
+    "ai",
     "markdown",
-    "cli",
-    "agent-context"
+    "cli"
   ],
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^25.0.0",
-    "typescript": "^5.9.0"
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
   }
 }

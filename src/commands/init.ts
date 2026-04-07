@@ -1,40 +1,46 @@
 import path from "node:path";
-import { ensureDir, writeTextFileSafe } from "../core/files.js";
-import { SUPPORTED_TOOLS, type SupportedTool } from "../core/types.js";
-import { scaffoldEntries } from "../templates/scaffold.js";
+import { ensureDir, writeFileSafe } from "../core/files.js";
+import { parseTools } from "../core/config.js";
+import { SUPPORTED_TOOLS, SupportedTool } from "../core/types.js";
+import { scaffoldDirectories, scaffoldFiles } from "../templates/scaffold.js";
 
 export interface InitOptions {
-  root?: string;
-  tools?: SupportedTool[];
-  name?: string;
-  force?: boolean;
+  cwd: string;
+  args: string[];
 }
 
-export function parseToolList(value: string): SupportedTool[] {
-  const tools = value.split(",").map((tool) => tool.trim()).filter(Boolean);
-  const unknown = tools.filter((tool) => !SUPPORTED_TOOLS.includes(tool as SupportedTool));
-  if (unknown.length > 0) {
-    throw new Error(`Unsupported tool(s): ${unknown.join(", ")}. Supported values: ${SUPPORTED_TOOLS.join(", ")}`);
-  }
-  return tools as SupportedTool[];
-}
-
-export async function initCommand(options: InitOptions = {}): Promise<string> {
-  const root = options.root ?? process.cwd();
-  const tools = options.tools ?? [...SUPPORTED_TOOLS];
-  const projectName = options.name ?? path.basename(root);
-  const entries = scaffoldEntries(projectName, tools);
-  for (const entry of entries) {
-    if (entry.directory) {
-      await ensureDir(root, entry.path);
-    } else if (entry.content !== undefined) {
-      await writeTextFileSafe(root, entry.path, entry.content, options.force ?? false);
+function parseInitArgs(args: string[], cwd: string): { force: boolean; name: string; tools: SupportedTool[] } {
+  let force = false;
+  let name = path.basename(cwd);
+  let tools: SupportedTool[] = [...SUPPORTED_TOOLS];
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index]!;
+    if (arg === "--force") force = true;
+    else if (arg === "--name") {
+      const value = args[++index];
+      if (!value) throw new Error("Missing value for --name");
+      name = value;
+    } else if (arg === "--tool") {
+      const value = args[++index];
+      if (!value) throw new Error("Missing value for --tool");
+      tools = parseTools(value);
+    } else if (arg.startsWith("--tool=")) {
+      tools = parseTools(arg.slice("--tool=".length));
+    } else {
+      throw new Error(`Unknown init option: ${arg}`);
     }
   }
-  return [
-    `Initialized CodeWiki for ${projectName}.`,
-    `Generated tools: ${tools.join(", ")}.`,
-    "No auto-detection was performed; use --tool to choose adapters explicitly.",
-    "Human approval boundary enabled: wiki updates remain proposals until approved."
-  ].join("\n");
+  return { force, name, tools };
+}
+
+export async function runInit({ cwd, args }: InitOptions): Promise<string> {
+  const options = parseInitArgs(args, cwd);
+  for (const dir of scaffoldDirectories(options.tools)) {
+    await ensureDir(cwd, dir);
+  }
+  const files = scaffoldFiles(options.name, options.tools);
+  for (const file of files) {
+    await writeFileSafe(cwd, file.path, file.content, options.force);
+  }
+  return `CodeWiki scaffold created for ${options.name}.\nGenerated adapters: ${options.tools.join(", ")}.\nHuman approval required for all wiki writes. No tool auto-detection was claimed.\n`;
 }

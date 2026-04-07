@@ -1,91 +1,94 @@
-import { promises as fs } from "node:fs";
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 
-export async function pathExists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export function toPosixPath(value: string): string {
-  return value.split(path.sep).join("/");
-}
-
-export function ensureWithinRoot(root: string, candidate: string): string {
+export function ensureInsideRoot(root: string, candidate: string): string {
   const resolvedRoot = path.resolve(root);
   const resolved = path.resolve(root, candidate);
-  if (resolved !== resolvedRoot && !resolved.startsWith(resolvedRoot + path.sep)) {
+  if (resolved !== resolvedRoot && !resolved.startsWith(`${resolvedRoot}${path.sep}`)) {
     throw new Error(`Path escapes project root: ${candidate}`);
   }
   return resolved;
 }
 
-export function relativeToRoot(root: string, absolutePath: string): string {
-  return toPosixPath(path.relative(root, absolutePath));
+export function relativePath(root: string, absolutePath: string): string {
+  return path.relative(path.resolve(root), path.resolve(absolutePath)).split(path.sep).join("/");
 }
 
-export async function writeTextFileSafe(root: string, relPath: string, content: string, force = false): Promise<void> {
-  const target = ensureWithinRoot(root, relPath);
-  await fs.mkdir(path.dirname(target), { recursive: true });
-  if (!force && (await pathExists(target))) {
-    const existing = await fs.readFile(target, "utf8");
-    if (existing.length > 0 && existing !== content) {
-      throw new Error(`Refusing to overwrite existing non-empty CodeWiki file without --force: ${relPath}`);
+export async function exists(filePath: string): Promise<boolean> {
+  try {
+    await stat(filePath);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+export async function readText(filePath: string): Promise<string> {
+  return readFile(filePath, "utf8");
+}
+
+export async function readTextIfExists(filePath: string): Promise<string | undefined> {
+  if (!(await exists(filePath))) return undefined;
+  return readText(filePath);
+}
+
+export async function writeFileSafe(root: string, relativeFile: string, content: string, force: boolean): Promise<void> {
+  const target = ensureInsideRoot(root, relativeFile);
+  await mkdir(path.dirname(target), { recursive: true });
+  if (!force && (await exists(target))) {
+    const current = await stat(target);
+    if (current.size > 0) {
+      throw new Error(`Refusing to overwrite existing non-empty file without --force: ${relativeFile}`);
     }
   }
-  await fs.writeFile(target, content, "utf8");
+  await writeFile(target, content, "utf8");
 }
 
-export async function ensureDir(root: string, relPath: string): Promise<void> {
-  await fs.mkdir(ensureWithinRoot(root, relPath), { recursive: true });
+export async function ensureDir(root: string, relativeDir: string): Promise<void> {
+  await mkdir(ensureInsideRoot(root, relativeDir), { recursive: true });
 }
 
-export async function readTextIfExists(root: string, relPath: string): Promise<string | undefined> {
-  const target = ensureWithinRoot(root, relPath);
-  if (!(await pathExists(target))) {
-    return undefined;
-  }
-  return fs.readFile(target, "utf8");
+export function isMarkdownPath(filePath: string): boolean {
+  const lower = filePath.toLowerCase();
+  return lower.endsWith(".md") || lower.endsWith(".markdown");
 }
 
-export async function readTextRequired(root: string, relPath: string): Promise<string> {
-  const text = await readTextIfExists(root, relPath);
-  if (text === undefined) {
-    throw new Error(`Required file not found: ${relPath}`);
-  }
-  return text;
-}
-
-export async function listFilesRecursive(root: string, relDir: string, extension?: string): Promise<string[]> {
-  const start = ensureWithinRoot(root, relDir);
-  if (!(await pathExists(start))) {
-    return [];
-  }
-  const output: string[] = [];
-  async function visit(absDir: string): Promise<void> {
-    const entries = await fs.readdir(absDir, { withFileTypes: true });
+export async function listMarkdownFiles(root: string, relativeDir: string): Promise<string[]> {
+  const base = ensureInsideRoot(root, relativeDir);
+  if (!(await exists(base))) return [];
+  const found: string[] = [];
+  async function walk(current: string): Promise<void> {
+    const entries = await readdir(current, { withFileTypes: true });
     for (const entry of entries) {
-      const abs = path.join(absDir, entry.name);
+      const full = path.join(current, entry.name);
       if (entry.isDirectory()) {
-        await visit(abs);
-      } else if (entry.isFile() && (!extension || entry.name.toLowerCase().endsWith(extension))) {
-        output.push(relativeToRoot(root, abs));
+        await walk(full);
+      } else if (entry.isFile() && isMarkdownPath(entry.name)) {
+        found.push(relativePath(root, full));
       }
     }
   }
-  await visit(start);
-  output.sort();
-  return output;
+  await walk(base);
+  return found.sort();
 }
 
-export async function snapshotFiles(root: string, relDir: string): Promise<Map<string, string>> {
-  const files = await listFilesRecursive(root, relDir);
-  const snapshot = new Map<string, string>();
-  for (const file of files) {
-    snapshot.set(file, await readTextRequired(root, file));
-  }
-  return snapshot;
+export async function sha256File(filePath: string): Promise<string> {
+  const data = await readFile(filePath);
+  return createHash("sha256").update(data).digest("hex");
+}
+
+export function slugify(input: string): string {
+  const slug = input
+    .toLowerCase()
+    .replace(/[`'"“”‘’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72);
+  return slug || "untitled";
+}
+
+export function timestampForFile(date = new Date()): string {
+  return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }

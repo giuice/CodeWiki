@@ -1,186 +1,27 @@
-import type { SupportedTool } from "../core/types.js";
-
-export function configTemplate(projectName: string, tools: SupportedTool[]): string {
-  const toolLines = tools.map((tool) => `  - ${tool}`).join("\n");
-  return `# .codewiki/config.yml
-version: 1
-
-project:
-  name: "${projectName}"
-  description: "Brief project description for LLM context"
-
-tools:
-${toolLines}
-
-wiki:
-  path: wiki/
-  raw_path: raw/
-
-verification:
-  require_human_approval: true
-  require_tests: true
-  auto_log: true
-
-ingestion:
-  interactive: true
-  max_pages_per_ingest: 20
-
-lint:
-  check_orphans: true
-  check_contradictions: true
-  check_stale_issues: true
-  check_file_drift: true
-`;
+export function entityTemplate(): string {
+  return `---\ntype: entity\nname: example-entity\nfiles: []\nfile_hashes:\n  path/to/file.ts: sha256-placeholder\nlinked_issues: []\nlinked_lessons: []\nlast_updated: YYYY-MM-DD\napproved: false\nverified_by: human\n---\n# Entity Name\n\n## Purpose\nDescribe the module, service, or component.\n\n## Key Files\n- \`path/to/file.ts\` — Why it matters.\n\n## Dependencies\n- Internal/external dependencies that shape future work.\n\n## Known Issues\n- [[ISSUE-XXX]] — Known trap.\n\n## Lessons Learned\n- [[LESSON-XXX]] — Verified learning.\n\n## Current Status\nHuman-reviewed status notes.\n`;
 }
 
-export const entityTemplate = `---
-type: entity
-name: example-entity
-files: [src/example.ts]
-file_hashes:
-  src/example.ts: TODO_SHA256
-linked_issues: []
-linked_lessons: []
-last_updated: TODO_DATE
-approved: false
-verified_by: human
----
-# example-entity
+export function decisionTemplate(): string {
+  return `---\ntype: decision\nid: DEC-XXX\nstatus: proposed\ndate: YYYY-MM-DD\napproved: false\nverified_by: human\n---\n# DEC-XXX: Decision Title\n\n## Context\nWhat forces led to this decision?\n\n## Decision\nWhat was decided?\n\n## Consequences\nWhat tradeoffs and follow-up checks matter?\n`;
+}
 
-## Purpose
-Describe the module, service, or component.
+export function lessonTemplate(): string {
+  return `---\ntype: lesson\nid: LESSON-XXX\nrelated_files: []\nrelated_entities: []\nverified: false\nverified_by: human\napproved: false\ndate: YYYY-MM-DD\n---\n# LESSON-XXX: Lesson Title\n\n## What happened\nDescribe the attempt or incident.\n\n## What went wrong\nCapture the false assumption or failure mode.\n\n## The fix\nCapture the verified correction.\n\n## Verification\nHuman-confirmed evidence required before this becomes accepted wiki knowledge.\n\n## Takeaway\nShort rule future agents should follow.\n`;
+}
 
-## Key Files
-- \`src/example.ts\` — Replace with real file responsibilities.
+export function issueTemplate(): string {
+  return `---\ntype: issue\nid: ISSUE-XXX\nstatus: open\nresolved_by: null\nrelated_files: []\nlinked_lessons: []\nverified_by: human\napproved: false\ndate: YYYY-MM-DD\n---\n# ISSUE-XXX: Issue Title\n\n## Problem\nKnown gotcha, trap, or agent pitfall.\n\n## How to recognize it\nSignals future agents should watch for.\n\n## Current workaround\nKnown mitigation while status is open.\n\n## Resolution\nIf status is resolved, link the stable lesson in \`resolved_by: LESSON-XXX\` without moving this file.\n`;
+}
 
-## Dependencies
-- Replace with direct dependencies.
+export function sourceSummaryTemplate(rawSource = "raw/example.md"): string {
+  return `---\ntype: source-summary\nsource: ${rawSource}\nrelated_pages: []\nverified_by: human\napproved: false\ndate: YYYY-MM-DD\n---\n# Source Summary: ${rawSource}\n\n## Source\n- \`${rawSource}\`\n\n## Key takeaways\n- Human/agent-reviewed summary point.\n\n## Related pages to update\n- Candidate wiki pages that may need changes after human approval.\n\n## Proposed wiki updates\nNo update is applied until a human approves the proposal.\n`;
+}
 
-## Known Issues
-- Link stable issue pages with \`[[ISSUE-XXX]]\`.
-
-## Lessons Learned
-- Link verified lessons with \`[[LESSON-XXX]]\`.
-
-## Current Status
-Human review needed before this template becomes a wiki fact.
-`;
-
-export const decisionTemplate = `---
-type: decision
-id: DEC-XXX
-status: proposed
-date: TODO_DATE
-approved: false
-verified_by: human
----
-# DEC-XXX: Decision title
-
-## Context
-What problem or force required a decision?
-
-## Decision
-What was chosen?
-
-## Consequences
-What tradeoffs follow from this choice?
-
-## Status
-Use proposed, accepted, superseded, or rejected after human review.
-`;
-
-export const lessonTemplate = `---
-type: lesson
-id: LESSON-XXX
-related_files: []
-related_entities: []
-verified: false
-verified_by: human
-approved: false
-date: TODO_DATE
----
-# LESSON-XXX: Lesson title
-
-## What happened
-Describe the attempted approach or observed behavior.
-
-## What went wrong
-Capture the false assumption, failure mode, or gotcha.
-
-## The fix
-Describe the verified correction.
-
-## Verification
-Human approval and evidence are required before this becomes wiki knowledge.
-
-## Takeaway
-State the reusable rule future agents should follow.
-`;
-
-export const issueTemplate = `---
-type: issue
-id: ISSUE-XXX
-status: open
-resolved_by: ""
-related_files: []
-related_entities: []
-verified_by: human
-approved: false
----
-# ISSUE-XXX: Issue title
-
-## Problem
-Known trap, pitfall, or unresolved risk.
-
-## Impact
-What breaks or becomes misleading?
-
-## Detection
-How future agents/developers can recognize it.
-
-## Resolution
-When resolved, keep this file in place and set \`status: resolved\` plus \`resolved_by: LESSON-XXX\` in frontmatter.
-`;
-
-export const sourceSummaryTemplate = `---
-type: source-summary
-source: raw/example.md
-related_pages: []
-verified_by: human
-approved: false
-date: TODO_DATE
----
-# Source Summary: example
-
-## Source
-Link to the immutable raw markdown source.
-
-## Key Takeaways
-- Human-reviewed summary bullets go here.
-
-## Related Wiki Updates Proposed
-- Entity/decision/issue/lesson pages that may need changes.
-
-## Approval Boundary
-PROPOSAL ONLY — no wiki files were modified without approval.
-`;
-
-export const initialIndex = `# CodeWiki Index
-
-Content-oriented catalog of human-approved wiki pages. Query and ingest commands read this first before selecting matched pages.
-
-## Entities
-
-## Decisions
-
-## Lessons
-
-## Issues
-
-## Sources
-`;
-
-export const initialLog = `# CodeWiki Log
-
-Append-only operation log. Entries are added only after human-approved wiki updates.
-`;
+export const PAGE_TEMPLATES = {
+  "entity.md": entityTemplate,
+  "decision.md": decisionTemplate,
+  "lesson.md": lessonTemplate,
+  "issue.md": issueTemplate,
+  "source-summary.md": () => sourceSummaryTemplate(),
+} as const;

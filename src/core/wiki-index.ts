@@ -1,36 +1,63 @@
 import path from "node:path";
-import { firstHeading, parseMarkdownWithFrontmatter, frontmatterString } from "./frontmatter.js";
-import { listFilesRecursive, readTextIfExists, readTextRequired } from "./files.js";
-import type { CodeWikiConfig, PageMatch } from "./types.js";
+import { ensureInsideRoot, listMarkdownFiles, readText, readTextIfExists, relativePath } from "./files.js";
 
-export function termsFromText(text: string): string[] {
-  const stop = new Set(["the", "and", "for", "with", "that", "this", "from", "into", "what", "how", "why", "about", "wiki", "codewiki"]);
-  const terms = text.toLowerCase().match(/[a-z0-9][a-z0-9_-]{2,}/g) ?? [];
-  return Array.from(new Set(terms.filter((term) => !stop.has(term))));
+export interface WikiPageMatch {
+  path: string;
+  score: number;
+  excerpt: string;
 }
 
-function summarize(markdown: string): string {
-  const line = markdown.split(/\r?\n/).find((candidate) => candidate.trim() && !candidate.startsWith("---") && !candidate.startsWith("#"));
-  return line?.trim().slice(0, 180) ?? "No summary available.";
+function terms(input: string): Set<string> {
+  return new Set(
+    input
+      .toLowerCase()
+      .split(/[^a-z0-9_-]+/)
+      .filter((term) => term.length > 2),
+  );
 }
 
-export async function findRelevantPages(root: string, config: CodeWikiConfig, query: string, limit = 5): Promise<{ index: string; matches: PageMatch[]; readOrder: string[] }> {
-  const indexPath = path.posix.join(config.wiki.path, "index.md");
-  const index = (await readTextIfExists(root, indexPath)) ?? "";
-  const readOrder = [indexPath];
-  const terms = termsFromText(`${query}\n${index}`);
-  const pages = (await listFilesRecursive(root, config.wiki.path, ".md")).filter((file) => !file.endsWith("index.md") && !file.endsWith("log.md"));
-  const matches: PageMatch[] = [];
+function firstHeading(markdown: string): string | undefined {
+  return markdown.split(/\r?\n/).find((line) => line.startsWith("# "))?.replace(/^#\s+/, "");
+}
+
+function excerptFor(markdown: string): string {
+  return markdown
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find((line) => line && !line.startsWith("---") && !line.startsWith("type:"))
+    ?.slice(0, 180) ?? "No excerpt available.";
+}
+
+export async function readIndexFirst(root: string, wikiPath: string): Promise<string> {
+  return (await readTextIfExists(path.join(root, wikiPath, "index.md"))) ?? "";
+}
+
+export async function findRelevantPages(root: string, wikiPath: string, query: string, limit = 5): Promise<WikiPageMatch[]> {
+  const index = await readIndexFirst(root, wikiPath);
+  const queryTerms = terms(`${query}\n${index}`);
+  const pages = (await listMarkdownFiles(root, wikiPath)).filter((page) => !page.endsWith("/index.md") && !page.endsWith("/log.md"));
+  const matches: WikiPageMatch[] = [];
+
   for (const page of pages) {
-    const markdown = await readTextRequired(root, page);
-    const parsed = parseMarkdownWithFrontmatter(markdown);
-    const title = firstHeading(parsed.body) ?? frontmatterString(parsed.frontmatter.id) ?? frontmatterString(parsed.frontmatter.name) ?? path.basename(page, ".md");
-    const haystack = `${page}\n${title}\n${markdown}`.toLowerCase();
-    const matchedTerms = terms.filter((term) => haystack.includes(term));
-    if (matchedTerms.length > 0) {
-      matches.push({ path: page, title, score: matchedTerms.length, matchedTerms, summary: summarize(parsed.body) });
+    const absolute = ensureInsideRoot(root, page);
+    const content = await readText(absolute);
+    const searchable = `${page}\n${firstHeading(content) ?? ""}\n${content}`.toLowerCase();
+    let score = 0;
+    for (const term of queryTerms) {
+      if (searchable.includes(term)) score += 1;
+    }
+    if (score > 0) {
+      matches.push({ path: relativePath(root, absolute), score, excerpt: excerptFor(content) });
     }
   }
-  matches.sort((a, b) => b.score - a.score || a.path.localeCompare(b.path));
-  return { index, matches: matches.slice(0, limit), readOrder };
+
+  return matches.sort((a, b) => b.score - a.score || a.path.localeCompare(b.path)).slice(0, limit);
+}
+
+export async function readWikiPages(root: string, matches: WikiPageMatch[]): Promise<Array<WikiPageMatch & { content: string }>> {
+  const withContent: Array<WikiPageMatch & { content: string }> = [];
+  for (const match of matches) {
+    withContent.push({ ...match, content: await readText(ensureInsideRoot(root, match.path)) });
+  }
+  return withContent;
 }

@@ -1,68 +1,54 @@
-export interface ParsedMarkdown {
-  frontmatter: Record<string, string | string[] | Record<string, string>>;
+export interface ParsedFrontmatter {
+  data: Record<string, unknown>;
   body: string;
 }
 
-function parseScalar(value: string): string | string[] {
-  const trimmed = value.trim();
-  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-    const inner = trimmed.slice(1, -1).trim();
+function parseScalar(raw: string): unknown {
+  const value = raw.trim();
+  if (value === "") return "";
+  if (value === "true") return true;
+  if (value === "false") return false;
+  if (value === "null") return null;
+  if (/^-?\d+(\.\d+)?$/.test(value)) return Number(value);
+  if (value.startsWith("[") && value.endsWith("]")) {
+    const inner = value.slice(1, -1).trim();
     if (!inner) return [];
-    return inner.split(",").map((item) => item.trim().replace(/^['\"]|['\"]$/g, ""));
+    return inner.split(",").map((part) => part.trim().replace(/^['"]|['"]$/g, ""));
   }
-  return trimmed.replace(/^['\"]|['\"]$/g, "");
+  return value.replace(/^['"]|['"]$/g, "");
 }
 
-export function parseMarkdownWithFrontmatter(markdown: string): ParsedMarkdown {
-  if (!markdown.startsWith("---\n")) {
-    return { frontmatter: {}, body: markdown };
-  }
+export function parseFrontmatter(markdown: string): ParsedFrontmatter {
+  if (!markdown.startsWith("---\n")) return { data: {}, body: markdown };
   const end = markdown.indexOf("\n---", 4);
-  if (end === -1) {
-    return { frontmatter: {}, body: markdown };
-  }
-  const frontmatterText = markdown.slice(4, end).trimEnd();
+  if (end < 0) return { data: {}, body: markdown };
+  const raw = markdown.slice(4, end);
   const body = markdown.slice(end + 4).replace(/^\n/, "");
-  const frontmatter: Record<string, string | string[] | Record<string, string>> = {};
+  const data: Record<string, unknown> = {};
   let currentMapKey: string | undefined;
-  for (const rawLine of frontmatterText.split(/\r?\n/)) {
-    if (!rawLine.trim() || rawLine.trim().startsWith("#")) continue;
-    if (rawLine.startsWith("  ") && currentMapKey) {
-      const nested = rawLine.trim();
-      const sep = nested.indexOf(":");
-      if (sep === -1) continue;
-      const map = frontmatter[currentMapKey];
-      if (typeof map === "object" && !Array.isArray(map)) {
-        map[nested.slice(0, sep).trim()] = nested.slice(sep + 1).trim().replace(/^['\"]|['\"]$/g, "");
+
+  for (const line of raw.split(/\r?\n/)) {
+    if (!line.trim() || line.trimStart().startsWith("#")) continue;
+    const nested = line.match(/^\s{2,}([^:]+):\s*(.*)$/);
+    if (nested && currentMapKey) {
+      const map = data[currentMapKey];
+      if (map && typeof map === "object" && !Array.isArray(map)) {
+        (map as Record<string, string>)[nested[1]!.trim()] = String(parseScalar(nested[2] ?? ""));
       }
       continue;
     }
-    currentMapKey = undefined;
-    const sep = rawLine.indexOf(":");
-    if (sep === -1) continue;
-    const key = rawLine.slice(0, sep).trim();
-    const value = rawLine.slice(sep + 1).trim();
-    if (value === "") {
-      frontmatter[key] = {};
+    const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (!match) continue;
+    const key = match[1]!;
+    const rawValue = match[2] ?? "";
+    if (rawValue === "") {
+      data[key] = {};
       currentMapKey = key;
     } else {
-      frontmatter[key] = parseScalar(value);
+      data[key] = parseScalar(rawValue);
+      currentMapKey = undefined;
     }
   }
-  return { frontmatter, body };
-}
 
-export function firstHeading(markdown: string): string | undefined {
-  const line = markdown.split(/\r?\n/).find((candidate) => candidate.startsWith("# "));
-  return line?.replace(/^#\s+/, "").trim();
-}
-
-export function wikilinks(markdown: string): string[] {
-  const matches = markdown.matchAll(/\[\[([^\]]+)\]\]/g);
-  return Array.from(matches, (match) => match[1]?.trim() ?? "").filter(Boolean);
-}
-
-export function frontmatterString(value: string | string[] | Record<string, string> | undefined): string | undefined {
-  if (typeof value === "string") return value;
-  return undefined;
+  return { data, body };
 }
