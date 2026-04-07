@@ -12,8 +12,8 @@ CodeWiki v2 rewrites the v1 runtime CLI as a pure installer/scaffolder. The jour
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Clean Slate** - Delete v1 runtime CLI; empty src/ ready for v2
-- [ ] **Phase 2: Shared Infrastructure** - Merge utils, scaffold, asset locator, reporter, detector
+- [x] **Phase 1: Clean Slate** - Delete v1 runtime CLI; empty src/ ready for v2
+- [x] **Phase 2: Shared Infrastructure** - Merge utils, scaffold, asset locator, reporter, detector
 - [ ] **Phase 3: Prompt Templates and Hook Scripts** - All markdown prompts, agent definitions, hook scripts
 - [ ] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
 - [ ] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
@@ -48,9 +48,9 @@ Plans:
   5. `src/lib/reporter.ts` prints a structured created/skipped/replaced/failed report to stdout
 **Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md — Merge utilities (deepMerge, marker merge) + vitest setup
-- [ ] 02-02-PLAN.md — Scaffold wrapper, tool detection, install reporter
-- [ ] 02-03-PLAN.md — Barrel export, postbuild copy, integration verification
+- [x] 02-01-PLAN.md — Merge utilities (deepMerge, marker merge) + vitest setup
+- [x] 02-02-PLAN.md — Scaffold wrapper, tool detection, install reporter
+- [x] 02-03-PLAN.md — Barrel export, postbuild copy, integration verification
 
 ### Phase 3: Prompt Templates and Hook Scripts
 **Goal**: All markdown prompt files, agent definitions, and hook scripts exist in src/templates/ and are individually verifiable
@@ -128,8 +128,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Clean Slate | 0/1 | Planning complete | - |
-| 2. Shared Infrastructure | 0/3 | Planning complete | - |
+| 1. Clean Slate | 1/1 | Complete | 2026-04-07 |
+| 2. Shared Infrastructure | 3/3 | Complete | 2026-04-07 |
 | 3. Prompt Templates and Hook Scripts | 0/TBD | Not started | - |
 | 4. Claude Code Adapter + init Command | 0/TBD | Not started | - |
 | 5. Test Suite | 0/TBD | Not started | - |

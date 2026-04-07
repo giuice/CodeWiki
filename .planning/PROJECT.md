@@ -14,7 +14,9 @@ Target users: solo developers using AI coding agents who have experienced agents
 
 ### Validated
 
-(None yet — ship to validate)
+- WIKI-01..WIKI-05 validated in Phase 2 — scaffold and init create the expected wiki tree, config, and template files.
+- MERGE-01..MERGE-04 validated in Phase 2 — merge utilities are covered by focused Vitest tests and regression-safe edge-case checks.
+- BUILD-01 validated early in Phase 2 — `npm run build` now copies template assets into `dist/templates/`.
 
 ### Active
 
@@ -39,7 +41,7 @@ Target users: solo developers using AI coding agents who have experienced agents
 
 ## Context
 
-- **Existing codebase:** `src/` has a v1 runtime CLI (TypeScript) with `ingest.ts`, `query.ts`, `lint.ts`, `prd.ts`, `tasks.ts`, `status.ts` commands that parse wiki pages and render proposals. This is the wrong architecture — delete aggressively.
+- **Existing codebase:** `src/` now has an init-only CLI plus Phase 2 shared infrastructure in `src/lib/`; prompt templates, hook scripts, and adapter installers remain to be implemented.
 - **Architecture model:** GSD (`get-shit-done`) — the CLI is a scaffolder/installer only, like how GSD installs prompts and configs. Study GSD's hook scripts and install pattern before implementing.
 - **Hook formats:** Each tool uses different hook config formats (`.claude/settings.json` for Claude Code, `.codex/hooks.json` for Codex, `.github/hooks/*.json` for Copilot, `opencode.json` for OpenCode). Research required before implementation.
 - **Original prompts:** `docs/prompts/create-prd.md`, `generate-tasks.md`, `process-task-list.md` are the source of truth for the `/codewiki-prd`, `/codewiki-tasks`, `/codewiki-process` slash command content.
@@ -82,4 +84,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 after initialization*
+*Last updated: 2026-04-07 after Phase 2 completion*

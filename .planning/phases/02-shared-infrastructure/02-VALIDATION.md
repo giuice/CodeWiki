@@ -1,9 +1,9 @@
 ---
 phase: 2
 slug: shared-infrastructure
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: verified
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-07
 ---
 
@@ -38,17 +38,17 @@ created: 2026-04-07
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 02-01-01 | 01 | 1 | MERGE-01 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ❌ W0 | ⬜ pending |
-| 02-01-02 | 01 | 1 | MERGE-02 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ❌ W0 | ⬜ pending |
-| 02-01-03 | 01 | 1 | MERGE-03 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ❌ W0 | ⬜ pending |
-| 02-01-04 | 01 | 1 | MERGE-04 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ❌ W0 | ⬜ pending |
-| 02-02-01 | 02 | 1 | WIKI-01 | — | N/A | unit | `npx vitest run src/lib/__tests__/scaffold.test.ts` | ❌ W0 | ⬜ pending |
-| 02-02-02 | 02 | 1 | WIKI-02 | — | N/A | unit | `npx vitest run src/lib/__tests__/scaffold.test.ts` | ❌ W0 | ⬜ pending |
-| 02-02-03 | 02 | 1 | WIKI-03 | — | N/A | unit | `npx vitest run src/lib/__tests__/scaffold.test.ts` | ❌ W0 | ⬜ pending |
-| 02-03-01 | 03 | 1 | WIKI-04 | — | N/A | unit | `npx vitest run src/lib/__tests__/detect.test.ts` | ❌ W0 | ⬜ pending |
-| 02-03-02 | 03 | 1 | WIKI-05 | — | N/A | unit | `npx vitest run src/lib/__tests__/detect.test.ts` | ❌ W0 | ⬜ pending |
-| 02-04-01 | 04 | 1 | — | — | N/A | unit | `npx vitest run src/lib/__tests__/reporter.test.ts` | ❌ W0 | ⬜ pending |
-| 02-05-01 | 05 | 2 | — | — | N/A | integration | `npm run build && ls dist/templates/` | ❌ W0 | ⬜ pending |
+| 02-01-01 | 01 | 1 | MERGE-01 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ✅ | ✅ green |
+| 02-01-02 | 01 | 1 | MERGE-02 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ✅ | ✅ green |
+| 02-01-03 | 01 | 1 | MERGE-03 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ✅ | ✅ green |
+| 02-01-04 | 01 | 1 | MERGE-04 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ✅ | ✅ green |
+| 02-02-01 | 02 | 1 | WIKI-01 | — | N/A | unit | `npx vitest run src/lib/__tests__/scaffold.test.ts` | ✅ | ✅ green |
+| 02-02-02 | 02 | 1 | WIKI-02 | — | N/A | unit | `npx vitest run src/lib/__tests__/scaffold.test.ts` | ✅ | ✅ green |
+| 02-02-03 | 02 | 1 | WIKI-03 | — | N/A | unit | `npx vitest run src/lib/__tests__/scaffold.test.ts` | ✅ | ✅ green |
+| 02-03-01 | 03 | 1 | WIKI-04 | — | N/A | unit | `npx vitest run src/lib/__tests__/detect.test.ts` | ✅ | ✅ green |
+| 02-03-02 | 03 | 1 | WIKI-05 | — | N/A | unit | `npx vitest run src/lib/__tests__/detect.test.ts` | ✅ | ✅ green |
+| 02-04-01 | 04 | 1 | — | — | N/A | unit | `npx vitest run src/lib/__tests__/reporter.test.ts` | ✅ | ✅ green |
+| 02-05-01 | 05 | 2 | — | — | N/A | integration | `npm run build && ls dist/templates/` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -56,12 +56,12 @@ created: 2026-04-07
 
 ## Wave 0 Requirements
 
-- [ ] `vitest` — install as devDependency if not present
-- [ ] `vitest.config.ts` — create config for TypeScript ESM
-- [ ] `src/lib/__tests__/merge.test.ts` — stubs for MERGE-01 through MERGE-04
-- [ ] `src/lib/__tests__/scaffold.test.ts` — stubs for WIKI-01 through WIKI-03
-- [ ] `src/lib/__tests__/detect.test.ts` — stubs for WIKI-04, WIKI-05
-- [ ] `src/lib/__tests__/reporter.test.ts` — stubs for reporter output
+- [x] `vitest` — install as devDependency if not present
+- [x] `vitest.config.ts` — create config for TypeScript ESM
+- [x] `src/lib/__tests__/merge.test.ts` — stubs for MERGE-01 through MERGE-04
+- [x] `src/lib/__tests__/scaffold.test.ts` — stubs for WIKI-01 through WIKI-03
+- [x] `src/lib/__tests__/detect.test.ts` — stubs for WIKI-04, WIKI-05
+- [x] `src/lib/__tests__/reporter.test.ts` — stubs for reporter output
 
 ---
 
@@ -73,11 +73,11 @@ created: 2026-04-07
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 5s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 5s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** verified 2026-04-07

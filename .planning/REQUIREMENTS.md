@@ -17,11 +17,11 @@
 
 ### Wiki Scaffold
 
-- [ ] **WIKI-01**: Creates `wiki/index.md` and `wiki/log.md`
-- [ ] **WIKI-02**: Creates `wiki/entities/`, `wiki/decisions/`, `wiki/lessons/`, `wiki/issues/`, `wiki/sources/` directories
-- [ ] **WIKI-03**: Creates `raw/` and `tasks/` directories
-- [ ] **WIKI-04**: Creates `.codewiki/config.yml` with project settings
-- [ ] **WIKI-05**: Creates `.codewiki/templates/` with all 5 page templates (entity, decision, lesson, issue, source-summary)
+- [x] **WIKI-01**: Creates `wiki/index.md` and `wiki/log.md`
+- [x] **WIKI-02**: Creates `wiki/entities/`, `wiki/decisions/`, `wiki/lessons/`, `wiki/issues/`, `wiki/sources/` directories
+- [x] **WIKI-03**: Creates `raw/` and `tasks/` directories
+- [x] **WIKI-04**: Creates `.codewiki/config.yml` with project settings
+- [x] **WIKI-05**: Creates `.codewiki/templates/` with all 5 page templates (entity, decision, lesson, issue, source-summary)
 
 ### Prompt Files (Slash Commands)
 
@@ -75,14 +75,14 @@
 
 ### Config Merge Safety
 
-- [ ] **MERGE-01**: JSON config merge (`.claude/settings.json`, `opencode.json`) never clobbers existing user keys
-- [ ] **MERGE-02**: JSON config merge deduplicates CodeWiki hooks (re-run does not double entries)
-- [ ] **MERGE-03**: Markdown instruction merge never creates duplicate `<!-- codewiki:start -->` sections
-- [ ] **MERGE-04**: `--force` replaces the existing marker section in instruction files
+- [x] **MERGE-01**: JSON config merge (`.claude/settings.json`, `opencode.json`) never clobbers existing user keys
+- [x] **MERGE-02**: JSON config merge deduplicates CodeWiki hooks (re-run does not double entries)
+- [x] **MERGE-03**: Markdown instruction merge never creates duplicate `<!-- codewiki:start -->` sections
+- [x] **MERGE-04**: `--force` replaces the existing marker section in instruction files
 
 ### Build & Publish
 
-- [ ] **BUILD-01**: `npm run build` copies `src/templates/**` to `dist/templates/` (postbuild step)
+- [x] **BUILD-01**: `npm run build` copies `src/templates/**` to `dist/templates/` (postbuild step)
 - [ ] **BUILD-02**: `npm pack --dry-run` lists `dist/templates/claude/commands/ingest.md` (prompt files in tarball)
 - [ ] **BUILD-03**: `engines.node >= "20.11.0"` set in package.json
 - [ ] **BUILD-04**: Zero npm runtime dependencies (Commander.js + optional picocolors only)
@@ -115,15 +115,15 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| WIKI-01 | Phase 2 (Shared Infrastructure) | Pending |
-| WIKI-02 | Phase 2 (Shared Infrastructure) | Pending |
-| WIKI-03 | Phase 2 (Shared Infrastructure) | Pending |
-| WIKI-04 | Phase 2 (Shared Infrastructure) | Pending |
-| WIKI-05 | Phase 2 (Shared Infrastructure) | Pending |
-| MERGE-01 | Phase 2 (Shared Infrastructure) | Pending |
-| MERGE-02 | Phase 2 (Shared Infrastructure) | Pending |
-| MERGE-03 | Phase 2 (Shared Infrastructure) | Pending |
-| MERGE-04 | Phase 2 (Shared Infrastructure) | Pending |
+| WIKI-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
+| WIKI-02 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
+| WIKI-03 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
+| WIKI-04 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
+| WIKI-05 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
+| MERGE-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
+| MERGE-02 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
+| MERGE-03 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
+| MERGE-04 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | CMD-01 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
 | CMD-02 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
 | CMD-03 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
@@ -150,7 +150,7 @@
 | CC-03 | Phase 4 (Claude Code Adapter + init Command) | Pending |
 | CC-04 | Phase 4 (Claude Code Adapter + init Command) | Pending |
 | CC-05 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| BUILD-01 | Phase 5 (Test Suite) | Pending |
+| BUILD-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | BUILD-02 | Phase 5 (Test Suite) | Pending |
 | OC-01 | Phase 6 (OpenCode Adapter) | Pending |
 | OC-02 | Phase 6 (OpenCode Adapter) | Pending |
@@ -174,4 +174,4 @@
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-07 — traceability expanded to individual requirements; coverage corrected to 49*
+*Last updated: 2026-04-07 — Phase 2 shared infrastructure requirements verified and traceability refreshed*
