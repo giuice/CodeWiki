@@ -6,14 +6,7 @@ import { prdCommand } from "./commands/prd.js";
 import { tasksCommand } from "./commands/tasks.js";
 import { statusCommand } from "./commands/status.js";
 
-export interface CliIO {
-  cwd: string;
-  stdout: (message: string) => void;
-  stderr: (message: string) => void;
-  now?: Date;
-}
-
-type CommandHandler = (args: string[], root: string, now?: Date) => Promise<string>;
+type CommandHandler = (args: string[], root?: string) => Promise<string>;
 
 const COMMANDS: Record<string, CommandHandler> = {
   init: (args, root) => initCommand({ args, root }),
@@ -46,43 +39,26 @@ Global:
 `;
 }
 
-function runtimeFor(context?: string | Partial<CliIO>): CliIO {
-  if (typeof context === "string") {
-    return {
-      cwd: context,
-      stdout: (message) => { console.log(message); },
-      stderr: (message) => { console.error(message); },
-    };
-  }
-  return {
-    cwd: context?.cwd ?? process.cwd(),
-    stdout: context?.stdout ?? ((message) => { console.log(message); }),
-    stderr: context?.stderr ?? ((message) => { console.error(message); }),
-    ...(context?.now ? { now: context.now } : {}),
-  };
-}
-
-export async function runCli(argv = process.argv.slice(2), context?: string | Partial<CliIO>): Promise<number> {
-  const runtime = runtimeFor(context);
+export async function runCli(argv = process.argv.slice(2), root = process.cwd()): Promise<number> {
   const [command, ...args] = argv;
   try {
     if (!command || command === "--help" || command === "-h") {
-      runtime.stdout(helpText());
+      console.log(helpText());
       return 0;
     }
     if (command === "--version" || command === "-v") {
-      runtime.stdout("0.1.0");
+      console.log("0.1.0");
       return 0;
     }
     const handler = COMMANDS[command];
     if (!handler) {
       throw new Error(`Unknown command: ${command}. Run codewiki --help for supported commands.`);
     }
-    const output = await handler(args, runtime.cwd, runtime.now);
-    if (output) runtime.stdout(output.endsWith("\n") ? output : `${output}\n`);
+    const output = await handler(args, root);
+    if (output) console.log(output);
     return 0;
   } catch (error) {
-    runtime.stderr(`${error instanceof Error ? error.message : String(error)}\n`);
+    console.error(error instanceof Error ? error.message : String(error));
     return 1;
   }
 }

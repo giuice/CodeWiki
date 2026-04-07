@@ -1,5 +1,6 @@
 .omx/
 .vscode/
 .DS_Store
+# Node/TypeScript build artifacts
 node_modules/
 dist/
