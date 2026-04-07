@@ -1,46 +1,48 @@
 import path from "node:path";
-import { ensureDir, writeFileSafe } from "../core/files.js";
-import { parseTools } from "../core/config.js";
-import { SUPPORTED_TOOLS, SupportedTool } from "../core/types.js";
+import { ensureDir, writeTextFileSafe } from "../core/files.js";
+import { SUPPORTED_TOOLS, type SupportedTool } from "../core/types.js";
 import { scaffoldDirectories, scaffoldFiles } from "../templates/scaffold.js";
 
 export interface InitOptions {
-  cwd: string;
+  root?: string;
   args: string[];
 }
 
-function parseInitArgs(args: string[], cwd: string): { force: boolean; name: string; tools: SupportedTool[] } {
-  let force = false;
-  let name = path.basename(cwd);
+function parseTools(value: string): SupportedTool[] {
+  const requested = value.split(",").map((tool) => tool.trim()).filter(Boolean);
+  const unknown = requested.filter((tool) => !SUPPORTED_TOOLS.includes(tool as SupportedTool));
+  if (unknown.length > 0) {
+    throw new Error(`Unsupported tool value: ${unknown.join(", ")}. Supported values: ${SUPPORTED_TOOLS.join(", ")}`);
+  }
+  return requested as SupportedTool[];
+}
+
+export async function initCommand({ root = process.cwd(), args }: InitOptions): Promise<string> {
+  let projectName = path.basename(root);
   let tools: SupportedTool[] = [...SUPPORTED_TOOLS];
+  let force = false;
   for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index]!;
-    if (arg === "--force") force = true;
-    else if (arg === "--name") {
+    const arg = args[index];
+    if (arg === "--force") {
+      force = true;
+    } else if (arg === "--name") {
       const value = args[++index];
-      if (!value) throw new Error("Missing value for --name");
-      name = value;
+      if (!value) throw new Error("--name requires a project name");
+      projectName = value;
     } else if (arg === "--tool") {
       const value = args[++index];
-      if (!value) throw new Error("Missing value for --tool");
+      if (!value) throw new Error("--tool requires comma-separated values");
       tools = parseTools(value);
-    } else if (arg.startsWith("--tool=")) {
-      tools = parseTools(arg.slice("--tool=".length));
     } else {
       throw new Error(`Unknown init option: ${arg}`);
     }
   }
-  return { force, name, tools };
-}
 
-export async function runInit({ cwd, args }: InitOptions): Promise<string> {
-  const options = parseInitArgs(args, cwd);
-  for (const dir of scaffoldDirectories(options.tools)) {
-    await ensureDir(cwd, dir);
+  for (const directory of scaffoldDirectories(tools)) {
+    await ensureDir(root, directory);
   }
-  const files = scaffoldFiles(options.name, options.tools);
-  for (const file of files) {
-    await writeFileSafe(cwd, file.path, file.content, options.force);
+  for (const file of scaffoldFiles(projectName, tools)) {
+    await writeTextFileSafe(root, file.path, file.content, force);
   }
-  return `CodeWiki scaffold created for ${options.name}.\nGenerated adapters: ${options.tools.join(", ")}.\nHuman approval required for all wiki writes. No tool auto-detection was claimed.\n`;
+  return [`Initialized CodeWiki for ${projectName}.`, `Adapters: ${tools.join(", ")}.`, "No tool auto-detection was performed.", "Wiki updates remain human-approved proposal-only until explicitly reviewed."].join("\n");
 }

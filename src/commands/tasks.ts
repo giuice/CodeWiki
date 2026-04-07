@@ -1,20 +1,39 @@
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { readConfig } from "../core/config.js";
-import { ensureInsideRoot, exists, readText, slugify, timestampForFile } from "../core/files.js";
+import { loadConfig } from "../core/config.js";
+import { ensureWithinRoot, readTextIfExists, writeTextFileSafe } from "../core/files.js";
 
-export async function runTasks(cwd: string, args: string[], now = new Date()): Promise<string> {
-  const prdPathArg = args[0];
-  if (!prdPathArg) throw new Error("Usage: codewiki tasks <prd-path>");
-  const prdPath = ensureInsideRoot(cwd, prdPathArg);
-  if (!(await exists(prdPath))) throw new Error(`PRD not found: ${prdPathArg}`);
-  const config = await readConfig(cwd);
-  const rawDir = ensureInsideRoot(cwd, config.wiki.raw_path);
-  await mkdir(rawDir, { recursive: true });
-  const prd = await readText(prdPath);
-  const title = prd.match(/^#\s+(.+)$/m)?.[1] ?? path.basename(prdPathArg, path.extname(prdPathArg));
-  const relative = `${config.wiki.raw_path.replace(/\/$/, "")}/tasks-${timestampForFile(now)}-${slugify(title)}.md`;
-  const content = `---\ntype: task-list\nstatus: human-review-needed\nsource_prd: ${prdPathArg}\napproved: false\nverified_by: human\ncreated_at: ${now.toISOString()}\n---\n# Tasks for ${title}\n\n> Human-review-needed: review this task split before execution.\n\n## Verification Loop Required\nEvery task must: read relevant wiki context, implement changes, run tests, summarize evidence, and request human approval before wiki writes.\n\n## Proposed Tasks\n- [ ] Review PRD scope and identify files likely to change.\n- [ ] Implement the smallest verified slice.\n- [ ] Run tests/typecheck and capture evidence.\n- [ ] Propose CodeWiki updates; do not apply them without approval.\n`;
-  await writeFile(ensureInsideRoot(cwd, relative), content, "utf8");
-  return `Created human-review-needed task artifact: ${relative}\n`;
+function stamp(): string {
+  return new Date().toISOString().replace(/[:.]/g, "").replace(/Z$/, "Z");
+}
+
+export async function tasksCommand(args: string[], root = process.cwd()): Promise<string> {
+  const prdPath = args[0];
+  if (!prdPath) throw new Error("Usage: codewiki tasks <prd-path>");
+  ensureWithinRoot(root, prdPath);
+  const prdText = await readTextIfExists(root, prdPath);
+  if (prdText === undefined) throw new Error(`PRD file not found: ${prdPath}`);
+  const config = await loadConfig(root);
+  const basename = path.basename(prdPath, path.extname(prdPath)).replace(/[^a-zA-Z0-9_-]+/g, "-");
+  const file = `${config.wiki.rawPath.replace(/\/$/, "")}/tasks-${stamp()}-${basename}.md`;
+  const content = `---
+type: task-list
+source_prd: ${prdPath}
+status: human-review-needed
+approved: false
+---
+
+# Task Draft for ${prdPath}
+
+## Tasks
+
+- [ ] Implement the smallest safe slice from the PRD.
+- [ ] Run the verification loop: build, typecheck, tests, and human-approved wiki proposal review.
+- [ ] Record proposed wiki updates without applying them automatically.
+
+## PRD Excerpt
+
+${prdText.slice(0, 1600)}
+`;
+  await writeTextFileSafe(root, file, content);
+  return `Created human-review-needed task draft: ${file}`;
 }

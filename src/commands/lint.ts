@@ -1,150 +1,80 @@
 import path from "node:path";
-import { loadConfig } from "../core/config.js";
-import { ensureWithinRoot, listFilesRecursive, pathExists, readTextIfExists, readTextRequired } from "../core/files.js";
-import { firstHeading, frontmatterString, parseMarkdownWithFrontmatter, wikilinks } from "../core/frontmatter.js";
+import { ensureWithinRoot, listFilesRecursive, pathExists, readTextIfExists } from "../core/files.js";
+import { parseMarkdownWithFrontmatter, wikilinks, frontmatterString } from "../core/frontmatter.js";
 import { sha256File } from "../core/hash.js";
-import type { CodeWikiConfig, LintFinding } from "../core/types.js";
-import { PROPOSAL_ONLY_BOUNDARY } from "../core/proposals.js";
+import { loadConfig } from "../core/config.js";
+import type { LintFinding } from "../core/types.js";
 
-function normalizeLink(link: string): string {
-  return link.split("|")[0]?.split("#")[0]?.trim() ?? link.trim();
-}
-
-async function requiredPathFindings(root: string, config: CodeWikiConfig): Promise<LintFinding[]> {
-  const required = [
-    ".codewiki/config.yml",
-    ".codewiki/templates/entity.md",
-    ".codewiki/templates/decision.md",
-    ".codewiki/templates/lesson.md",
-    ".codewiki/templates/issue.md",
-    ".codewiki/templates/source-summary.md",
-    config.wiki.rawPath,
-    config.wiki.path,
-    path.posix.join(config.wiki.path, "index.md"),
-    path.posix.join(config.wiki.path, "log.md"),
-    path.posix.join(config.wiki.path, "entities"),
-    path.posix.join(config.wiki.path, "decisions"),
-    path.posix.join(config.wiki.path, "lessons"),
-    path.posix.join(config.wiki.path, "issues"),
-    path.posix.join(config.wiki.path, "sources")
-  ];
-  const findings: LintFinding[] = [];
-  for (const rel of required) {
-    if (!(await pathExists(ensureWithinRoot(root, rel)))) {
-      findings.push({ severity: "error", category: "missing-required", path: rel, message: `Required CodeWiki path is missing: ${rel}` });
-    }
-  }
-  return findings;
-}
-
-function linkTargetSet(pagePath: string, markdown: string): string[] {
-  const parsed = parseMarkdownWithFrontmatter(markdown);
-  const base = path.posix.basename(pagePath, ".md");
-  const withoutWiki = pagePath.replace(/^wiki\//, "").replace(/\.md$/, "");
-  const heading = firstHeading(parsed.body);
-  const targets = [base, withoutWiki, pagePath, pagePath.replace(/\.md$/, "")];
-  const id = frontmatterString(parsed.frontmatter.id);
-  const name = frontmatterString(parsed.frontmatter.name);
-  if (id) targets.push(id);
-  if (name) targets.push(name);
-  if (heading) targets.push(heading);
-  return targets;
+function knownPageKeys(page: string, id?: string): string[] {
+  const withoutExt = page.replace(/\.md$/i, "");
+  const base = path.posix.basename(withoutExt);
+  return [page, withoutExt, base, ...(id ? [id] : [])];
 }
 
 export async function collectLintFindings(root = process.cwd()): Promise<LintFinding[]> {
   const config = await loadConfig(root);
-  const findings = await requiredPathFindings(root, config);
-  const pagePaths = await listFilesRecursive(root, config.wiki.path, ".md");
-  const pageTexts = new Map<string, string>();
-  const knownTargets = new Set<string>();
-  for (const page of pagePaths) {
-    const markdown = await readTextRequired(root, page);
-    pageTexts.set(page, markdown);
-    for (const target of linkTargetSet(page, markdown)) knownTargets.add(target);
-  }
-
-  const inbound = new Map<string, number>();
-  for (const page of pagePaths) inbound.set(page, 0);
-  for (const [page, markdown] of pageTexts) {
-    for (const rawLink of wikilinks(markdown)) {
-      const link = normalizeLink(rawLink);
-      if (!knownTargets.has(link)) {
-        findings.push({ severity: "warning", category: "broken-link", path: page, message: `Broken wikilink [[${rawLink}]] does not match a known page id, name, heading, or path.` });
-        continue;
-      }
-      for (const [candidate, text] of pageTexts) {
-        if (linkTargetSet(candidate, text).includes(link)) {
-          inbound.set(candidate, (inbound.get(candidate) ?? 0) + 1);
-        }
-      }
+  const wikiPath = config.wiki.path.replace(/\/$/, "");
+  const findings: LintFinding[] = [];
+  for (const required of [`${wikiPath}/index.md`, `${wikiPath}/log.md`]) {
+    if (!(await pathExists(ensureWithinRoot(root, required)))) {
+      findings.push({ severity: "error", category: "missing-required", path: required, message: `Missing required CodeWiki file: ${required}` });
     }
   }
-
-  const indexText = (await readTextIfExists(root, path.posix.join(config.wiki.path, "index.md"))) ?? "";
-  for (const [page, markdown] of pageTexts) {
-    const parsed = parseMarkdownWithFrontmatter(markdown);
-    const type = frontmatterString(parsed.frontmatter.type);
-    if (page.endsWith("index.md") || page.endsWith("log.md")) continue;
-    if (!type) {
-      findings.push({ severity: "info", category: "missing-required", path: page, message: "Wiki page has no parseable frontmatter type." });
-    }
-    if ((inbound.get(page) ?? 0) === 0 && !indexText.includes(page) && !indexText.includes(path.posix.basename(page, ".md"))) {
-      findings.push({ severity: "info", category: "orphan", path: page, message: "Orphan candidate: no inbound wikilinks and not listed in wiki/index.md." });
-    }
-    if (type === "issue") {
-      const status = frontmatterString(parsed.frontmatter.status);
-      const resolvedBy = frontmatterString(parsed.frontmatter.resolved_by);
-      if (status === "resolved" && !resolvedBy) {
-        findings.push({ severity: "warning", category: "issue-lifecycle", path: page, message: "Resolved issue is missing resolved_by: LESSON-XXX." });
-      } else if (status === "resolved" && resolvedBy && !knownTargets.has(resolvedBy)) {
-        findings.push({ severity: "warning", category: "issue-lifecycle", path: page, message: `Resolved issue points to unknown lesson: ${resolvedBy}.` });
-      }
-    }
-    if (type === "entity" && config.lint.checkFileDrift) {
-      const hashes = parsed.frontmatter.file_hashes;
-      if (hashes && typeof hashes === "object" && !Array.isArray(hashes)) {
-        for (const [file, storedHash] of Object.entries(hashes)) {
-          const absolute = ensureWithinRoot(root, file);
-          if (!(await pathExists(absolute))) {
-            findings.push({ severity: "warning", category: "file-drift", path: page, message: `Entity references missing file for drift tracking: ${file}.` });
-            continue;
-          }
-          const current = await sha256File(absolute);
-          if (storedHash && current !== storedHash) {
-            findings.push({ severity: "warning", category: "file-drift", path: page, message: `Entity file hash drift for ${file}: expected ${storedHash}, actual ${current}.` });
+  const pages = await listFilesRecursive(root, wikiPath, ".md");
+  const known = new Set<string>();
+  const incoming = new Map<string, number>();
+  const parsedPages = new Map<string, ReturnType<typeof parseMarkdownWithFrontmatter>>();
+  for (const page of pages) {
+    const parsed = parseMarkdownWithFrontmatter((await readTextIfExists(root, page)) ?? "");
+    parsedPages.set(page, parsed);
+    for (const key of knownPageKeys(page, frontmatterString(parsed.frontmatter.id))) known.add(key);
+    incoming.set(page, 0);
+  }
+  for (const [page, parsed] of parsedPages) {
+    for (const link of wikilinks(parsed.body)) {
+      if (!known.has(link)) {
+        findings.push({ severity: "warning", category: "broken-link", path: page, message: `Broken wikilink: [[${link}]]` });
+      } else {
+        for (const candidate of pages) {
+          if (knownPageKeys(candidate, frontmatterString(parsedPages.get(candidate)?.frontmatter.id)).includes(link)) {
+            incoming.set(candidate, (incoming.get(candidate) ?? 0) + 1);
           }
         }
       }
     }
+    if (frontmatterString(parsed.frontmatter.type) === "issue" && frontmatterString(parsed.frontmatter.status) === "resolved" && !frontmatterString(parsed.frontmatter.resolved_by)) {
+      findings.push({ severity: "warning", category: "issue-lifecycle", path: page, message: "Resolved issue is missing resolved_by: LESSON-XXX." });
+    }
+    if (frontmatterString(parsed.frontmatter.type) === "entity" && typeof parsed.frontmatter.file_hashes === "object" && !Array.isArray(parsed.frontmatter.file_hashes)) {
+      for (const [relFile, expectedHash] of Object.entries(parsed.frontmatter.file_hashes)) {
+        try {
+          const actual = await sha256File(ensureWithinRoot(root, relFile));
+          if (actual !== expectedHash) {
+            findings.push({ severity: "warning", category: "file-drift", path: page, message: `File hash drift for ${relFile}.` });
+          }
+        } catch {
+          findings.push({ severity: "warning", category: "file-drift", path: page, message: `Tracked file missing for hash drift check: ${relFile}.` });
+        }
+      }
+    }
   }
-
-  findings.push({
-    severity: "info",
-    category: "agent-review",
-    path: config.wiki.path,
-    message: "Semantic contradiction and stale-claim review require an agent/human checklist in v1; deterministic lint did not auto-fix or claim semantic proof."
-  });
+  for (const page of pages) {
+    if (!page.endsWith("index.md") && !page.endsWith("log.md") && (incoming.get(page) ?? 0) === 0) {
+      findings.push({ severity: "info", category: "orphan", path: page, message: "Orphan candidate: no incoming wikilinks found." });
+    }
+  }
+  if (config.lint.checkContradictions || config.lint.checkStaleIssues) {
+    findings.push({ severity: "info", category: "agent-review", path: wikiPath, message: "Semantic contradiction and stale-claim review requires an agent/human checklist; no deterministic fix was applied." });
+  }
   return findings;
 }
 
-export async function lintCommand(root = process.cwd()): Promise<string> {
+export async function lintCommand(_args: string[], root = process.cwd()): Promise<string> {
   const findings = await collectLintFindings(root);
-  const lines = findings.map((finding) => `${finding.severity.toUpperCase()} [${finding.category}] ${finding.path}: ${finding.message}`);
-  const errorCount = findings.filter((finding) => finding.severity === "error").length;
-  const warningCount = findings.filter((finding) => finding.severity === "warning").length;
-  return `${PROPOSAL_ONLY_BOUNDARY}
-
-# CodeWiki Lint Report
-
-Errors: ${errorCount}
-Warnings: ${warningCount}
-Findings: ${findings.length}
-
-${lines.join("\n") || "No deterministic findings."}
-
-## Agent Review Checklist
-- Review contradictions between pages.
-- Review stale claims superseded by newer lessons.
-- Propose fixes only; require human approval before wiki writes.
-`;
+  return [
+    "# CodeWiki Lint",
+    "Deterministic checks completed; no wiki fixes were written automatically.",
+    "",
+    ...findings.map((finding) => `- ${finding.severity.toUpperCase()} [${finding.category}] ${finding.path}: ${finding.message}`)
+  ].join("\n");
 }

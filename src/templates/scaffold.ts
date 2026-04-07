@@ -1,15 +1,13 @@
-import { basename } from "node:path";
-import { defaultConfigYaml } from "../core/config.js";
-import { SupportedTool } from "../core/types.js";
-import { adapterFiles } from "./adapter-templates.js";
-import { PAGE_TEMPLATES } from "./page-templates.js";
+import type { SupportedTool } from "../core/types.js";
+import { adapterReadme } from "./adapter-templates.js";
+import { configTemplate, decisionTemplate, entityTemplate, indexTemplate, issueTemplate, lessonTemplate, logTemplate, sourceSummaryTemplate } from "./page-templates.js";
 
 export interface ScaffoldFile {
   path: string;
   content: string;
 }
 
-export function scaffoldDirectories(tools: SupportedTool[]): string[] {
+export function scaffoldDirectories(tools: readonly SupportedTool[]): string[] {
   return [
     ".codewiki/templates",
     ".codewiki/adapters",
@@ -19,26 +17,20 @@ export function scaffoldDirectories(tools: SupportedTool[]): string[] {
     "wiki/decisions",
     "wiki/lessons",
     "wiki/issues",
-    "wiki/sources",
+    "wiki/sources"
   ];
 }
 
-export function scaffoldFiles(projectName: string, tools: SupportedTool[]): ScaffoldFile[] {
-  const files: ScaffoldFile[] = [
-    { path: ".codewiki/config.yml", content: defaultConfigYaml(projectName || basename(process.cwd()), tools) },
-    { path: "wiki/index.md", content: "# CodeWiki Index\n\nEvery human-approved wiki page is cataloged here with summary and tags. Read this file first for queries.\n\n## Entities\n\n## Decisions\n\n## Lessons\n\n## Issues\n\n## Sources\n" },
-    { path: "wiki/log.md", content: "# CodeWiki Log\n\nAppend-only human-approved operation log.\n" },
+export function scaffoldFiles(projectName: string, tools: readonly SupportedTool[]): ScaffoldFile[] {
+  return [
+    { path: ".codewiki/config.yml", content: configTemplate(projectName, tools) },
+    { path: ".codewiki/templates/entity.md", content: entityTemplate },
+    { path: ".codewiki/templates/decision.md", content: decisionTemplate },
+    { path: ".codewiki/templates/lesson.md", content: lessonTemplate },
+    { path: ".codewiki/templates/issue.md", content: issueTemplate },
+    { path: ".codewiki/templates/source-summary.md", content: sourceSummaryTemplate },
+    { path: "wiki/index.md", content: indexTemplate(projectName) },
+    { path: "wiki/log.md", content: logTemplate },
+    ...tools.map((tool) => ({ path: `.codewiki/adapters/${tool}/README.md`, content: adapterReadme(tool) }))
   ];
-
-  for (const [name, render] of Object.entries(PAGE_TEMPLATES)) {
-    files.push({ path: `.codewiki/templates/${name}`, content: render() });
-  }
-
-  for (const tool of tools) {
-    for (const [fileName, content] of Object.entries(adapterFiles(tool))) {
-      files.push({ path: `.codewiki/adapters/${tool}/${fileName}`, content });
-    }
-  }
-
-  return files;
 }

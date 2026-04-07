@@ -1,87 +1,64 @@
-import { initCommand, parseToolList } from "./commands/init.js";
+import { initCommand } from "./commands/init.js";
 import { ingestCommand } from "./commands/ingest.js";
 import { queryCommand } from "./commands/query.js";
 import { lintCommand } from "./commands/lint.js";
 import { prdCommand } from "./commands/prd.js";
 import { tasksCommand } from "./commands/tasks.js";
 import { statusCommand } from "./commands/status.js";
-import type { SupportedTool } from "./core/types.js";
 
-export const HELP = `CodeWiki — markdown-first, human-approved project wiki framework
+type CommandHandler = (args: string[], root?: string) => Promise<string>;
+
+const COMMANDS: Record<string, CommandHandler> = {
+  init: (args, root) => initCommand({ args, root }),
+  ingest: ingestCommand,
+  query: queryCommand,
+  lint: lintCommand,
+  prd: prdCommand,
+  tasks: tasksCommand,
+  status: statusCommand
+};
+
+export function helpText(): string {
+  return `CodeWiki — markdown-first, human-approved project wiki framework
 
 Usage:
   codewiki <command> [args]
 
 Commands:
-  init [--tool <claude-code,codex,copilot,opencode>] [--name <project-name>] [--force]
-  ingest <markdown-path>
-  query <question>
-  lint
-  prd <description>
-  tasks <prd-path>
-  status
+  init     Create .codewiki/, raw/, and wiki/ scaffold
+  ingest   Emit a source-summary proposal for a markdown raw source
+  query    Read wiki/index.md first and emit a referenced context bundle
+  lint     Run deterministic checks and agent-review prompts
+  prd      Create a human-review-needed raw PRD draft
+  tasks    Create a human-review-needed task draft from a PRD
+  status   Report wiki stats and drift warning counts
 
-Human approval boundary: proposal-producing commands do not modify wiki files without approval.
+Global:
+  --help   Show this help
+  --version Show package version
 `;
-
-interface ParsedInitArgs {
-  tools?: SupportedTool[];
-  name?: string;
-  force?: boolean;
 }
 
-function parseInitArgs(args: string[]): ParsedInitArgs {
-  const options: ParsedInitArgs = {};
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index];
-    if (arg === "--force") {
-      options.force = true;
-    } else if (arg === "--tool") {
-      const value = args[index + 1];
-      if (!value) throw new Error("--tool requires a comma-separated value");
-      options.tools = parseToolList(value);
-      index += 1;
-    } else if (arg?.startsWith("--tool=")) {
-      options.tools = parseToolList(arg.slice("--tool=".length));
-    } else if (arg === "--name") {
-      const value = args[index + 1];
-      if (!value) throw new Error("--name requires a value");
-      options.name = value;
-      index += 1;
-    } else if (arg?.startsWith("--name=")) {
-      options.name = arg.slice("--name=".length);
-    } else {
-      throw new Error(`Unknown init option: ${arg}`);
-    }
-  }
-  return options;
-}
-
-export async function runCli(argv: string[], root = process.cwd()): Promise<{ code: number; stdout: string; stderr: string }> {
+export async function runCli(argv = process.argv.slice(2), root = process.cwd()): Promise<number> {
   const [command, ...args] = argv;
   try {
     if (!command || command === "--help" || command === "-h") {
-      return { code: 0, stdout: HELP, stderr: "" };
+      console.log(helpText());
+      return 0;
     }
-    switch (command) {
-      case "init":
-        return { code: 0, stdout: await initCommand({ ...parseInitArgs(args), root }), stderr: "" };
-      case "ingest":
-        return { code: 0, stdout: await ingestCommand(args[0] ?? "", root), stderr: "" };
-      case "query":
-        return { code: 0, stdout: await queryCommand(args.join(" "), root), stderr: "" };
-      case "lint":
-        return { code: 0, stdout: await lintCommand(root), stderr: "" };
-      case "prd":
-        return { code: 0, stdout: await prdCommand(args.join(" "), root), stderr: "" };
-      case "tasks":
-        return { code: 0, stdout: await tasksCommand(args[0] ?? "", root), stderr: "" };
-      case "status":
-        return { code: 0, stdout: await statusCommand(root), stderr: "" };
-      default:
-        return { code: 1, stdout: "", stderr: `Unknown command: ${command}\n\n${HELP}` };
+    if (command === "--version" || command === "-v") {
+      console.log("0.1.0");
+      return 0;
     }
+    const handler = COMMANDS[command];
+    if (!handler) {
+      throw new Error(`Unknown command: ${command}. Run codewiki --help for supported commands.`);
+    }
+    const output = await handler(args, root);
+    if (output) console.log(output);
+    return 0;
   } catch (error) {
-    return { code: 1, stdout: "", stderr: error instanceof Error ? error.message : String(error) };
+    console.error(error instanceof Error ? error.message : String(error));
+    return 1;
   }
 }
