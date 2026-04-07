@@ -16,7 +16,7 @@ export async function statusCommand(_args: string[], root = process.cwd()): Prom
     }
   }
   const logText = (await readTextIfExists(root, `${config.wiki.path.replace(/\/$/, "")}/log.md`)) ?? "";
-  const latestLog = firstHeading(logText) ?? "No log heading found";
+  const latestLog = logText.split(/\r?\n/).filter((line) => line.startsWith("## ")).at(-1) ?? firstHeading(logText) ?? "No log heading found";
   const driftWarnings = (await collectLintFindings(root)).filter((finding) => finding.category === "file-drift").length;
   return [
     "# CodeWiki Status",
@@ -24,7 +24,7 @@ export async function statusCommand(_args: string[], root = process.cwd()): Prom
     `Wiki path: ${config.wiki.path}`,
     `Raw path: ${config.wiki.rawPath}`,
     `Page count: ${pages.length}`,
-    `Latest log heading: ${latestLog}`,
+    `Latest log entry: ${latestLog}`,
     `Open issues: ${openIssues}`,
     `Resolved issues: ${resolvedIssues}`,
     `Drift warning count: ${driftWarnings}`

@@ -1,20 +1,20 @@
 import path from "node:path";
 import { loadConfig } from "../core/config.js";
-import { writeTextFileSafe } from "../core/files.js";
+import { timestampForFile, writeTextFileSafe } from "../core/files.js";
 
-function stamp(): string {
-  return new Date().toISOString().replace(/[:.]/g, "").replace(/Z$/, "Z");
+function stamp(now = new Date()): string {
+  return timestampForFile(now);
 }
 
 function slugify(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "prd";
 }
 
-export async function prdCommand(args: string[], root = process.cwd()): Promise<string> {
+export async function prdCommand(args: string[], root = process.cwd(), now = new Date()): Promise<string> {
   const description = args.join(" ").trim();
   if (!description) throw new Error("Usage: codewiki prd <description>");
   const config = await loadConfig(root);
-  const file = `${config.wiki.rawPath.replace(/\/$/, "")}/prd-${stamp()}-${slugify(description)}.md`;
+  const file = `${config.wiki.rawPath.replace(/\/$/, "")}/prd-${stamp(now)}-${slugify(description)}.md`;
   const content = `---
 type: prd
 status: human-review-needed

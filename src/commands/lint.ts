@@ -3,6 +3,8 @@ import { ensureWithinRoot, listFilesRecursive, pathExists, readTextIfExists } fr
 import { parseMarkdownWithFrontmatter, wikilinks, frontmatterString } from "../core/frontmatter.js";
 import { sha256File } from "../core/hash.js";
 import { loadConfig } from "../core/config.js";
+import { PROPOSAL_BOUNDARY } from "../core/proposals.js";
+import type { CodeWikiConfig } from "../core/types.js";
 import type { LintFinding } from "../core/types.js";
 
 function knownPageKeys(page: string, id?: string): string[] {
@@ -12,12 +14,25 @@ function knownPageKeys(page: string, id?: string): string[] {
 }
 
 export async function collectLintFindings(root = process.cwd()): Promise<LintFinding[]> {
-  const config = await loadConfig(root);
-  const wikiPath = config.wiki.path.replace(/\/$/, "");
   const findings: LintFinding[] = [];
+  let config: CodeWikiConfig = {
+    version: 1,
+    project: { name: path.basename(root), description: "" },
+    tools: [],
+    wiki: { path: "wiki/", raw_path: "raw/", rawPath: "raw/" },
+    verification: { require_human_approval: true, require_tests: true, auto_log: true },
+    ingestion: { interactive: true, max_pages_per_ingest: 20 },
+    lint: { check_orphans: true, check_contradictions: true, check_stale_issues: true, check_file_drift: true },
+  };
+  try {
+    config = await loadConfig(root);
+  } catch (error) {
+    findings.push({ severity: "error", category: "missing-required", path: ".codewiki/config.yml", message: (error as Error).message });
+  }
+  const wikiPath = config.wiki.path.replace(/\/$/, "");
   for (const required of [`${wikiPath}/index.md`, `${wikiPath}/log.md`]) {
     if (!(await pathExists(ensureWithinRoot(root, required)))) {
-      findings.push({ severity: "error", category: "missing-required", path: required, message: `Missing required CodeWiki file: ${required}` });
+      findings.push({ severity: "error", category: "missing-required", path: required, message: `Missing required CodeWiki path: ${required}` });
     }
   }
   const pages = await listFilesRecursive(root, wikiPath, ".md");
@@ -33,7 +48,7 @@ export async function collectLintFindings(root = process.cwd()): Promise<LintFin
   for (const [page, parsed] of parsedPages) {
     for (const link of wikilinks(parsed.body)) {
       if (!known.has(link)) {
-        findings.push({ severity: "warning", category: "broken-link", path: page, message: `Broken wikilink: [[${link}]]` });
+        findings.push({ severity: "warning", category: "broken-link", path: page, message: `Broken wikilink [[${link}]]` });
       } else {
         for (const candidate of pages) {
           if (knownPageKeys(candidate, frontmatterString(parsedPages.get(candidate)?.frontmatter.id)).includes(link)) {
@@ -50,7 +65,7 @@ export async function collectLintFindings(root = process.cwd()): Promise<LintFin
         try {
           const actual = await sha256File(ensureWithinRoot(root, relFile));
           if (actual !== expectedHash) {
-            findings.push({ severity: "warning", category: "file-drift", path: page, message: `File hash drift for ${relFile}.` });
+            findings.push({ severity: "warning", category: "file-drift", path: page, message: `Entity file hash drift for ${relFile}.` });
           }
         } catch {
           findings.push({ severity: "warning", category: "file-drift", path: page, message: `Tracked file missing for hash drift check: ${relFile}.` });
@@ -74,6 +89,7 @@ export async function lintCommand(_args: string[], root = process.cwd()): Promis
   return [
     "# CodeWiki Lint",
     "Deterministic checks completed; no wiki fixes were written automatically.",
+    PROPOSAL_BOUNDARY,
     "",
     ...findings.map((finding) => `- ${finding.severity.toUpperCase()} [${finding.category}] ${finding.path}: ${finding.message}`)
   ].join("\n");
