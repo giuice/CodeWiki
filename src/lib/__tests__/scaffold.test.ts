@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, rm, stat } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -69,6 +69,15 @@ describe("scaffoldProject", () => {
       "lesson.md",
       "source-summary.md"
     ]);
+  });
+
+  test("renders an explicit empty tools array when no tools are selected", async () => {
+    const root = await makeTempRoot();
+
+    await scaffoldProject({ force: false, projectName: "demo", root, tools: [] });
+
+    expect(await readdir(path.join(root, ".codewiki/adapters"))).toEqual([]);
+    expect(await readFile(path.join(root, ".codewiki/config.yml"), "utf8")).toMatch(/^tools: \[\]$/m);
   });
 
   test("reports created, skipped, and replaced based on actual file state", async () => {

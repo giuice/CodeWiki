@@ -2,6 +2,7 @@ const START_MARKER = "<!-- codewiki:start -->";
 const END_MARKER = "<!-- codewiki:end -->";
 
 type MergeableRecord = Record<string, unknown>;
+const UNSAFE_MERGE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
 function countOccurrences(value: string, pattern: string): number {
   return value.split(pattern).length - 1;
@@ -15,6 +16,10 @@ export function deepMerge<T extends MergeableRecord>(target: T, source: Partial<
   const result: MergeableRecord = { ...target };
 
   for (const [key, sourceValue] of Object.entries(source as MergeableRecord)) {
+    if (UNSAFE_MERGE_KEYS.has(key)) {
+      throw new Error(`Unsafe merge key: ${key}`);
+    }
+
     if (sourceValue === undefined) {
       continue;
     }

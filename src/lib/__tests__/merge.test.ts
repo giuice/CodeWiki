@@ -28,6 +28,12 @@ describe("deepMerge", () => {
   test("replaces arrays atomically", () => {
     expect(deepMerge({ hooks: ["existing"] }, { hooks: ["incoming"] })).toEqual({ hooks: ["incoming"] });
   });
+
+  test("rejects unsafe prototype-sensitive keys", () => {
+    const source = JSON.parse('{"__proto__":{"polluted":true}}') as Record<string, unknown>;
+
+    expect(() => deepMerge({}, source)).toThrow(/Unsafe merge key: __proto__/);
+  });
 });
 
 describe("deduplicateHookArray", () => {

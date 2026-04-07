@@ -74,6 +74,10 @@ test("init --tool filters adapters and unknown tools fail clearly", () => {
   assert.notEqual(bad.status, 0);
   assert.match(bad.stderr, /Supported values: claude-code, codex, copilot, opencode/);
 
+  const missingToolValue = runCli(tempProject(), ["init", "--tool", "--force"]);
+  assert.notEqual(missingToolValue.status, 0);
+  assert.match(missingToolValue.stderr, /--tool requires comma-separated values/);
+
   const empty = runCli(tempProject(), ["init", "--tool", ","]);
   assert.notEqual(empty.status, 0);
   assert.match(empty.stderr, /requires at least one supported value/);
@@ -96,4 +100,8 @@ test("init refuses overwrite without force and config parser fails closed", () =
   writeFileSync(path.join(cwd, ".codewiki/config.yml"), "version: 1\ntools: [codex]\n");
   const badInit = runCli(cwd, ["init"]);
   assert.notEqual(badInit.status, 0);
+
+  const missingNameValue = runCli(tempProject(), ["init", "--name", "--force"]);
+  assert.notEqual(missingNameValue.status, 0);
+  assert.match(missingNameValue.stderr, /--name requires a project name/);
 });

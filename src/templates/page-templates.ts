@@ -8,13 +8,13 @@ function escapeDoubleQuotedYaml(value: string): string {
 
 export function configTemplate(projectName: string, tools: readonly string[]): string {
   const escapedProjectName = escapeDoubleQuotedYaml(projectName);
+  const renderedTools = tools.length > 0 ? `tools:\n${tools.map((tool) => `  - ${tool}`).join("\n")}` : "tools: []";
 
   return `version: 1
 project:
   name: "${escapedProjectName}"
   description: "Brief project description for LLM context"
-tools:
-${tools.map((tool) => `  - ${tool}`).join("\n")}
+${renderedTools}
 wiki:
   path: "wiki/"
   raw_path: "raw/"

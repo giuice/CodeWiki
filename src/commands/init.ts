@@ -8,6 +8,19 @@ export interface InitOptions {
   args: string[];
 }
 
+function readOptionValue(args: string[], index: number, flag: "--name" | "--tool"): string {
+  const value = args[index + 1];
+  if (!value || value.startsWith("--")) {
+    if (flag === "--name") {
+      throw new Error("--name requires a project name");
+    }
+
+    throw new Error("--tool requires comma-separated values");
+  }
+
+  return value;
+}
+
 function parseTools(value: string): SupportedTool[] {
   const requested = value.split(",").map((tool) => tool.trim()).filter(Boolean);
   if (requested.length === 0) {
@@ -29,12 +42,12 @@ export async function initCommand({ root = process.cwd(), args }: InitOptions): 
     if (arg === "--force") {
       force = true;
     } else if (arg === "--name") {
-      const value = args[++index];
-      if (!value) throw new Error("--name requires a project name");
+      const value = readOptionValue(args, index, "--name");
+      index += 1;
       projectName = value;
     } else if (arg === "--tool") {
-      const value = args[++index];
-      if (!value) throw new Error("--tool requires comma-separated values");
+      const value = readOptionValue(args, index, "--tool");
+      index += 1;
       tools = parseTools(value);
     } else {
       throw new Error(`Unknown init option: ${arg}`);
