@@ -1,1 +1,32 @@
-{"type":"module","scripts":{"test":"echo hi"},"devDependencies":{"typescript":"^5.0.0","@types/node":"^20.0.0"}}
+{
+  "name": "codewiki",
+  "version": "0.1.0",
+  "description": "Markdown-first, human-approved project wiki framework CLI.",
+  "type": "module",
+  "bin": {
+    "codewiki": "./dist/bin/codewiki.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig.test.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "npm run build && node --test \"dist/test/**/*.test.js\"",
+    "prepack": "npm run build"
+  },
+  "keywords": [
+    "codewiki",
+    "markdown",
+    "cli",
+    "agent-context"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "typescript": "^5.9.0"
+  }
+}
