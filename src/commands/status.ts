@@ -1,23 +1,42 @@
 import path from "node:path";
-import { readConfig } from "../core/config.js";
-import { ensureInsideRoot, exists, listMarkdownFiles, readText } from "../core/files.js";
-import { parseFrontmatter } from "../core/frontmatter.js";
+import { loadConfig } from "../core/config.js";
+import { listFilesRecursive, readTextIfExists, readTextRequired } from "../core/files.js";
+import { frontmatterString, parseMarkdownWithFrontmatter } from "../core/frontmatter.js";
 import { collectLintFindings } from "./lint.js";
 
-export async function runStatus(cwd: string): Promise<string> {
-  const config = await readConfig(cwd);
-  const pages = await listMarkdownFiles(cwd, config.wiki.path);
-  const logPath = path.join(cwd, config.wiki.path, "log.md");
-  const log = (await exists(logPath)) ? await readText(logPath) : "";
-  const headings = log.split(/\r?\n/).filter((line) => line.startsWith("## "));
+export async function statusCommand(root = process.cwd()): Promise<string> {
+  const config = await loadConfig(root);
+  const pages = await listFilesRecursive(root, config.wiki.path, ".md");
+  const issuePages = pages.filter((page) => page.includes("/issues/"));
   let openIssues = 0;
   let resolvedIssues = 0;
-  for (const page of pages.filter((candidate) => candidate.includes("/issues/"))) {
-    const { data } = parseFrontmatter(await readText(ensureInsideRoot(cwd, page)));
-    if (data.status === "resolved") resolvedIssues += 1;
+  for (const page of issuePages) {
+    const parsed = parseMarkdownWithFrontmatter(await readTextRequired(root, page));
+    const status = frontmatterString(parsed.frontmatter.status);
+    if (status === "resolved") resolvedIssues += 1;
     else openIssues += 1;
   }
-  const findings = await collectLintFindings(cwd);
-  const driftWarnings = findings.filter((finding) => finding.category === "file-drift").length;
-  return `# CodeWiki Status\n\nProject: ${config.project.name}\nWiki path: ${config.wiki.path}\nRaw path: ${config.wiki.raw_path}\nPage count: ${pages.length}\nOpen issues: ${openIssues}\nResolved issues: ${resolvedIssues}\nLatest log entry: ${headings.at(-1) ?? "none"}\nDrift warning count: ${driftWarnings}\nHuman approval required: ${config.verification.require_human_approval}\n`;
+  const logPath = path.posix.join(config.wiki.path, "log.md");
+  const log = (await readTextIfExists(root, logPath)) ?? "";
+  const lastLogHeading = Array.from(log.matchAll(/^##\s+(.+)$/gm)).at(-1)?.[1] ?? "No log entries";
+  const lintFindings = await collectLintFindings(root);
+  const driftWarnings = lintFindings.filter((finding) => finding.category === "file-drift").length;
+  return `# CodeWiki Status
+
+Project: ${config.project.name}
+Wiki path: ${config.wiki.path}
+Raw path: ${config.wiki.rawPath}
+Pages: ${pages.length}
+Entities: ${pages.filter((page) => page.includes("/entities/")).length}
+Decisions: ${pages.filter((page) => page.includes("/decisions/")).length}
+Lessons: ${pages.filter((page) => page.includes("/lessons/")).length}
+Issues open: ${openIssues}
+Issues resolved: ${resolvedIssues}
+Sources: ${pages.filter((page) => page.includes("/sources/")).length}
+Last log entry: ${lastLogHeading}
+Drift warning count: ${driftWarnings}
+Lint warning/error count: ${lintFindings.filter((finding) => finding.severity !== "info").length}
+
+No database, server, web UI, vector index, or non-markdown ingestion is required for this status report.
+`;
 }
