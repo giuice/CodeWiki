@@ -13,6 +13,7 @@ export function scaffoldDirectories(tools: readonly SupportedTool[]): string[] {
     ".codewiki/adapters",
     ...tools.map((tool) => `.codewiki/adapters/${tool}`),
     "raw",
+    "tasks",
     "wiki/entities",
     "wiki/decisions",
     "wiki/lessons",
