@@ -14,8 +14,15 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<ReportE
   const report: ReportEntry[] = [];
 
   for (const directory of scaffoldDirectories(options.tools)) {
+    const targetPath = ensureInsideRoot(options.root, directory);
+    const existedBeforeCreate = await exists(targetPath);
+
     await ensureDir(options.root, directory);
-    report.push({ action: "created", path: directory });
+    report.push(
+      existedBeforeCreate
+        ? { action: "skipped", path: directory, reason: "exists" }
+        : { action: "created", path: directory }
+    );
   }
 
   for (const file of scaffoldFiles(options.projectName, options.tools)) {

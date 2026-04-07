@@ -75,9 +75,15 @@ describe("scaffoldProject", () => {
     const root = await makeTempRoot();
 
     const created = await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
+    expect(created.find((entry) => entry.path === "tasks")?.action).toBe("created");
     expect(created.find((entry) => entry.path === ".codewiki/config.yml")?.action).toBe("created");
 
     const skipped = await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
+    expect(skipped.find((entry) => entry.path === "tasks")).toEqual({
+      action: "skipped",
+      path: "tasks",
+      reason: "exists"
+    });
     expect(skipped.find((entry) => entry.path === ".codewiki/config.yml")).toEqual({
       action: "skipped",
       path: ".codewiki/config.yml",
