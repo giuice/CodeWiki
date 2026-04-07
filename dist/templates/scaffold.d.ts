@@ -1,7 +1,7 @@
 import type { SupportedTool } from "../core/types.js";
-export interface ScaffoldFile {
+export interface ScaffoldEntry {
     path: string;
-    content: string;
+    content?: string;
+    directory?: boolean;
 }
-export declare function scaffoldDirectories(tools: readonly SupportedTool[]): string[];
-export declare function scaffoldFiles(projectName: string, tools: readonly SupportedTool[]): ScaffoldFile[];
+export declare function scaffoldEntries(projectName: string, tools: SupportedTool[]): ScaffoldEntry[];

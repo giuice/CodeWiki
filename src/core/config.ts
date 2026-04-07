@@ -38,15 +38,75 @@ function nestedValue(lines: string[], section: string, key: string): string | un
   return undefined;
 }
 
-function sequence(lines: string[], section: string): string[] {
-  const start = lines.findIndex((line) => line === `${section}:`);
-  if (start < 0) return [];
-  const values: string[] = [];
-  for (let index = start + 1; index < lines.length; index += 1) {
-    const line = lines[index]!;
-    if (/^\S/.test(line)) break;
-    const match = line.match(/^  -\s+(.+)$/);
-    if (match) values.push(stripQuotes(match[1]!));
+export function parseGeneratedConfig(text: string, root = process.cwd()): CodeWikiConfig {
+  assertSupportedYamlSubset(text);
+  const config: CodeWikiConfig = structuredClone(DEFAULT_CONFIG);
+  config.tools = [];
+  let section: keyof CodeWikiConfig | "tools" | undefined;
+  for (const rawLine of text.split(/\r?\n/)) {
+    const trimmedRaw = rawLine.trim();
+    if (!trimmedRaw || trimmedRaw.startsWith("#")) continue;
+    const withoutComment = rawLine.replace(/\s+#.*$/, "");
+    if (!withoutComment.trim()) continue;
+    if (!withoutComment.startsWith(" ")) {
+      const [key, ...rest] = withoutComment.split(":");
+      const value = rest.join(":").trim();
+      if (!key) continue;
+      if (key === "version") {
+        config.version = parseNumber(value, "version");
+        section = undefined;
+      } else if (["project", "tools", "wiki", "verification", "ingestion", "lint"].includes(key) && value === "") {
+        section = key as keyof CodeWikiConfig;
+      } else {
+        throw new Error(`Unsupported top-level config line: ${rawLine}`);
+      }
+      continue;
+    }
+    if (!section) throw new Error(`Config value without a supported section: ${rawLine}`);
+    const trimmed = withoutComment.trim();
+    if (section === "tools" && trimmed.startsWith("- ")) {
+      const tool = unquote(trimmed.slice(2)) as SupportedTool;
+      if (!SUPPORTED_TOOLS.includes(tool)) {
+        throw new Error(`Unsupported CodeWiki tool in config: ${tool}`);
+      }
+      config.tools.push(tool);
+      continue;
+    }
+    const sep = trimmed.indexOf(":");
+    if (sep === -1) throw new Error(`Unsupported config line: ${rawLine}`);
+    const key = trimmed.slice(0, sep).trim();
+    const value = unquote(trimmed.slice(sep + 1).trim());
+    switch (section) {
+      case "project":
+        if (key === "name" || key === "description") config.project[key] = value;
+        else throw new Error(`Unsupported project config key: ${key}`);
+        break;
+      case "wiki":
+        if (key === "path") config.wiki.path = value;
+        else if (key === "raw_path") config.wiki.rawPath = value;
+        else throw new Error(`Unsupported wiki config key: ${key}`);
+        break;
+      case "verification":
+        if (key === "require_human_approval") config.verification.requireHumanApproval = parseBoolean(value, key);
+        else if (key === "require_tests") config.verification.requireTests = parseBoolean(value, key);
+        else if (key === "auto_log") config.verification.autoLog = parseBoolean(value, key);
+        else throw new Error(`Unsupported verification config key: ${key}`);
+        break;
+      case "ingestion":
+        if (key === "interactive") config.ingestion.interactive = parseBoolean(value, key);
+        else if (key === "max_pages_per_ingest") config.ingestion.maxPagesPerIngest = parseNumber(value, key);
+        else throw new Error(`Unsupported ingestion config key: ${key}`);
+        break;
+      case "lint":
+        if (key === "check_orphans") config.lint.checkOrphans = parseBoolean(value, key);
+        else if (key === "check_contradictions") config.lint.checkContradictions = parseBoolean(value, key);
+        else if (key === "check_stale_issues") config.lint.checkStaleIssues = parseBoolean(value, key);
+        else if (key === "check_file_drift") config.lint.checkFileDrift = parseBoolean(value, key);
+        else throw new Error(`Unsupported lint config key: ${key}`);
+        break;
+      default:
+        throw new Error(`Unsupported config section: ${String(section)}`);
+    }
   }
   return values;
 }

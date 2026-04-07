@@ -1,38 +1,38 @@
-import { loadConfig } from "../core/config.js";
-import { writeTextFileSafe } from "../core/files.js";
-function stamp() {
-    return new Date().toISOString().replace(/[:.]/g, "").replace(/Z$/, "Z");
-}
-function slugify(value) {
-    return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "prd";
-}
-export async function prdCommand(args, root = process.cwd()) {
-    const description = args.join(" ").trim();
+import path from "node:path";
+import { ensureDir, writeTextFileSafe } from "../core/files.js";
+import { slugify, timestampForFile } from "../core/proposals.js";
+export async function prdCommand(description, root = process.cwd(), now = new Date()) {
     if (!description)
         throw new Error("Usage: codewiki prd <description>");
-    const config = await loadConfig(root);
-    const file = `${config.wiki.rawPath.replace(/\/$/, "")}/prd-${stamp()}-${slugify(description)}.md`;
+    await ensureDir(root, "raw");
+    const slug = slugify(description).slice(0, 60);
+    const relPath = path.posix.join("raw", `${timestampForFile(now)}-prd-${slug}.md`);
     const content = `---
 type: prd
-status: human-review-needed
+human_review_needed: true
 approved: false
+date: ${now.toISOString()}
 ---
-
 # PRD Draft: ${description}
 
+HUMAN-REVIEW-NEEDED: This raw PRD draft is a prompt artifact. Refine and approve before generating tasks or wiki updates.
+
 ## Problem
+Describe the user/problem evidence.
 
 ## Goals
+- TODO
 
-## Non-goals
+## Non-Goals
+- Preserve CodeWiki v1 boundaries unless explicitly changed.
 
 ## Acceptance Criteria
+- TODO
 
 ## Verification Loop
-
-Each derived task must summarize tests, changes, and proposed wiki updates for human approval.
+Each implementation task must run tests and ask for human approval before wiki updates.
 `;
-    await writeTextFileSafe(root, file, content);
-    return `Created human-review-needed PRD draft: ${file}`;
+    await writeTextFileSafe(root, relPath, content, false);
+    return `Created human-review-needed PRD draft: ${relPath}`;
 }
 //# sourceMappingURL=prd.js.map

@@ -1,1 +1,1 @@
-export declare function tasksCommand(args: string[], root?: string): Promise<string>;
+export declare function tasksCommand(prdPath: string, root?: string, now?: Date): Promise<string>;

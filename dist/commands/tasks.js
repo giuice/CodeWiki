@@ -1,40 +1,36 @@
 import path from "node:path";
-import { loadConfig } from "../core/config.js";
-import { ensureWithinRoot, readTextIfExists, writeTextFileSafe } from "../core/files.js";
-function stamp() {
-    return new Date().toISOString().replace(/[:.]/g, "").replace(/Z$/, "Z");
-}
-export async function tasksCommand(args, root = process.cwd()) {
-    const prdPath = args[0];
+import { ensureWithinRoot, readTextRequired, writeTextFileSafe } from "../core/files.js";
+import { slugify, timestampForFile } from "../core/proposals.js";
+export async function tasksCommand(prdPath, root = process.cwd(), now = new Date()) {
     if (!prdPath)
         throw new Error("Usage: codewiki tasks <prd-path>");
-    ensureWithinRoot(root, prdPath);
-    const prdText = await readTextIfExists(root, prdPath);
-    if (prdText === undefined)
-        throw new Error(`PRD file not found: ${prdPath}`);
-    const config = await loadConfig(root);
-    const basename = path.basename(prdPath, path.extname(prdPath)).replace(/[^a-zA-Z0-9_-]+/g, "-");
-    const file = `${config.wiki.rawPath.replace(/\/$/, "")}/tasks-${stamp()}-${basename}.md`;
+    const absolute = ensureWithinRoot(root, prdPath);
+    const rel = path.relative(root, absolute).split(path.sep).join("/");
+    const prd = await readTextRequired(root, rel);
+    const base = slugify(path.basename(rel, path.extname(rel))).slice(0, 70);
+    const out = path.posix.join("raw", `${timestampForFile(now)}-tasks-${base}.md`);
     const content = `---
 type: task-list
-source_prd: ${prdPath}
-status: human-review-needed
+source_prd: ${rel}
+human_review_needed: true
 approved: false
+date: ${now.toISOString()}
 ---
+# Task List Draft for ${rel}
 
-# Task Draft for ${prdPath}
+HUMAN-REVIEW-NEEDED: Review this task breakdown before execution. Every task must use the CodeWiki verification loop and human approval before wiki writes.
+
+## Source PRD Excerpt
+${prd.slice(0, 3000)}
 
 ## Tasks
-
-- [ ] Implement the smallest safe slice from the PRD.
-- [ ] Run the verification loop: build, typecheck, tests, and human-approved wiki proposal review.
-- [ ] Record proposed wiki updates without applying them automatically.
-
-## PRD Excerpt
-
-${prdText.slice(0, 1600)}
+- [ ] 1. Confirm PRD scope and required tests with the human.
+- [ ] 2. Implement the smallest verified slice.
+- [ ] 3. Run relevant tests/typecheck/lint.
+- [ ] 4. Summarize changes and wiki context used.
+- [ ] 5. Ask for human approval before any CodeWiki wiki update.
 `;
-    await writeTextFileSafe(root, file, content);
-    return `Created human-review-needed task draft: ${file}`;
+    await writeTextFileSafe(root, out, content, false);
+    return `Created human-review-needed task artifact: ${out}`;
 }
 //# sourceMappingURL=tasks.js.map

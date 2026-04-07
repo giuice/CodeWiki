@@ -1,1 +1,1 @@
-export declare function statusCommand(_args: string[], root?: string): Promise<string>;
+export declare function statusCommand(root?: string): Promise<string>;

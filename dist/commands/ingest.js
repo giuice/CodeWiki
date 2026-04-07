@@ -1,49 +1,48 @@
 import path from "node:path";
 import { promises as fs } from "node:fs";
-import { ensureWithinRoot, readTextIfExists, snapshotFiles } from "../core/files.js";
+import { ensureWithinRoot, relativeToRoot } from "../core/files.js";
 import { loadConfig } from "../core/config.js";
-import { PROPOSAL_BOUNDARY, renderProposal } from "../core/proposals.js";
-import { matchWikiPages } from "../core/wiki-index.js";
-export async function ingestCommand(args, root = process.cwd()) {
-    const input = args[0];
-    if (!input)
+import { findRelevantPages } from "../core/wiki-index.js";
+import { PROPOSAL_ONLY_BOUNDARY, slugify } from "../core/proposals.js";
+export async function ingestCommand(sourcePath, root = process.cwd()) {
+    if (!sourcePath)
         throw new Error("Usage: codewiki ingest <markdown-path>");
-    if (!/\.md(?:own)?$/i.test(input))
-        throw new Error("CodeWiki v1 ingests markdown sources only (.md or .markdown).");
-    const absolute = ensureWithinRoot(root, input);
-    const sourceText = await fs.readFile(absolute, "utf8");
-    const relSource = path.relative(root, absolute).split(path.sep).join("/");
-    const config = await loadConfig(root);
-    const before = await snapshotFiles(root, config.wiki.path);
-    const { matches, readOrder } = await matchWikiPages(root, sourceText, config.wiki.path);
-    const after = await snapshotFiles(root, config.wiki.path);
-    if (before.size !== after.size || Array.from(before).some(([file, text]) => after.get(file) !== text)) {
-        throw new Error("Internal safety violation: ingest attempted to modify wiki files.");
+    if (!/\.md(?:own)?$/i.test(sourcePath)) {
+        throw new Error("CodeWiki v1 ingests markdown files only (.md or .markdown). Non-markdown ingestion is out of scope.");
     }
-    const result = {
-        kind: "proposal",
-        title: `Source Summary Proposal: ${relSource}`,
-        boundary: PROPOSAL_BOUNDARY,
-        proposedWrites: [{ kind: "proposal", path: `wiki/sources/${path.basename(relSource, path.extname(relSource))}.md`, description: "Human-reviewed source-summary page candidate" }],
-        body: [
-            "## Source",
-            relSource,
-            "",
-            "## Read Order",
-            readOrder.join(" -> "),
-            "",
-            "## Source Summary Draft",
-            sourceText.split(/\r?\n/).slice(0, 20).join("\n"),
-            "",
-            "## Candidate Related Updates",
-            ...(matches.length > 0 ? matches.map((match) => `- ${match.path} (matched: ${match.matchedTerms.join(", ") || "index reference"})`) : ["- No deterministic related pages found."]),
-            "",
-            "## Approval Checklist",
-            "- [ ] Human reviewed this source summary.",
-            "- [ ] Human approved any related wiki updates."
-        ].join("\n")
-    };
-    await readTextIfExists(root, path.posix.join(config.wiki.path.replace(/\/$/, ""), "index.md"));
-    return renderProposal(result);
+    const absolute = ensureWithinRoot(root, sourcePath);
+    const rel = relativeToRoot(root, absolute);
+    const source = await fs.readFile(absolute, "utf8");
+    const config = await loadConfig(root);
+    const related = await findRelevantPages(root, config, `${rel}\n${source}`, 8);
+    const title = slugify(path.basename(rel, path.extname(rel)));
+    const candidateLines = related.matches.length
+        ? related.matches.map((match) => `- ${match.path} — matched ${match.matchedTerms.join(", ")}`).join("\n")
+        : "- No deterministic related wiki pages found from wiki/index.md and page text.";
+    return `${PROPOSAL_ONLY_BOUNDARY}
+
+# Source Summary Proposal: ${title}
+
+## Source
+- ${rel}
+
+## Read Order
+1. ${related.readOrder.join("\n2. ")}
+
+## Proposed Wiki Write (not applied)
+- wiki/sources/${title}.md — source-summary proposal for human review
+
+## Key Takeaway Draft
+Summarize the markdown source below, then ask the human to approve any wiki writes.
+
+## Candidate Related Updates
+${candidateLines}
+
+## Agent Prompt
+Read the source and candidate pages. Propose a source-summary page and any entity/decision/issue/lesson updates. Do not write wiki files until the human approves.
+
+## Source Excerpt
+${source.slice(0, 4000)}
+`;
 }
 //# sourceMappingURL=ingest.js.map

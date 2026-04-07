@@ -1,20 +1,28 @@
 export function configTemplate(projectName, tools) {
-    return `version: 1
+    const toolLines = tools.map((tool) => `  - ${tool}`).join("\n");
+    return `# .codewiki/config.yml
+version: 1
+
 project:
   name: "${projectName}"
   description: "Brief project description for LLM context"
+
 tools:
-${tools.map((tool) => `  - ${tool}`).join("\n")}
+${toolLines}
+
 wiki:
-  path: "wiki/"
-  raw_path: "raw/"
+  path: wiki/
+  raw_path: raw/
+
 verification:
   require_human_approval: true
   require_tests: true
   auto_log: true
+
 ingestion:
   interactive: true
   max_pages_per_ingest: 20
+
 lint:
   check_orphans: true
   check_contradictions: true
@@ -24,122 +32,134 @@ lint:
 }
 export const entityTemplate = `---
 type: entity
-id: ENTITY-001
-name: Example Entity
-status: active
-key_files: []
-file_hashes: {}
+name: example-entity
+files: [src/example.ts]
+file_hashes:
+  src/example.ts: TODO_SHA256
 linked_issues: []
 linked_lessons: []
-verified_by: human
+last_updated: TODO_DATE
 approved: false
+verified_by: human
 ---
-
-# Example Entity
+# example-entity
 
 ## Purpose
-
-Describe the entity and why it matters.
+Describe the module, service, or component.
 
 ## Key Files
+- \`src/example.ts\` — Replace with real file responsibilities.
 
-- Add source files after human review.
+## Dependencies
+- Replace with direct dependencies.
 
-## Current Behavior
+## Known Issues
+- Link stable issue pages with \`[[ISSUE-XXX]]\`.
 
-Record verified behavior only.
+## Lessons Learned
+- Link verified lessons with \`[[LESSON-XXX]]\`.
 
-## Open Questions
-
-- None yet.
+## Current Status
+Human review needed before this template becomes a wiki fact.
 `;
 export const decisionTemplate = `---
 type: decision
-id: ADR-001
+id: DEC-XXX
 status: proposed
-date: YYYY-MM-DD
-deciders: []
+date: TODO_DATE
 approved: false
+verified_by: human
 ---
-
-# ADR-001: Decision Title
+# DEC-XXX: Decision title
 
 ## Context
+What problem or force required a decision?
 
 ## Decision
+What was chosen?
 
 ## Consequences
+What tradeoffs follow from this choice?
 
-## Alternatives Considered
+## Status
+Use proposed, accepted, superseded, or rejected after human review.
 `;
 export const lessonTemplate = `---
 type: lesson
-id: LESSON-001
+id: LESSON-XXX
+related_files: []
+related_entities: []
+verified: false
 verified_by: human
 approved: false
-linked_issues: []
+date: TODO_DATE
 ---
+# LESSON-XXX: Lesson title
 
-# LESSON-001: Lesson Title
+## What happened
+Describe the attempted approach or observed behavior.
 
-## Trigger
+## What went wrong
+Capture the false assumption, failure mode, or gotcha.
 
-## Verified Lesson
+## The fix
+Describe the verified correction.
 
-## Evidence
+## Verification
+Human approval and evidence are required before this becomes wiki knowledge.
 
-## Future Guidance
+## Takeaway
+State the reusable rule future agents should follow.
 `;
 export const issueTemplate = `---
 type: issue
-id: ISSUE-001
+id: ISSUE-XXX
 status: open
 resolved_by: ""
+related_files: []
+related_entities: []
 verified_by: human
 approved: false
 ---
+# ISSUE-XXX: Issue title
 
-# ISSUE-001: Issue Title
+## Problem
+Known trap, pitfall, or unresolved risk.
 
-## Symptom
+## Impact
+What breaks or becomes misleading?
 
-## Investigation
+## Detection
+How future agents/developers can recognize it.
 
 ## Resolution
-
-Set status: resolved and resolved_by: LESSON-XXX after a human-approved lesson captures the fix.
+When resolved, keep this file in place and set \`status: resolved\` plus \`resolved_by: LESSON-XXX\` in frontmatter.
 `;
 export const sourceSummaryTemplate = `---
 type: source-summary
-id: SOURCE-001
-raw_source: raw/example.md
+source: raw/example.md
 related_pages: []
 verified_by: human
 approved: false
+date: TODO_DATE
 ---
-
-# SOURCE-001: Source Summary
+# Source Summary: example
 
 ## Source
+Link to the immutable raw markdown source.
 
-## Summary
+## Key Takeaways
+- Human-reviewed summary bullets go here.
 
-## Candidate Wiki Updates
+## Related Wiki Updates Proposed
+- Entity/decision/issue/lesson pages that may need changes.
 
-## Approval Checklist
-
-- [ ] Human reviewed source summary.
-- [ ] Human approved related wiki page updates.
+## Approval Boundary
+PROPOSAL ONLY — no wiki files were modified without approval.
 `;
-export function indexTemplate(projectName) {
-    return `---
-type: index
-project: "${projectName}"
----
+export const initialIndex = `# CodeWiki Index
 
-# CodeWiki Index
-
-This index is the first file read by \`codewiki query\` before matched pages.
+Content-oriented catalog of human-approved wiki pages. Query and ingest commands read this first before selecting matched pages.
 
 ## Entities
 
@@ -151,15 +171,8 @@ This index is the first file read by \`codewiki query\` before matched pages.
 
 ## Sources
 `;
-}
-export const logTemplate = `---
-type: log
----
+export const initialLog = `# CodeWiki Log
 
-# CodeWiki Log
-
-## Initial scaffold
-
-- CodeWiki initialized. Future updates require human approval.
+Append-only operation log. Entries are added only after human-approved wiki updates.
 `;
 //# sourceMappingURL=page-templates.js.map

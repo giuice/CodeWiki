@@ -40,6 +40,9 @@ export function parseGeneratedConfig(text, root = process.cwd()) {
     config.tools = [];
     let section;
     for (const rawLine of text.split(/\r?\n/)) {
+        const trimmedRaw = rawLine.trim();
+        if (!trimmedRaw || trimmedRaw.startsWith("#"))
+            continue;
         const withoutComment = rawLine.replace(/\s+#.*$/, "");
         if (!withoutComment.trim())
             continue;

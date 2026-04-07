@@ -1,35 +1,35 @@
-import { readTextIfExists } from "../core/files.js";
 import { loadConfig } from "../core/config.js";
-import { PROPOSAL_BOUNDARY } from "../core/proposals.js";
-import { matchWikiPages } from "../core/wiki-index.js";
-export async function queryCommand(args, root = process.cwd()) {
-    const question = args.join(" ").trim();
+import { findRelevantPages } from "../core/wiki-index.js";
+import { readTextRequired } from "../core/files.js";
+import { PROPOSAL_ONLY_BOUNDARY } from "../core/proposals.js";
+export async function queryCommand(question, root = process.cwd()) {
     if (!question)
         throw new Error("Usage: codewiki query <question>");
     const config = await loadConfig(root);
-    const { matches, readOrder } = await matchWikiPages(root, question, config.wiki.path);
-    const pageSections = [];
-    for (const match of matches) {
-        const text = (await readTextIfExists(root, match.path)) ?? "";
-        pageSections.push(`### ${match.path}\n${text.slice(0, 1200)}`);
+    const related = await findRelevantPages(root, config, question, 6);
+    const refs = [];
+    for (const match of related.matches) {
+        const markdown = await readTextRequired(root, match.path);
+        refs.push(`## ${match.path}\nMatched terms: ${match.matchedTerms.join(", ")}\n${markdown.slice(0, 2400)}`);
     }
-    return [
-        "# CodeWiki Query Context Bundle",
-        "",
-        PROPOSAL_BOUNDARY,
-        "",
-        `Question: ${question}`,
-        "",
-        `Read order: ${readOrder.join(" -> ")}`,
-        "",
-        "## Wiki References",
-        matches.length > 0 ? matches.map((match) => `- ${match.path} — ${match.title}`).join("\n") : "No matching wiki pages found; do not hallucinate wiki context.",
-        "",
-        "## Matched Page Context",
-        pageSections.length > 0 ? pageSections.join("\n\n") : "No matched page content.",
-        "",
-        "## Synthesis Prompt",
-        "Answer only from the referenced CodeWiki pages above, and cite relative wiki paths. Do not create wiki pages automatically."
-    ].join("\n");
+    const noMatch = related.matches.length === 0 ? "\nNo matching wiki pages found. Do not hallucinate wiki context; answer from available evidence or ask the human for more sources.\n" : "";
+    return `${PROPOSAL_ONLY_BOUNDARY}
+
+# CodeWiki Query Context Bundle
+
+Question: ${question}
+
+## Read Order
+1. ${related.readOrder.join("\n2. ")}
+
+## Matched Page References
+${related.matches.map((match) => `- ${match.path} — ${match.title}`).join("\n") || "- None"}
+${noMatch}
+## Context
+${refs.join("\n\n") || "No wiki page context selected."}
+
+## Synthesis Prompt
+Answer using the referenced wiki pages above. Cite relative wiki paths. Do not create or update wiki pages unless the human explicitly approves a later write.
+`;
 }
 //# sourceMappingURL=query.js.map

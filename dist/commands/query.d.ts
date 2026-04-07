@@ -1,1 +1,1 @@
-export declare function queryCommand(args: string[], root?: string): Promise<string>;
+export declare function queryCommand(question: string, root?: string): Promise<string>;

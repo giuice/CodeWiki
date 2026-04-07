@@ -1,10 +1,7 @@
-import type { PageMatch } from "./types.js";
-export declare function tokenize(value: string): string[];
-export declare function readIndexFirst(root: string, wikiPath?: string): Promise<{
-    indexText: string;
-    readOrder: string[];
-}>;
-export declare function matchWikiPages(root: string, question: string, wikiPath?: string, limit?: number): Promise<{
+import type { CodeWikiConfig, PageMatch } from "./types.js";
+export declare function termsFromText(text: string): string[];
+export declare function findRelevantPages(root: string, config: CodeWikiConfig, query: string, limit?: number): Promise<{
+    index: string;
     matches: PageMatch[];
     readOrder: string[];
 }>;

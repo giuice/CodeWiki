@@ -1,1 +1,1 @@
-export declare function ingestCommand(args: string[], root?: string): Promise<string>;
+export declare function ingestCommand(sourcePath: string, root?: string): Promise<string>;

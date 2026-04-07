@@ -1,1 +1,1 @@
-export declare function prdCommand(args: string[], root?: string): Promise<string>;
+export declare function prdCommand(description: string, root?: string, now?: Date): Promise<string>;
