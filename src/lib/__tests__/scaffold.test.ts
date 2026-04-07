@@ -70,4 +70,21 @@ describe("scaffoldProject", () => {
       "source-summary.md"
     ]);
   });
+
+  test("reports created, skipped, and replaced based on actual file state", async () => {
+    const root = await makeTempRoot();
+
+    const created = await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
+    expect(created.find((entry) => entry.path === ".codewiki/config.yml")?.action).toBe("created");
+
+    const skipped = await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
+    expect(skipped.find((entry) => entry.path === ".codewiki/config.yml")).toEqual({
+      action: "skipped",
+      path: ".codewiki/config.yml",
+      reason: "exists"
+    });
+
+    const replaced = await scaffoldProject({ force: true, projectName: "demo", root, tools: ["claude-code"] });
+    expect(replaced.find((entry) => entry.path === ".codewiki/config.yml")?.action).toBe("replaced");
+  });
 });
