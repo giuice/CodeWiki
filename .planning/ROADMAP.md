@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `src/` directory structure is ready to receive v2 adapter and lib files
 **Plans:** 1 plan
 Plans:
-- [ ] 01-01-PLAN.md — Delete v1 runtime code, prune orphaned modules, update cli.ts, verify build
+- [x] 01-01-PLAN.md — Delete v1 runtime code, prune orphaned modules, update cli.ts, verify build
 
 ### Phase 2: Shared Infrastructure
 **Goal**: All shared library modules exist and are individually testable; the postbuild copy step is confirmed working
@@ -46,7 +46,11 @@ Plans:
   3. `src/lib/detect.ts` returns correct tool names when `.claude/`, `.codex/`, `opencode.json`, or `.github/copilot-instructions.md` are present in a directory
   4. `npm run build` followed by `ls dist/templates/` shows template files were copied by the postbuild step
   5. `src/lib/reporter.ts` prints a structured created/skipped/replaced/failed report to stdout
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md — Merge utilities (deepMerge, marker merge) + vitest setup
+- [ ] 02-02-PLAN.md — Scaffold wrapper, tool detection, install reporter
+- [ ] 02-03-PLAN.md — Barrel export, postbuild copy, integration verification
 
 ### Phase 3: Prompt Templates and Hook Scripts
 **Goal**: All markdown prompt files, agent definitions, and hook scripts exist in src/templates/ and are individually verifiable
@@ -125,7 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Clean Slate | 0/1 | Planning complete | - |
-| 2. Shared Infrastructure | 0/TBD | Not started | - |
+| 2. Shared Infrastructure | 0/3 | Planning complete | - |
 | 3. Prompt Templates and Hook Scripts | 0/TBD | Not started | - |
 | 4. Claude Code Adapter + init Command | 0/TBD | Not started | - |
 | 5. Test Suite | 0/TBD | Not started | - |
