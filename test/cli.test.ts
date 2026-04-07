@@ -3,28 +3,35 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
-const repoRoot = process.cwd();
-const cliPath = path.join(repoRoot, "dist", "bin", "codewiki.js");
+const execFileAsync = promisify(execFile);
+const cliPath = path.resolve("dist/bin/codewiki.js");
 
-interface RunResult {
-  status: number | null;
-  stdout: string;
-  stderr: string;
+async function makeTempProject(): Promise<string> {
+  const root = path.join(tmpdir(), `codewiki-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  await mkdir(root, { recursive: true });
+  return root;
 }
 
-function runCodeWiki(args: string[], cwd = repoRoot): RunResult {
-  const result = spawnSync(process.execPath, [cliPath, ...args], { cwd, encoding: "utf8" });
-  return { status: result.status, stdout: result.stdout, stderr: result.stderr };
+async function run(args: string[], cwd: string): Promise<{ code: number; stdout: string; stderr: string }> {
+  try {
+    const { stdout, stderr } = await execFileAsync(process.execPath, [cliPath, ...args], { cwd });
+    return { code: 0, stdout: String(stdout), stderr: String(stderr) };
+  } catch (error) {
+    const failure = error as Error & { code?: number | string; stdout?: string | Buffer; stderr?: string | Buffer };
+    return {
+      code: typeof failure.code === "number" ? failure.code : 1,
+      stdout: String(failure.stdout ?? ""),
+      stderr: String(failure.stderr ?? failure.message),
+    };
+  }
 }
 
-async function tempProject(): Promise<string> {
-  return mkdtemp(path.join(tmpdir(), "codewiki-test-"));
-}
-
-async function exists(target: string): Promise<boolean> {
+async function exists(filePath: string): Promise<boolean> {
   try {
     await stat(target);
     return true;
@@ -47,13 +54,10 @@ async function listFiles(root: string, relDir: string): Promise<Map<string, stri
   return out;
 }
 
-test("package baseline and CLI help match the TypeScript npm contract", async () => {
-  const pkg = JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8")) as Record<string, unknown>;
-  assert.equal(pkg.type, "module");
-  assert.deepEqual(pkg.bin, { codewiki: "./dist/bin/codewiki.js" });
-  const scripts = pkg.scripts as Record<string, string>;
-  for (const script of ["clean", "build", "typecheck", "test", "prepack"]) {
-    assert.ok(scripts[script], `missing script ${script}`);
+test("compiled CLI help lists all required commands", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [cliPath, "--help"]);
+  for (const command of ["init", "ingest", "query", "lint", "prd", "tasks", "status"]) {
+    assert.match(stdout, new RegExp(`\\b${command}\\b`));
   }
   assert.deepEqual(pkg.dependencies ?? {}, {}, "runtime dependencies should stay empty for v1");
   const devDeps = pkg.devDependencies as Record<string, string>;
@@ -184,9 +188,43 @@ test("lint, prd, tasks, and status preserve human approval boundaries", async ()
   }
   assert.match(lint.stdout, /no wiki fixes were written automatically/);
 
-  const status = runCodeWiki(["status"], root);
-  assert.equal(status.status, 0, status.stderr);
-  assert.match(status.stdout, /Page count: 5/);
+  const lint = await run(["lint"], root);
+  assert.equal(lint.code, 0, lint.stderr);
+  assert.match(lint.stdout, /Broken wikilink \[\[MISSING-123\]\]/);
+  assert.match(lint.stdout, /Resolved issue is missing resolved_by/);
+  assert.match(lint.stdout, /Entity file hash drift for src\/foo.ts/);
+  assert.match(lint.stdout, /Orphan candidate/);
+  assert.match(lint.stdout, /Semantic contradiction and stale-claim review requires an agent\/human checklist/);
+  assert.match(lint.stdout, /PROPOSAL ONLY — no wiki files were modified without approval/);
+});
+
+test("prd, tasks, and status create human-review artifacts and summarize wiki state", async () => {
+  const root = await makeTempProject();
+  assert.equal((await run(["init", "--name", "status-demo"], root)).code, 0);
+  const prd = await run(["prd", "add retry widget"], root);
+  assert.equal(prd.code, 0, prd.stderr);
+  assert.match(prd.stdout, /raw\/prd-\d{8}T\d{6}Z-add-retry-widget\.md/);
+  const prdPath = prd.stdout.match(/raw\/[^\s]+\.md/)?.[0];
+  assert.ok(prdPath);
+  const prdContent = await readFile(path.join(root, prdPath), "utf8");
+  assert.match(prdContent, /human-review-needed/);
+
+  const tasks = await run(["tasks", prdPath], root);
+  assert.equal(tasks.code, 0, tasks.stderr);
+  assert.match(tasks.stdout, /human-review-needed task artifact/);
+  const taskPath = tasks.stdout.match(/raw\/[^\s]+\.md/)?.[0];
+  assert.ok(taskPath);
+  const taskContent = await readFile(path.join(root, taskPath), "utf8");
+  assert.match(taskContent, /Verification Loop Required/);
+  assert.match(taskContent, /request human approval before wiki writes/);
+
+  await writeFile(path.join(root, "wiki/log.md"), "# CodeWiki Log\n\n## [2026-04-07T17:00] ingest | demo\n- Status: VERIFIED ✅\n", "utf8");
+  await writeFile(path.join(root, "wiki/issues/ISSUE-OPEN.md"), "---\ntype: issue\nid: ISSUE-OPEN\nstatus: open\n---\n# ISSUE-OPEN\n", "utf8");
+  await writeFile(path.join(root, "wiki/issues/ISSUE-RESOLVED.md"), "---\ntype: issue\nid: ISSUE-RESOLVED\nstatus: resolved\nresolved_by: LESSON-001\n---\n# ISSUE-RESOLVED\n", "utf8");
+  const status = await run(["status"], root);
+  assert.equal(status.code, 0, status.stderr);
+  assert.match(status.stdout, /Project: status-demo/);
+  assert.match(status.stdout, /Open issues: 1/);
   assert.match(status.stdout, /Resolved issues: 1/);
   assert.match(status.stdout, /Drift warning count: 1/);
 

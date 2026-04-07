@@ -13,9 +13,9 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "tsc",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
+    "build": "tsc && tsc -p tsconfig.test.json",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "npm run build && node --test \"dist/test/**/*.test.js\"",
     "prepack": "npm run clean && npm run build && npm test"
   },
