@@ -1,17 +1,87 @@
 # CodeWiki
 
-CodeWiki is a TypeScript npm CLI for bootstrapping a markdown-first project wiki that AI coding agents can read before modifying files and update only after human approval. It scaffolds a local `.codewiki/` schema plus `raw/` and `wiki/` folders, then helps agents produce human-reviewable wiki proposals instead of silently rewriting project knowledge.
+CodeWiki is a markdown-first framework for giving AI coding agents durable, human-approved project memory.
 
-## V1 principles
+Instead of asking an agent to rediscover project context from scratch on every run, CodeWiki installs a small wiki into a project. Agents read the wiki before risky code changes, propose updates after verification, and only write durable knowledge after a human approves it.
 
-- **Human approval is mandatory.** Commands may scaffold files or draft proposal artifacts, but wiki knowledge is not applied without an explicit human review step.
-- **Markdown is the system of record.** CodeWiki uses project-local markdown files instead of a database, server, vector index, or web UI.
-- **Tool adapters are thin.** Claude Code, Codex, Copilot, and OpenCode adapters translate the same verification loop into each tool's instruction or hook surface.
-- **Proposal output is honest.** `ingest`, `query`, and semantic lint review produce context bundles/checklists; they do not claim autonomous LLM synthesis or final verification.
+The result is a compounding knowledge base of decisions, lessons, issues, source summaries, and entity pages that future Claude Code, Codex, Copilot, OpenCode, or other agents can use.
 
-## Generated project layout
+## The right workflow
 
-After initialization, a project should contain:
+The core rule is simple:
+
+> The agent proposes; the human approves; only approved knowledge enters `wiki/`.
+
+Use CodeWiki as a verification loop around coding work, not as an autonomous wiki writer.
+
+```mermaid
+flowchart TD
+  A[Developer asks agent to change code] --> B[Agent reads wiki/index.md]
+  B --> C[Agent reads relevant wiki pages<br/>entities, lessons, issues, decisions]
+  C --> D[Agent changes code with known context]
+  D --> E[Agent runs verification<br/>tests, typecheck, manual checks]
+  E --> F[Agent summarizes changes + wiki context used]
+  F --> G{Human approves result?}
+
+  G -- Yes --> H[Agent proposes wiki updates<br/>lesson/entity/issue/log/source summary]
+  H --> I{Human approves wiki update?}
+  I -- Yes --> J[Write approved updates to wiki/]
+  I -- No --> K[Keep proposal out of wiki/]
+
+  G -- No --> L[Agent investigates failure]
+  L --> M[Create or update proposed issue/lesson<br/>explaining what failed]
+  M --> N[Human reviews strategy]
+  N --> D
+```
+
+For read-only questions, do not trigger hook-style context injection. Ask the wiki explicitly:
+
+```bash
+codewiki query "what do we know about retry backoff?"
+```
+
+For write tasks, the adapter/instructions should nudge the agent to read CodeWiki context before editing and then stop for review before any wiki mutation.
+
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph Raw[Raw layer: human-curated source of truth]
+    R1[raw/*.md<br/>PRDs, notes, incidents, specs]
+  end
+
+  subgraph Wiki[Wiki layer: LLM-written, human-approved]
+    W1[wiki/index.md<br/>catalog]
+    W2[wiki/log.md<br/>chronology]
+    W3[wiki/entities]
+    W4[wiki/decisions]
+    W5[wiki/lessons]
+    W6[wiki/issues]
+    W7[wiki/sources]
+  end
+
+  subgraph Schema[Schema layer: conventions and adapters]
+    S1[.codewiki/config.yml]
+    S2[.codewiki/templates]
+    S3[.codewiki/adapters<br/>claude-code, codex, copilot, opencode]
+  end
+
+  R1 -->|ingest proposal| W7
+  W1 -->|find context| Agent[AI coding agent]
+  W3 --> Agent
+  W4 --> Agent
+  W5 --> Agent
+  W6 --> Agent
+  S1 --> Agent
+  S2 --> Agent
+  S3 --> Agent
+  Agent -->|proposal only| Review[Human review]
+  Review -->|approved| Wiki
+```
+
+### Generated project layout
+
+After `codewiki init`, a project gets:
 
 ```text
 .codewiki/
@@ -38,64 +108,137 @@ wiki/
   sources/
 ```
 
-`raw/` is for immutable human-curated markdown sources. `wiki/` is for LLM-written, human-approved project knowledge. `.codewiki/` stores schema conventions, config, templates, and tool-specific adapter fragments.
+- `raw/` contains immutable, human-curated markdown sources.
+- `wiki/` contains synthesized project knowledge that should be written only after human approval.
+- `.codewiki/` contains config, templates, and adapter fragments for different AI coding tools.
 
-## Development
+## Install
+
+### From this repository
 
 ```bash
 npm install
 npm run build
-npm run typecheck
-npm test
+npm link
+```
+
+Then use the CLI anywhere as:
+
+```bash
+codewiki --help
+```
+
+If you do not want to link globally, run it directly from this repo:
+
+```bash
 node dist/bin/codewiki.js --help
 ```
 
-The package compiles TypeScript from `src/` into `dist/` and runs Node's built-in test runner against compiled tests in `dist/test/`. Runtime dependencies are intentionally empty; `typescript` and `@types/node` are dev-only.
-
-## Commands
+### From npm, once published
 
 ```bash
-codewiki init [--tool claude-code,codex,copilot,opencode] [--name <project-name>] [--force]
-codewiki ingest <raw-markdown-path>
-codewiki query "<question>"
+npm install -g codewiki
+# or
+npx codewiki --help
+```
+
+## Quick start in a project
+
+```bash
+# 1. Initialize the framework
+codewiki init --name "My Project" --tool codex,claude-code
+
+# 2. Ask questions against approved wiki context
+codewiki query "what do we know about auth middleware?"
+
+# 3. Add a raw source and generate a proposal only
+mkdir -p raw
+cp ~/notes/api-redesign.md raw/api-redesign.md
+codewiki ingest raw/api-redesign.md
+
+# 4. Run deterministic wiki health checks
 codewiki lint
-codewiki prd "<description>"
-codewiki tasks <raw-prd-path>
+
+# 5. Draft PRDs/tasks through the same human-review boundary
+codewiki prd "add retry policy to API client"
+codewiki tasks raw/<generated-prd-file>.md
+
+# 6. Inspect wiki status
 codewiki status
 ```
 
-| Command | Behavior |
-| --- | --- |
-| `init` | Creates the `.codewiki/`, `raw/`, and `wiki/` scaffold. It must refuse unsafe overwrites unless `--force` is supplied and must not claim tool auto-detection if none was performed. |
-| `ingest` | Accepts markdown sources, reads `wiki/index.md` when present, and emits a source-summary proposal plus related-update checklist. It must not write final wiki pages automatically. |
-| `query` | Reads `wiki/index.md` first, then matched wiki pages, and prints a referenced context bundle for an agent or human. It must not file new pages automatically. |
-| `lint` | Runs deterministic checks for required files, broken wikilinks, issue lifecycle metadata, orphan candidates, and entity file-hash drift. Semantic contradiction/stale-claim review is emitted as an agent-review checklist. |
-| `prd` | Creates a raw PRD draft marked human-review-needed. |
-| `tasks` | Creates a task-list artifact from a PRD and routes the work through the verification loop. |
-| `status` | Reports configured paths, page counts, last log entry, issue counts, and drift warning counts. |
+## Commands
 
-## Human approval boundary
+| Command | What it does | Important boundary |
+| --- | --- | --- |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Creates `.codewiki/`, `raw/`, and `wiki/` scaffolding. | Refuses unsafe overwrites unless `--force` is passed. Does not claim auto-detection. |
+| `codewiki ingest <path>` | Reads a markdown raw source and emits a source-summary proposal plus related page checklist. | Does not write final wiki pages. |
+| `codewiki query "..."` | Reads `wiki/index.md` first, then matched pages, and emits a context bundle. | Does not file answers back into the wiki. |
+| `codewiki lint` | Runs deterministic checks: required files, broken wikilinks, issue lifecycle hints, orphan candidates, and hash drift. | Semantic contradiction/stale-claim review is a checklist, not an automatic fix. |
+| `codewiki prd "..."` | Creates a raw PRD draft marked human-review-needed. | Draft is not approved by default. |
+| `codewiki tasks <prd-path>` | Creates a task artifact from a PRD. | Tasks remain in the verification/human review loop. |
+| `codewiki status` | Reports wiki paths, page counts, issue counts, latest log entry, and drift warnings. | Read-only. |
 
-Tests passing never implies approval to mutate wiki pages. Ingest, query, and lint-derived updates are proposal-only and print:
+Proposal-producing commands print:
 
 ```text
 PROPOSAL ONLY — no wiki files were modified without approval
 ```
 
-## Verification loop for wiki updates
+## Adapter guidance
 
-1. Before modifying project files, an adapter can read `wiki/index.md` and matched issue/lesson/entity pages to inject relevant context.
-2. The agent makes the code change with that context.
-3. The agent runs relevant tests and summarizes files changed, wiki context used, and verification results.
-4. The agent stops for human review.
-5. Only after human approval may the agent propose or apply wiki updates such as lessons, entity updates, source summaries, or log entries.
+`codewiki init --tool ...` can generate adapter fragments for:
 
-Read-only questions should use `codewiki query` explicitly instead of triggering pre-hook context injection automatically.
+- `claude-code`
+- `codex`
+- `copilot`
+- `opencode`
 
-## Adapter notes
+Use them as instruction fragments or hook examples. In v1, the durable value is the markdown wiki; adapters are intentionally thin.
 
-`init` can generate adapter fragments for Claude Code, Codex, Copilot, and OpenCode. Claude Code includes example hook wiring. Codex, Copilot, and OpenCode adapters are instruction-only unless you manually wire them into those tools. All adapters state that pre-hook behavior is file-modification-only and read-only tasks should call `codewiki query` explicitly when wiki context is helpful.
+A good adapter should enforce this behavior:
+
+```mermaid
+sequenceDiagram
+  participant Dev as Developer
+  participant Agent as AI agent
+  participant CW as CodeWiki
+  participant Human as Human reviewer
+
+  Dev->>Agent: Change code
+  Agent->>CW: Read wiki/index.md + relevant pages
+  CW-->>Agent: Approved context
+  Agent->>Agent: Edit code and run verification
+  Agent->>Human: Summary + proposed wiki updates
+  Human-->>Agent: Approve or reject
+  Agent->>CW: Write wiki updates only if approved
+```
+
+## Development
+
+```bash
+npm install
+npm run typecheck
+npm run build
+npm test
+node dist/bin/codewiki.js --help
+```
+
+The package compiles TypeScript from `src/` into `dist/` and runs Node's built-in test runner against compiled tests in `dist/test/`.
+
+Runtime dependencies are intentionally empty for v1. `typescript` and `@types/node` are dev-only.
 
 ## V1 non-goals
 
-CodeWiki v1 deliberately avoids agent activity-log ingestion as raw source, non-markdown ingestion, embeddings/vector search, team workflow management, auto-verification, template migration commands, a database, a server, and a web UI.
+CodeWiki v1 deliberately does **not** include:
+
+- embeddings or vector search
+- a database, server, or web UI
+- non-markdown ingestion
+- autonomous semantic contradiction fixing
+- automatic wiki writes after tests pass
+- team workflow orchestration
+- agent activity logs as raw source
+- template migration commands
+
+These can be revisited later, but the v1 contract is intentionally small: local markdown, deterministic CLI helpers, and human-approved wiki knowledge.
