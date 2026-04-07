@@ -21,6 +21,8 @@ status: human-review-needed
 approved: false
 ---
 
+HUMAN-REVIEW-NEEDED
+
 # PRD Draft: ${description}
 
 ## Problem

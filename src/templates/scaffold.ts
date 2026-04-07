@@ -31,6 +31,9 @@ export function scaffoldFiles(projectName: string, tools: readonly SupportedTool
     { path: ".codewiki/templates/source-summary.md", content: sourceSummaryTemplate },
     { path: "wiki/index.md", content: indexTemplate(projectName) },
     { path: "wiki/log.md", content: logTemplate },
-    ...tools.map((tool) => ({ path: `.codewiki/adapters/${tool}/README.md`, content: adapterReadme(tool) }))
+    ...tools.flatMap((tool) => [
+      { path: `.codewiki/adapters/${tool}/README.md`, content: adapterReadme(tool) },
+      ...(tool === "codex" ? [{ path: `.codewiki/adapters/${tool}/AGENTS.fragment.md`, content: adapterReadme(tool) }] : [])
+    ])
   ];
 }

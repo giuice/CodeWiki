@@ -9,7 +9,7 @@ import type { ProposalResult } from "../core/types.js";
 export async function ingestCommand(args: string[], root = process.cwd()): Promise<string> {
   const input = args[0];
   if (!input) throw new Error("Usage: codewiki ingest <markdown-path>");
-  if (!/\.md(?:own)?$/i.test(input)) throw new Error("CodeWiki v1 ingests markdown sources only (.md or .markdown).");
+  if (!/\.md(?:own)?$/i.test(input)) throw new Error("CodeWiki v1 ingests markdown sources only; markdown files only (.md or .markdown).");
   const absolute = ensureWithinRoot(root, input);
   const sourceText = await fs.readFile(absolute, "utf8");
   const relSource = path.relative(root, absolute).split(path.sep).join("/");

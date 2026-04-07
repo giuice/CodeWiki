@@ -44,5 +44,5 @@ export async function initCommand({ root = process.cwd(), args }: InitOptions): 
   for (const file of scaffoldFiles(projectName, tools)) {
     await writeTextFileSafe(root, file.path, file.content, force);
   }
-  return [`Initialized CodeWiki for ${projectName}.`, `Adapters: ${tools.join(", ")}.`, "No tool auto-detection was performed.", "Wiki updates remain human-approved proposal-only until explicitly reviewed."].join("\n");
+  return [`Initialized CodeWiki for ${projectName}.`, `Adapters: ${tools.join(", ")}.`, "No tool auto-detection was performed.", "Human approval boundary: wiki updates remain human-approved proposal-only until explicitly reviewed."].join("\n");
 }

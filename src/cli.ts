@@ -9,7 +9,7 @@ import { statusCommand } from "./commands/status.js";
 type CommandHandler = (args: string[], root?: string) => Promise<string>;
 
 const COMMANDS: Record<string, CommandHandler> = {
-  init: (args, root) => initCommand({ args, root }),
+  init: (args, root) => initCommand(root === undefined ? { args } : { args, root }),
   ingest: ingestCommand,
   query: queryCommand,
   lint: lintCommand,

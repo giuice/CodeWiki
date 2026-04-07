@@ -45,7 +45,7 @@ export async function writeFileSafe(root: string, relativeFile: string, content:
   if (!force && (await exists(target))) {
     const current = await stat(target);
     if (current.size > 0) {
-      throw new Error(`Refusing to overwrite existing non-empty file without --force: ${relativeFile}`);
+      throw new Error(`Refusing to overwrite existing non-empty CodeWiki file without --force: ${relativeFile}`);
     }
   }
   await writeFile(target, content, "utf8");

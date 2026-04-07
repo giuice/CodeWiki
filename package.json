@@ -13,12 +13,11 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "tsc && tsc -p tsconfig.test.json",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
-    "lint": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "npm run build && node --test \"dist/test/**/*.test.js\"",
-    "prepack": "npm run build",
-    "lint": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit"
+    "prepack": "npm run build"
   },
   "keywords": [
     "codewiki",

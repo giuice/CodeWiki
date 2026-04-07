@@ -92,6 +92,10 @@ export async function lintCommand(_args: string[], root = process.cwd()): Promis
     "Deterministic checks completed; no wiki fixes were written automatically.",
     PROPOSAL_BOUNDARY,
     "",
+    "## Agent Review Checklist",
+    "- [ ] Review semantic contradictions and stale claims manually or with an approved agent.",
+    "- [ ] Do not apply wiki fixes without human approval.",
+    "",
     ...findings.map((finding) => `- ${finding.severity.toUpperCase()} [${finding.category}] ${finding.path}: ${finding.message}`)
   ].join("\n");
 }

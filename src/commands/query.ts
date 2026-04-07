@@ -20,8 +20,10 @@ export async function queryCommand(args: string[], root = process.cwd()): Promis
     "",
     `Question: ${question}`,
     "",
-    "Read order:",
-    ...readOrder.map((entry, index) => `${index + 1}. \`${entry}\``),
+    `Read order: ${readOrder.join(" -> ")}`,
+    "",
+    "## Read Order",
+    ...readOrder.map((entry, index) => `${index + 1}. ${entry}`),
     "",
     "## Wiki References",
     matches.length > 0 ? `Matched page references:\n${matches.map((match) => `- ${match.path} — ${match.title}`).join("\n")}` : "No matching wiki pages found; do not hallucinate wiki context.",
@@ -30,6 +32,6 @@ export async function queryCommand(args: string[], root = process.cwd()): Promis
     pageSections.length > 0 ? pageSections.join("\n\n") : "No matched page content.",
     "",
     "## Synthesis Prompt",
-    "Answer only from the referenced CodeWiki pages above, and cite relative wiki paths. Do not create wiki pages automatically."
+    "Answer only from the referenced CodeWiki pages above. Cite relative wiki paths. Do not create wiki pages automatically."
   ].join("\n");
 }
