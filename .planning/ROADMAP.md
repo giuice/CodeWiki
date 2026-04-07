@@ -62,8 +62,11 @@ Plans:
   3. `post-verify.sh` exits 0 under all conditions including empty JSON payload input
   4. `shellcheck --shell=sh` passes on both hook scripts with zero warnings
   5. Both agent definition markdown files (`codewiki-wiki-updater`, `codewiki-verifier`) exist in `src/templates/` with complete instruction content
-**Plans**: TBD
-**UI hint**: no
+**Plans:** 3 plans
+Plans:
+- [ ] 03-01-PLAN.md -- Create 6 slash command markdown files (ingest, query, lint, prd, tasks, process)
+- [ ] 03-02-PLAN.md -- Create 2 hook scripts (pre-wiki-context.sh, post-verify.sh)
+- [ ] 03-03-PLAN.md -- Create 2 agent definitions (wiki-updater, verifier)
 
 ### Phase 4: Claude Code Adapter + init Command
 **Goal**: `npx codewiki init` installs the wiki scaffold and Claude Code integration into a real project; re-running produces identical state
@@ -130,7 +133,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 |-------|----------------|--------|-----------|
 | 1. Clean Slate | 1/1 | Complete | 2026-04-07 |
 | 2. Shared Infrastructure | 3/3 | Complete | 2026-04-07 |
-| 3. Prompt Templates and Hook Scripts | 0/TBD | Not started | - |
+| 3. Prompt Templates and Hook Scripts | 0/3 | Planning complete | - |
 | 4. Claude Code Adapter + init Command | 0/TBD | Not started | - |
 | 5. Test Suite | 0/TBD | Not started | - |
 | 6. OpenCode Adapter | 0/TBD | Not started | - |
