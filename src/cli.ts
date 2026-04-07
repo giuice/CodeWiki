@@ -1,21 +1,9 @@
 import { initCommand } from "./commands/init.js";
-import { ingestCommand } from "./commands/ingest.js";
-import { queryCommand } from "./commands/query.js";
-import { lintCommand } from "./commands/lint.js";
-import { prdCommand } from "./commands/prd.js";
-import { tasksCommand } from "./commands/tasks.js";
-import { statusCommand } from "./commands/status.js";
 
 type CommandHandler = (args: string[], root?: string) => Promise<string>;
 
 const COMMANDS: Record<string, CommandHandler> = {
   init: (args, root) => initCommand(root === undefined ? { args } : { args, root }),
-  ingest: ingestCommand,
-  query: queryCommand,
-  lint: lintCommand,
-  prd: prdCommand,
-  tasks: tasksCommand,
-  status: statusCommand
 };
 
 export function helpText(): string {
@@ -26,12 +14,6 @@ Usage:
 
 Commands:
   init     Create .codewiki/, raw/, and wiki/ scaffold
-  ingest   Emit a source-summary proposal for a markdown raw source
-  query    Read wiki/index.md first and emit a referenced context bundle
-  lint     Run deterministic checks and agent-review prompts
-  prd      Create a human-review-needed raw PRD draft
-  tasks    Create a human-review-needed task draft from a PRD
-  status   Report wiki stats and drift warning counts
 
 Global:
   --help   Show this help
