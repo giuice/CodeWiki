@@ -3,6 +3,11 @@ export interface ParsedFrontmatter {
   body: string;
 }
 
+export interface ParsedMarkdown {
+  frontmatter: Record<string, unknown>;
+  body: string;
+}
+
 function parseScalar(raw: string): unknown {
   const value = raw.trim();
   if (value === "") return "";
@@ -51,4 +56,21 @@ export function parseFrontmatter(markdown: string): ParsedFrontmatter {
   }
 
   return { data, body };
+}
+
+export function parseMarkdownWithFrontmatter(markdown: string): ParsedMarkdown {
+  const parsed = parseFrontmatter(markdown);
+  return { frontmatter: parsed.data, body: parsed.body };
+}
+
+export function firstHeading(markdown: string): string | undefined {
+  return markdown.split(/\r?\n/).find((line) => line.startsWith("# "))?.replace(/^#\s+/, "").trim();
+}
+
+export function wikilinks(markdown: string): string[] {
+  return Array.from(markdown.matchAll(/\[\[([^\]]+)\]\]/g), (match) => match[1]?.trim() ?? "").filter(Boolean);
+}
+
+export function frontmatterString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
 }

@@ -11,6 +11,8 @@ export function ensureInsideRoot(root: string, candidate: string): string {
   return resolved;
 }
 
+export const ensureWithinRoot = ensureInsideRoot;
+
 export function relativePath(root: string, absolutePath: string): string {
   return path.relative(path.resolve(root), path.resolve(absolutePath)).split(path.sep).join("/");
 }
@@ -29,7 +31,10 @@ export async function readText(filePath: string): Promise<string> {
   return readFile(filePath, "utf8");
 }
 
-export async function readTextIfExists(filePath: string): Promise<string | undefined> {
+export async function readTextIfExists(filePath: string): Promise<string | undefined>;
+export async function readTextIfExists(root: string, relativeFile: string): Promise<string | undefined>;
+export async function readTextIfExists(first: string, second?: string): Promise<string | undefined> {
+  const filePath = second === undefined ? first : ensureInsideRoot(first, second);
   if (!(await exists(filePath))) return undefined;
   return readText(filePath);
 }
@@ -44,6 +49,10 @@ export async function writeFileSafe(root: string, relativeFile: string, content:
     }
   }
   await writeFile(target, content, "utf8");
+}
+
+export async function writeTextFileSafe(root: string, relativeFile: string, content: string, force = false): Promise<void> {
+  await writeFileSafe(root, relativeFile, content, force);
 }
 
 export async function ensureDir(root: string, relativeDir: string): Promise<void> {
@@ -72,6 +81,35 @@ export async function listMarkdownFiles(root: string, relativeDir: string): Prom
   }
   await walk(base);
   return found.sort();
+}
+
+export async function listFilesRecursive(root: string, relativeDir: string, extension?: string): Promise<string[]> {
+  const base = ensureInsideRoot(root, relativeDir);
+  if (!(await exists(base))) return [];
+  const found: string[] = [];
+  async function walk(current: string): Promise<void> {
+    const entries = await readdir(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        await walk(full);
+      } else if (entry.isFile() && (!extension || entry.name.toLowerCase().endsWith(extension.toLowerCase()))) {
+        found.push(relativePath(root, full));
+      }
+    }
+  }
+  await walk(base);
+  return found.sort();
+}
+
+export const pathExists = exists;
+
+export async function snapshotFiles(root: string, relativeDir: string): Promise<Map<string, string>> {
+  const snapshot = new Map<string, string>();
+  for (const file of await listFilesRecursive(root, relativeDir)) {
+    snapshot.set(file, await readText(ensureInsideRoot(root, file)));
+  }
+  return snapshot;
 }
 
 export async function sha256File(filePath: string): Promise<string> {

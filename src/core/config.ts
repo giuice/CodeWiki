@@ -120,7 +120,7 @@ export function parseTools(rawTools: string): SupportedTool[] {
   return tools as SupportedTool[];
 }
 
-export function parseConfigYaml(yaml: string): CodeWikiConfig {
+export function parseConfigYaml(yaml: string, root = process.cwd()): CodeWikiConfig {
   if (/[\t{}&*]|<<:/.test(yaml)) {
     throw new Error("Unsupported YAML syntax in .codewiki/config.yml. Regenerate config or keep to the generated simple YAML subset.");
   }
@@ -141,6 +141,7 @@ export function parseConfigYaml(yaml: string): CodeWikiConfig {
     wiki: {
       path: stripQuotes(nestedValue(lines, "wiki", "path") ?? "wiki/"),
       raw_path: stripQuotes(nestedValue(lines, "wiki", "raw_path") ?? "raw/"),
+      rawPath: stripQuotes(nestedValue(lines, "wiki", "raw_path") ?? "raw/"),
     },
     verification: {
       require_human_approval: parseBoolean(nestedValue(lines, "verification", "require_human_approval") ?? "true", "verification.require_human_approval"),
@@ -159,8 +160,8 @@ export function parseConfigYaml(yaml: string): CodeWikiConfig {
     },
   };
 
-  ensureInsideRoot(process.cwd(), config.wiki.path);
-  ensureInsideRoot(process.cwd(), config.wiki.raw_path);
+  ensureInsideRoot(root, config.wiki.path);
+  ensureInsideRoot(root, config.wiki.raw_path);
   return config;
 }
 
@@ -169,11 +170,13 @@ export async function readConfig(root: string): Promise<CodeWikiConfig> {
   if (!(await exists(configPath))) {
     throw new Error("Missing .codewiki/config.yml. Run `codewiki init` first.");
   }
-  const config = parseConfigYaml(await readText(configPath));
+  const config = parseConfigYaml(await readText(configPath), root);
   ensureInsideRoot(root, config.wiki.path);
   ensureInsideRoot(root, config.wiki.raw_path);
   return config;
 }
+
+export const loadConfig = readConfig;
 
 export function defaultConfigYaml(projectName: string, tools: SupportedTool[]): string {
   return `# .codewiki/config.yml\nversion: 1\n\nproject:\n  name: "${projectName}"\n  description: "Brief project description for LLM context"\n\ntools:\n${tools.map((tool) => `  - ${tool}`).join("\n")}\n\nwiki:\n  path: wiki/\n  raw_path: raw/\n\nverification:\n  require_human_approval: true\n  require_tests: true\n  auto_log: true\n\ningestion:\n  interactive: true\n  max_pages_per_ingest: 20\n\nlint:\n  check_orphans: true\n  check_contradictions: true\n  check_stale_issues: true\n  check_file_drift: true\n`;

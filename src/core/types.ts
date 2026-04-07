@@ -12,6 +12,7 @@ export interface CodeWikiConfig {
   wiki: {
     path: string;
     raw_path: string;
+    rawPath: string;
   };
   verification: {
     require_human_approval: boolean;
@@ -30,7 +31,7 @@ export interface CodeWikiConfig {
   };
 }
 
-export type WriteKind = "applied" | "proposal-only";
+export type WriteKind = "applied" | "proposal" | "proposal-only";
 
 export interface FileWriteRecord {
   kind: WriteKind;
@@ -46,11 +47,33 @@ export interface ProposalBundle {
   body: string;
 }
 
+export interface FileWritePlan {
+  kind: WriteKind;
+  path: string;
+  description: string;
+}
+
+export interface ProposalResult {
+  kind: "proposal";
+  title: string;
+  boundary: string;
+  proposedWrites: FileWritePlan[];
+  body: string;
+}
+
 export type LintSeverity = "error" | "warning" | "info";
 
 export interface LintFinding {
   severity: LintSeverity;
-  category: "required-file" | "wikilink" | "issue-lifecycle" | "orphan" | "file-drift" | "agent-review";
+  category: "required-file" | "missing-required" | "wikilink" | "broken-link" | "issue-lifecycle" | "orphan" | "file-drift" | "agent-review";
   path?: string;
   message: string;
+}
+
+export interface PageMatch {
+  path: string;
+  title: string;
+  score: number;
+  matchedTerms: string[];
+  summary: string;
 }
