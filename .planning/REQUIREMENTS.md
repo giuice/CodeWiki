@@ -115,23 +115,63 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 through CLI-07 | Phase 4 (Claude Code Adapter + init) | Pending |
-| WIKI-01 through WIKI-05 | Phase 2 (Shared Infrastructure) | Pending |
-| CMD-01 through CMD-07 | Phase 3 (Prompt Templates + Hooks) | Pending |
-| HOOK-01 through HOOK-05 | Phase 3 (Prompt Templates + Hooks) | Pending |
-| AGENT-01 through AGENT-02 | Phase 3 (Prompt Templates + Hooks) | Pending |
-| CC-01 through CC-05 | Phase 4 (Claude Code Adapter + init) | Pending |
-| CODEX-01 through CODEX-03 | Phase 7 (Codex + Copilot Adapters) | Pending |
-| COP-01 through COP-03 | Phase 7 (Codex + Copilot Adapters) | Pending |
-| OC-01 through OC-04 | Phase 6 (OpenCode Adapter) | Pending |
-| MERGE-01 through MERGE-04 | Phase 2 (Shared Infrastructure) | Pending |
-| BUILD-01 through BUILD-04 | Phase 8 (npm Publish Hardening) | Pending |
+| WIKI-01 | Phase 2 (Shared Infrastructure) | Pending |
+| WIKI-02 | Phase 2 (Shared Infrastructure) | Pending |
+| WIKI-03 | Phase 2 (Shared Infrastructure) | Pending |
+| WIKI-04 | Phase 2 (Shared Infrastructure) | Pending |
+| WIKI-05 | Phase 2 (Shared Infrastructure) | Pending |
+| MERGE-01 | Phase 2 (Shared Infrastructure) | Pending |
+| MERGE-02 | Phase 2 (Shared Infrastructure) | Pending |
+| MERGE-03 | Phase 2 (Shared Infrastructure) | Pending |
+| MERGE-04 | Phase 2 (Shared Infrastructure) | Pending |
+| CMD-01 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| CMD-02 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| CMD-03 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| CMD-04 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| CMD-05 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| CMD-06 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| CMD-07 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| HOOK-01 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| HOOK-02 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| HOOK-03 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| HOOK-04 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| HOOK-05 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| AGENT-01 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| AGENT-02 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| CLI-01 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CLI-02 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CLI-03 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CLI-04 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CLI-05 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CLI-06 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CLI-07 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CC-01 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CC-02 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CC-03 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CC-04 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CC-05 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| BUILD-01 | Phase 5 (Test Suite) | Pending |
+| BUILD-02 | Phase 5 (Test Suite) | Pending |
+| OC-01 | Phase 6 (OpenCode Adapter) | Pending |
+| OC-02 | Phase 6 (OpenCode Adapter) | Pending |
+| OC-03 | Phase 6 (OpenCode Adapter) | Pending |
+| OC-04 | Phase 6 (OpenCode Adapter) | Pending |
+| CODEX-01 | Phase 7 (Codex and Copilot Adapters) | Pending |
+| CODEX-02 | Phase 7 (Codex and Copilot Adapters) | Pending |
+| CODEX-03 | Phase 7 (Codex and Copilot Adapters) | Pending |
+| COP-01 | Phase 7 (Codex and Copilot Adapters) | Pending |
+| COP-02 | Phase 7 (Codex and Copilot Adapters) | Pending |
+| COP-03 | Phase 7 (Codex and Copilot Adapters) | Pending |
+| BUILD-03 | Phase 8 (npm Publish Hardening) | Pending |
+| BUILD-04 | Phase 8 (npm Publish Hardening) | Pending |
 
 **Coverage:**
-- v1 requirements: 45 total
-- Mapped to phases: 45
+- v1 requirements: 49 total
+- Mapped to phases: 49
 - Unmapped: 0 ✓
+
+**Note:** Phase 1 (Clean Slate) has no v1 requirements assigned — it is a prerequisite cleanup that removes v1 runtime code to create a clean foundation. All v1 requirements map to Phases 2-8.
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-07 after initial definition*
+*Last updated: 2026-04-07 — traceability expanded to individual requirements; coverage corrected to 49*
