@@ -60,8 +60,9 @@ export async function collectLintFindings(root = process.cwd()): Promise<LintFin
     if (frontmatterString(parsed.frontmatter.type) === "issue" && frontmatterString(parsed.frontmatter.status) === "resolved" && !frontmatterString(parsed.frontmatter.resolved_by)) {
       findings.push({ severity: "warning", category: "issue-lifecycle", path: page, message: "Resolved issue is missing resolved_by: LESSON-XXX." });
     }
-    if (frontmatterString(parsed.frontmatter.type) === "entity" && typeof parsed.frontmatter.file_hashes === "object" && !Array.isArray(parsed.frontmatter.file_hashes)) {
-      for (const [relFile, expectedHash] of Object.entries(parsed.frontmatter.file_hashes)) {
+    const fileHashes = parsed.frontmatter.file_hashes;
+    if (frontmatterString(parsed.frontmatter.type) === "entity" && fileHashes !== null && typeof fileHashes === "object" && !Array.isArray(fileHashes)) {
+      for (const [relFile, expectedHash] of Object.entries(fileHashes)) {
         try {
           const actual = await sha256File(ensureWithinRoot(root, relFile));
           if (actual !== expectedHash) {
@@ -78,7 +79,7 @@ export async function collectLintFindings(root = process.cwd()): Promise<LintFin
       findings.push({ severity: "info", category: "orphan", path: page, message: "Orphan candidate: no incoming wikilinks found." });
     }
   }
-  if (config.lint.checkContradictions || config.lint.checkStaleIssues) {
+  if (config.lint.check_contradictions || config.lint.check_stale_issues) {
     findings.push({ severity: "info", category: "agent-review", path: wikiPath, message: "Semantic contradiction and stale-claim review requires an agent/human checklist; no deterministic fix was applied." });
   }
   return findings;
