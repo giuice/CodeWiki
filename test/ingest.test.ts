@@ -1,0 +1,28 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { mustRun, read, runCli, tempProject } from "./helpers.js";
+
+test("ingest rejects non-markdown and emits proposal without wiki mutation", () => {
+  const cwd = tempProject();
+  mustRun(cwd, ["init"]);
+  mkdirSync(path.join(cwd, "raw"), { recursive: true });
+  writeFileSync(path.join(cwd, "raw/source.md"), "# API Retry PRD\n\nRetry logic touches api-client and backoff behavior.\n");
+  writeFileSync(path.join(cwd, "raw/not-markdown.txt"), "nope");
+  writeFileSync(path.join(cwd, "wiki/entities/api-client.md"), "---\ntype: entity\nname: api-client\n---\n# api-client\n\nHandles retry logic and backoff.\n");
+  const beforeIndex = read(cwd, "wiki/index.md");
+  const beforeEntity = read(cwd, "wiki/entities/api-client.md");
+
+  const bad = runCli(cwd, ["ingest", "raw/not-markdown.txt"]);
+  assert.notEqual(bad.status, 0);
+  assert.match(bad.stderr, /markdown files only/);
+
+  const result = mustRun(cwd, ["ingest", "raw/source.md"]);
+  assert.match(result.stdout, /PROPOSAL ONLY/);
+  assert.match(result.stdout, /Source Summary Proposal/);
+  assert.match(result.stdout, /wiki\/sources\/source\.md/);
+  assert.match(result.stdout, /wiki\/index\.md/);
+  assert.equal(read(cwd, "wiki/index.md"), beforeIndex);
+  assert.equal(read(cwd, "wiki/entities/api-client.md"), beforeEntity);
+});
