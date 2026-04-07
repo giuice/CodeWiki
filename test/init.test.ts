@@ -54,6 +54,11 @@ test("init creates PRD-defined scaffold and generated config", () => {
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/entity.md"), "utf8"), /file_hashes:/);
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/lesson.md"), "utf8"), /verified_by: human/);
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/source-summary.md"), "utf8"), /approved: false/);
+
+  const quoted = tempProject();
+  mustRun(quoted, ["init", "--name", 'demo "quoted"']);
+  assert.match(readFileSync(path.join(quoted, ".codewiki/config.yml"), "utf8"), /name: "demo \\"quoted\\""/);
+  assert.match(readFileSync(path.join(quoted, "wiki/index.md"), "utf8"), /project: "demo \\"quoted\\""/);
 });
 
 test("init --tool filters adapters and unknown tools fail clearly", () => {
@@ -68,6 +73,10 @@ test("init --tool filters adapters and unknown tools fail clearly", () => {
   const bad = runCli(tempProject(), ["init", "--tool", "unknown"]);
   assert.notEqual(bad.status, 0);
   assert.match(bad.stderr, /Supported values: claude-code, codex, copilot, opencode/);
+
+  const empty = runCli(tempProject(), ["init", "--tool", ","]);
+  assert.notEqual(empty.status, 0);
+  assert.match(empty.stderr, /requires at least one supported value/);
 
   const deduped = tempProject();
   const duplicateSelection = mustRun(deduped, ["init", "--tool", "claude-code,claude-code,codex"]);

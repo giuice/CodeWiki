@@ -10,6 +10,9 @@ export interface InitOptions {
 
 function parseTools(value: string): SupportedTool[] {
   const requested = value.split(",").map((tool) => tool.trim()).filter(Boolean);
+  if (requested.length === 0) {
+    throw new Error("--tool requires at least one supported value");
+  }
   const unknown = requested.filter((tool) => !SUPPORTED_TOOLS.includes(tool as SupportedTool));
   if (unknown.length > 0) {
     throw new Error(`Unsupported tool value: ${unknown.join(", ")}. Supported values: ${SUPPORTED_TOOLS.join(", ")}`);

@@ -2,10 +2,16 @@ export interface PageTemplateInput {
   projectName: string;
 }
 
+function escapeDoubleQuotedYaml(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n");
+}
+
 export function configTemplate(projectName: string, tools: readonly string[]): string {
+  const escapedProjectName = escapeDoubleQuotedYaml(projectName);
+
   return `version: 1
 project:
-  name: "${projectName}"
+  name: "${escapedProjectName}"
   description: "Brief project description for LLM context"
 tools:
 ${tools.map((tool) => `  - ${tool}`).join("\n")}
@@ -142,9 +148,11 @@ approved: false
 `;
 
 export function indexTemplate(projectName: string): string {
+  const escapedProjectName = escapeDoubleQuotedYaml(projectName);
+
   return `---
 type: index
-project: "${projectName}"
+project: "${escapedProjectName}"
 ---
 
 # CodeWiki Index
