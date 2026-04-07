@@ -64,4 +64,16 @@ describe("mergeMarkerSection", () => {
       "<!-- codewiki:start -->\ncontent\n<!-- codewiki:end -->\n"
     );
   });
+
+  test("throws when only one marker exists", () => {
+    expect(() => mergeMarkerSection("# Existing\n<!-- codewiki:start -->\nold", "new", false)).toThrow(
+      /Malformed CodeWiki marker section/
+    );
+  });
+
+  test("throws when markers are out of order", () => {
+    expect(() => mergeMarkerSection("<!-- codewiki:end -->\ntext\n<!-- codewiki:start -->", "new", true)).toThrow(
+      /Malformed CodeWiki marker section/
+    );
+  });
 });

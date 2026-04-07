@@ -68,6 +68,12 @@ test("init --tool filters adapters and unknown tools fail clearly", () => {
   const bad = runCli(tempProject(), ["init", "--tool", "unknown"]);
   assert.notEqual(bad.status, 0);
   assert.match(bad.stderr, /Supported values: claude-code, codex, copilot, opencode/);
+
+  const deduped = tempProject();
+  const duplicateSelection = mustRun(deduped, ["init", "--tool", "claude-code,claude-code,codex"]);
+  assert.match(duplicateSelection.stdout, /Adapters: claude-code, codex\./);
+  assert.equal(existsSync(path.join(deduped, ".codewiki/adapters/claude-code")), true);
+  assert.equal(existsSync(path.join(deduped, ".codewiki/adapters/codex")), true);
 });
 
 test("init refuses overwrite without force and config parser fails closed", () => {

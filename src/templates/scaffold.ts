@@ -7,11 +7,17 @@ export interface ScaffoldFile {
   content: string;
 }
 
+function uniqueTools(tools: readonly SupportedTool[]): SupportedTool[] {
+  return [...new Set(tools)];
+}
+
 export function scaffoldDirectories(tools: readonly SupportedTool[]): string[] {
+  const selectedTools = uniqueTools(tools);
+
   return [
     ".codewiki/templates",
     ".codewiki/adapters",
-    ...tools.map((tool) => `.codewiki/adapters/${tool}`),
+    ...selectedTools.map((tool) => `.codewiki/adapters/${tool}`),
     "raw",
     "tasks",
     "wiki/entities",
@@ -23,8 +29,10 @@ export function scaffoldDirectories(tools: readonly SupportedTool[]): string[] {
 }
 
 export function scaffoldFiles(projectName: string, tools: readonly SupportedTool[]): ScaffoldFile[] {
+  const selectedTools = uniqueTools(tools);
+
   return [
-    { path: ".codewiki/config.yml", content: configTemplate(projectName, tools) },
+    { path: ".codewiki/config.yml", content: configTemplate(projectName, selectedTools) },
     { path: ".codewiki/templates/entity.md", content: entityTemplate },
     { path: ".codewiki/templates/decision.md", content: decisionTemplate },
     { path: ".codewiki/templates/lesson.md", content: lessonTemplate },
@@ -32,7 +40,7 @@ export function scaffoldFiles(projectName: string, tools: readonly SupportedTool
     { path: ".codewiki/templates/source-summary.md", content: sourceSummaryTemplate },
     { path: "wiki/index.md", content: indexTemplate(projectName) },
     { path: "wiki/log.md", content: logTemplate },
-    ...tools.flatMap((tool) => [
+    ...selectedTools.flatMap((tool) => [
       { path: `.codewiki/adapters/${tool}/README.md`, content: adapterReadme(tool) },
       ...(tool === "codex" ? [{ path: `.codewiki/adapters/${tool}/AGENTS.fragment.md`, content: adapterReadme(tool) }] : [])
     ])

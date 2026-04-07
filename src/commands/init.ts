@@ -14,7 +14,7 @@ function parseTools(value: string): SupportedTool[] {
   if (unknown.length > 0) {
     throw new Error(`Unsupported tool value: ${unknown.join(", ")}. Supported values: ${SUPPORTED_TOOLS.join(", ")}`);
   }
-  return requested as SupportedTool[];
+  return [...new Set(requested)] as SupportedTool[];
 }
 
 export async function initCommand({ root = process.cwd(), args }: InitOptions): Promise<string> {
