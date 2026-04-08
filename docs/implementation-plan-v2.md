@@ -192,6 +192,35 @@ File: `src/prompts/commands/process.md`
 5. Junior developer mentorship: explain "why", safety first, suggest docs updates
 6. End each response with: "Completed: [Task X]", "Next Up: [Task Y]", "Awaiting your command to proceed."
 
+#### Task 2.7: Create `/codewiki-absorb` prompt
+File: `src/prompts/commands/absorb.md`
+
+**Inspired by Farzaa's wiki skill absorption loop.** Content should instruct the AI to:
+1. Read `git diff HEAD~N` or recent commits to understand what changed in the session
+2. Read `wiki/index.md` and `wiki/_backlinks.json` to understand current wiki state
+3. For each changed file, identify which wiki entities, lessons, decisions, or issues are affected
+4. Cross-reference against existing wiki pages to avoid duplication
+5. Propose concrete wiki updates: new pages, enriched existing pages, new cross-links
+6. Apply anti-cramming rule: if adding a 3rd paragraph about a sub-topic to an article, propose a new page instead
+7. Apply anti-thinning rule: every page touched must get meaningfully richer
+8. Wait for human approval before writing any wiki files
+9. Update `wiki/_backlinks.json` after all changes are applied
+10. Append to `wiki/log.md`
+
+#### Task 2.8: Create `/codewiki-breakdown` prompt
+File: `src/prompts/commands/breakdown.md`
+
+**Inspired by Farzaa's breakdown mining.** Content should instruct the AI to:
+1. Read all wiki pages and `wiki/_backlinks.json`
+2. Identify entities mentioned in 2+ pages that have no dedicated wiki page
+3. Identify pages with zero inbound links (orphans via `_backlinks.json`)
+4. Rank candidates by reference count (most-referenced gaps first)
+5. Present a candidate table: `| # | Article | Dir | Refs | Description |`
+6. For approved candidates, create new pages with content drawn from existing mentions
+7. Add wikilinks from existing articles back to the new pages
+8. Rebuild `wiki/_backlinks.json`
+9. Wait for human approval before writing any wiki files
+
 ---
 
 ### Phase 3: Create Hook Scripts
@@ -212,15 +241,26 @@ Keep it simple — just `grep` and `cat`. No complex parsing. The AI tool does t
 
 **Research note:** Study how GSD's hook scripts work. Look at `gsd-context-monitor.js` and `gsd-prompt-guard.js` for patterns.
 
-#### Task 3.2: Create post-hook verification reminder script
+#### Task 3.2: Create post-hook wiki-updater trigger script
 File: `src/prompts/hooks/post-verify.sh`
 
-This script:
+This script actively triggers wiki updates (not just a passive reminder):
 1. Receives JSON on stdin about the completed tool call
 2. Checks if any files related to wiki entities were modified
-3. Outputs a brief reminder: "Files related to wiki entities were modified. Consider running /codewiki-lint."
+3. Outputs structured context about what changed and which wiki entities are affected
+4. The AI tool receives this output and triggers the wiki-updater agent with change context
+5. The wiki-updater agent proposes concrete wiki edits (human approval still required)
 
-#### Task 3.3: Make hook scripts work across tools
+#### Task 3.3: Create session-end hook script
+File: `src/prompts/hooks/session-end.sh`
+
+This script fires on session end (Claude Code `Stop`, Codex `session_completed`, etc.):
+1. Reads `git diff` of uncommitted or recent changes from the session
+2. Outputs a summary of what was accomplished
+3. Triggers a lightweight absorb pass — the AI tool proposes wiki updates for new knowledge
+4. Always exits 0
+
+#### Task 3.4: Make hook scripts work across tools
 Each tool passes slightly different JSON to hooks. The scripts should:
 - Parse JSON with `jq` if available, fall back to `grep` patterns
 - Be POSIX-compatible (no bash-isms)
@@ -539,11 +579,14 @@ test/prd-tasks-status.test.ts
 src/prompts/commands/ingest.md
 src/prompts/commands/query.md
 src/prompts/commands/lint.md
+src/prompts/commands/absorb.md
+src/prompts/commands/breakdown.md
 src/prompts/commands/prd.md
 src/prompts/commands/tasks.md
 src/prompts/commands/process.md
 src/prompts/hooks/pre-wiki-context.sh
 src/prompts/hooks/post-verify.sh
+src/prompts/hooks/session-end.sh
 src/prompts/agents/codewiki-wiki-updater.md
 src/prompts/agents/codewiki-verifier.md
 src/prompts/instructions/claude-code.md

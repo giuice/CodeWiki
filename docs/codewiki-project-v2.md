@@ -72,6 +72,8 @@ Solo developers using AI coding agents on real projects. Developers who have exp
 │  Commands/Skills ─── /codewiki-ingest       │
 │                  ├── /codewiki-query         │
 │                  ├── /codewiki-lint          │
+│                  ├── /codewiki-absorb        │
+│                  ├── /codewiki-breakdown     │
 │                  ├── /codewiki-prd           │
 │                  ├── /codewiki-tasks         │
 │                  └── /codewiki-process       │
@@ -97,6 +99,8 @@ project-root/
 │   │       ├── ingest.md          # /codewiki-ingest slash command
 │   │       ├── query.md           # /codewiki-query slash command
 │   │       ├── lint.md            # /codewiki-lint slash command
+│   │       ├── absorb.md          # /codewiki-absorb slash command
+│   │       ├── breakdown.md       # /codewiki-breakdown slash command
 │   │       ├── prd.md             # /codewiki-prd slash command
 │   │       ├── tasks.md           # /codewiki-tasks slash command
 │   │       └── process.md         # /codewiki-process slash command
@@ -119,6 +123,7 @@ project-root/
 ├── wiki/
 │   ├── index.md                   # Auto-maintained catalog of all pages
 │   ├── log.md                     # Chronological record of all operations
+│   ├── _backlinks.json            # Reverse link index for importance ranking
 │   ├── entities/
 │   ├── decisions/
 │   ├── lessons/
@@ -181,15 +186,14 @@ Developer: "implement retry logic in api-client.ts"
          │
          ▼
 ┌──── POST-HOOK (automatic) ──────────────────────┐
-│ Hook script checks for wiki-relevant changes     │
-│ Outputs reminder: "Changes detected in files     │
-│ related to wiki entities. Consider running        │
-│ /codewiki-lint to check for needed wiki updates." │
+│ Hook script detects wiki-relevant changes and    │
+│ triggers the wiki-updater agent with change      │
+│ context. The agent proposes concrete wiki edits  │
+│ (new lessons, entity updates, issue tracking).   │
 └──────────────────────────────────────────────────┘
          │
          ▼
-   Developer decides whether to update wiki
-   (uses /codewiki-ingest or asks agent directly)
+   Wiki-updater agent proposes specific updates
          │
     ┌────┴─────────────┐
     │                  │
@@ -201,18 +205,70 @@ Developer: "implement retry logic in api-client.ts"
  (human confirms)   documenting failure
 ```
 
-### 5.2 Source Ingestion (`/codewiki-ingest`)
+### 5.2 The Auto-Improvement Engine (Compounding Loop)
+
+The verification loop captures knowledge reactively (when files change). The auto-improvement engine captures knowledge **proactively** — it finds gaps, extracts patterns, and strengthens the wiki without waiting for a specific code change.
+
+#### 5.2.1 Absorb (`/codewiki-absorb`)
+
+After a coding session (or on demand), the agent reviews recent changes and extracts durable knowledge:
+
+1. Reads `git diff` or recent commits to understand what changed.
+2. Reads `wiki/index.md` and `wiki/_backlinks.json` to understand current wiki state.
+3. Identifies new entities, lessons, decisions, or issues implied by the changes.
+4. Cross-references against existing wiki pages to avoid duplication.
+5. Proposes concrete wiki updates (new pages, enriched existing pages, new cross-links).
+6. Human approves each proposed change.
+7. Updates `wiki/_backlinks.json` after all changes are applied.
+
+This is the **compounding loop**: every session leaves the wiki richer for the next session.
+
+#### 5.2.2 Breakdown (`/codewiki-breakdown`)
+
+Proactive gap-finding. The agent scans the wiki for referenced-but-undocumented entities:
+
+1. Reads all wiki pages and `wiki/_backlinks.json`.
+2. Identifies entities mentioned in 2+ pages that have no dedicated wiki page.
+3. Identifies pages with zero inbound links (orphans).
+4. Ranks candidates by reference count (most-referenced gaps first).
+5. Proposes new pages for the top candidates, with content drawn from existing mentions.
+6. Human approves each new page.
+
+#### 5.2.3 Backlink Index (`wiki/_backlinks.json`)
+
+A reverse-link map tracking which wiki pages reference each other. Maintained automatically by `absorb`, `ingest`, and `lint`. Structure:
+
+```json
+{
+  "entities/api-client": ["lessons/retry-backoff", "issues/timeout-bug", "decisions/http-library"],
+  "lessons/retry-backoff": ["entities/api-client"]
+}
+```
+
+High-backlink pages indicate important entities. The breakdown command uses this to prioritize gap-filling.
+
+#### 5.2.4 Session-End Hook
+
+A hook that fires when the AI tool session ends (or on `SessionEnd` / `session_completed` events). It:
+
+1. Summarizes what was accomplished in the session.
+2. Triggers a lightweight `absorb` pass over session changes.
+3. Proposes wiki updates for any new knowledge worth capturing.
+
+This ensures knowledge capture happens even when the developer forgets to run `/codewiki-absorb` manually.
+
+### 5.3 Source Ingestion (`/codewiki-ingest`)
 
 Slash command, not CLI. The agent:
 1. Reads the raw source document.
 2. Discusses key takeaways with the developer.
 3. Creates a source summary page in `wiki/sources/`.
-4. Updates `wiki/index.md`.
+4. Updates `wiki/index.md` and `wiki/_backlinks.json`.
 5. Identifies affected entity/decision/issue pages and proposes updates.
 6. Human reviews and approves each wiki update.
 7. Agent appends to `wiki/log.md`.
 
-### 5.3 PRD-to-Tasks Flow
+### 5.4 PRD-to-Tasks Flow
 
 Three slash commands adapted from the original prompts:
 
@@ -222,21 +278,24 @@ Three slash commands adapted from the original prompts:
 
 3. **`/codewiki-process`** — Agent works through tasks one sub-task at a time. Marks `[x]` on completion, runs tests when parent task is done, commits with conventional commits, pauses for user approval between each sub-task. Each task goes through the Verification Loop (§5.1). (Adapted from `docs/prompts/process-task-list.md`)
 
-### 5.4 Wiki Query (`/codewiki-query`)
+### 5.5 Wiki Query (`/codewiki-query`)
 
-Slash command. Agent reads `wiki/index.md`, finds relevant pages, synthesizes an answer with references. If the answer is valuable, the developer can tell the agent to file it as a new wiki page.
+Slash command. Agent reads `wiki/index.md` and `wiki/_backlinks.json`, finds relevant pages (prioritizing high-backlink pages), synthesizes an answer with references. If the answer is valuable, the agent files it back into the wiki as a new page or enriches an existing one (with human approval). This **output filing** ensures every question makes the next answer better.
 
-### 5.5 Wiki Lint (`/codewiki-lint`)
+### 5.6 Wiki Lint (`/codewiki-lint`)
 
 Slash command. The agent scans for:
 - Contradictions between pages.
 - Stale claims superseded by newer lessons.
-- Orphan pages with no inbound links.
+- Orphan pages with no inbound links (using `_backlinks.json`).
 - Missing cross-references.
 - File drift (entity `file_hashes` vs current files).
 - Open issues with no activity.
+- **Anti-cramming check**: articles over 120 lines that should be split.
+- **Anti-thinning check**: stub pages (<15 lines) that should be enriched or merged.
+- **Structural audit**: articles organized by date instead of theme (diary-driven vs narrative).
 
-Agent proposes fixes. Human approves.
+Agent proposes fixes. Human approves. Rebuilds `wiki/_backlinks.json` after changes.
 
 ## 6. Multi-Tool Support
 
@@ -289,7 +348,7 @@ That's it. The CLI does one thing: install CodeWiki into your project.
 2. Creates `.codewiki/templates/` with page templates.
 3. Creates `.codewiki/hooks/` with shared hook scripts.
 4. Creates `raw/` directory for source documents.
-5. Creates `wiki/` directory structure with `index.md` and `log.md`.
+5. Creates `wiki/` directory structure with `index.md`, `log.md`, and `_backlinks.json`.
 6. Creates `tasks/` directory for PRD and task files.
 7. **Per tool:** installs hooks, commands, agents, and system instructions into the tool's native locations.
 8. Reports what was installed.
@@ -349,6 +408,7 @@ lint:
 
 - **Runtime CLI logic.** The CLI does not parse wiki pages, match terms, or render proposals. That's the AI tool's job.
 - **Custom LLM calls.** The CLI does not call any LLM API. All AI work happens inside the AI coding tool.
+- **Autonomous wiki writes.** The agent always proposes; the human always approves. Even the auto-improvement engine (absorb, breakdown, session-end) goes through the human approval gate.
 
 ## 12. Design Decisions (Resolved)
 
@@ -365,3 +425,11 @@ lint:
 6. **PRD integration → Slash commands from original prompts.** The three prompts (`create-prd.md`, `generate-tasks.md`, `process-task-list.md`) become slash commands installed by `init`. They preserve the original prompt's interaction model (clarifying questions, "Go" confirmation, one-sub-task-at-a-time).
 
 7. **Shared hook scripts.** Hook scripts live in `.codewiki/hooks/` and are referenced by each tool's config. This avoids duplicating shell logic per tool. The tool-specific config (`.claude/settings.json`, `.codex/hooks.json`, etc.) just points to the shared scripts.
+
+8. **Auto-improvement engine → Separate commands, not unified skill.** The absorb, breakdown, and lint commands are separate slash commands rather than subcommands of a single skill. This keeps each command's token footprint small — the AI tool only loads the prompt it needs. Inspired by Farzaa's wiki skill pattern but adapted for token efficiency.
+
+9. **Backlink index → JSON file, not computed on the fly.** `wiki/_backlinks.json` is a pre-computed reverse-link map maintained by absorb/ingest/lint. This avoids scanning all wiki pages on every query — the agent reads one file to find high-importance pages. Inspired by Farzaa's `_backlinks.json` pattern.
+
+10. **Post-hook → Active trigger, not passive reminder.** The post-hook triggers the wiki-updater agent with change context rather than just printing a reminder. The human approval gate stays (the agent proposes, human approves), but the trigger is automatic. This is the key difference from the v2 original design — the system is active, not passive.
+
+11. **Anti-cramming / anti-thinning rules in lint.** Borrowed from Farzaa's wiki skill: articles over 120 lines should be split, stubs under 15 lines should be enriched or merged, and articles organized chronologically should be restructured by theme. These quality checks prevent the wiki from degrading over time.

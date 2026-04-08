@@ -51,7 +51,17 @@ flowchart TD
 
   Build --> Maintain
 
-  subgraph Maintain["<b>5. MAINTAIN</b>"]
+  Build --> Compound
+
+  subgraph Compound["<b>5. COMPOUND (auto-improvement)</b>"]
+    direction TB
+    C1["/codewiki-absorb<br/>Extract lessons, entities,<br/>issues from session changes"] --> C2["Session-end hook<br/>auto-triggers absorb"]
+    C2 --> C3["/codewiki-breakdown<br/>Find gaps: referenced but<br/>undocumented entities"]
+  end
+
+  Compound --> Maintain
+
+  subgraph Maintain["<b>6. MAINTAIN</b>"]
     direction LR
     M1["/codewiki-query<br/>Ask questions against<br/>accumulated wiki"] --> M2["/codewiki-lint<br/>Health-check: broken links,<br/>contradictions, stale claims"]
   end
@@ -70,10 +80,11 @@ flowchart TD
 1. **Setup** — Run `npx codewiki init` once. It scaffolds the wiki and installs hooks, slash commands, and agents into your AI tool.
 2. **Feed knowledge** — Drop existing docs (PRDs, architecture notes, incident reports) into `raw/` and run `/codewiki-ingest` to digest them into wiki pages. The agent proposes; you approve.
 3. **Plan a feature** — Run `/codewiki-prd` with a feature idea. The agent asks clarifying questions and drafts a PRD. Then `/codewiki-tasks` generates a task breakdown with a checklist.
-4. **Build** — Run `/codewiki-process`. The agent works through tasks one sub-task at a time. Hooks automatically inject wiki context before edits and prompt for verification after. Every task goes through the human approval loop — both for code and for wiki updates.
-5. **Maintain** — Use `/codewiki-query` to ask questions against accumulated knowledge. Run `/codewiki-lint` to catch broken links, contradictions, and stale claims.
+4. **Build** — Run `/codewiki-process`. The agent works through tasks one sub-task at a time. Hooks automatically inject wiki context before edits and trigger the wiki-updater agent after. Every task goes through the human approval loop — both for code and for wiki updates.
+5. **Compound** — After coding sessions, `/codewiki-absorb` extracts lessons, entity updates, and issues from recent changes. A session-end hook triggers this automatically. `/codewiki-breakdown` proactively finds gaps — entities referenced in multiple pages but never documented.
+6. **Maintain** — Use `/codewiki-query` to ask questions against accumulated knowledge (answers get filed back into the wiki). Run `/codewiki-lint` to catch broken links, contradictions, bloated articles, and stale claims.
 
-The wiki compounds over time. Every session starts with the full history of what worked, what failed, and why.
+The wiki compounds over time. Every session leaves the wiki richer for the next one.
 
 ## Architecture
 
@@ -86,6 +97,7 @@ flowchart TB
   subgraph Wiki[Wiki layer: LLM-written, human-approved]
     W1[wiki/index.md — catalog]
     W2[wiki/log.md — chronology]
+    W8[wiki/_backlinks.json — reverse links]
     W3[wiki/entities/]
     W4[wiki/decisions/]
     W5[wiki/lessons/]
@@ -94,8 +106,8 @@ flowchart TB
   end
 
   subgraph ToolIntegration[Tool integration layer: installed by init]
-    H1[Hooks<br/>pre-wiki-context.sh · post-verify.sh]
-    SC[Slash Commands<br/>ingest · query · lint · prd · tasks · process]
+    H1[Hooks<br/>pre-wiki-context.sh · post-verify.sh · session-end.sh]
+    SC[Slash Commands<br/>ingest · query · lint · absorb · breakdown · prd · tasks · process]
     AG[Agents<br/>wiki-updater · verifier]
     SI[System Instructions<br/>CLAUDE.md / AGENTS.md / copilot-instructions.md]
   end
@@ -122,11 +134,13 @@ project-root/
 │   │   └── source-summary.md
 │   └── hooks/                        # Shared hook scripts
 │       ├── pre-wiki-context.sh       # Injects wiki context before file edits
-│       └── post-verify.sh            # Verification reminder after changes
+│       ├── post-verify.sh            # Triggers wiki-updater after changes
+│       └── session-end.sh            # Auto-absorb on session end
 ├── raw/                              # Immutable human-curated source documents
 ├── wiki/
 │   ├── index.md                      # Auto-maintained catalog of all pages
 │   ├── log.md                        # Chronological record of all operations
+│   ├── _backlinks.json               # Reverse link index for importance ranking
 │   ├── entities/
 │   ├── decisions/
 │   ├── lessons/
@@ -193,6 +207,8 @@ npx codewiki init --name "My Project" --tool claude-code
 # 2. Use slash commands inside your AI tool:
 #    /codewiki-query "what do we know about auth middleware?"
 #    /codewiki-ingest raw/api-redesign.md
+#    /codewiki-absorb              (extract knowledge from recent changes)
+#    /codewiki-breakdown           (find undocumented entities)
 #    /codewiki-lint
 #    /codewiki-prd "add retry policy to API client"
 #    /codewiki-tasks raw/<prd-file>.md
@@ -200,7 +216,8 @@ npx codewiki init --name "My Project" --tool claude-code
 
 # 3. Hooks run automatically:
 #    pre-wiki-context.sh — injects wiki context before file edits
-#    post-verify.sh — verification reminder after changes
+#    post-verify.sh — triggers wiki-updater after changes
+#    session-end.sh — auto-absorb on session end
 
 # 4. Agents available on demand:
 #    codewiki-wiki-updater — proposes wiki updates from session work
@@ -222,8 +239,10 @@ Installed as markdown prompt files into your AI tool's command directory. Use th
 | Slash Command | Purpose |
 | --- | --- |
 | `/codewiki-ingest` | Read a raw source document and propose wiki updates (source summary, entity updates, cross-references) |
-| `/codewiki-query` | Search the wiki for relevant context and synthesize an answer with citations |
-| `/codewiki-lint` | Health-check the wiki: broken links, orphan pages, contradictions, stale claims, file drift |
+| `/codewiki-query` | Search the wiki for relevant context and synthesize an answer with citations. Answers get filed back into the wiki. |
+| `/codewiki-lint` | Health-check the wiki: broken links, orphan pages, contradictions, stale claims, file drift, bloated/stub articles |
+| `/codewiki-absorb` | Extract lessons, entities, and issues from recent code changes. The compounding loop — every session leaves the wiki richer. |
+| `/codewiki-breakdown` | Proactive gap-finding: discover entities referenced in multiple pages but never documented. Ranks by importance. |
 | `/codewiki-prd` | Draft a PRD through clarifying questions — saves to `tasks/` for review |
 | `/codewiki-tasks` | Generate a task breakdown from a PRD with checklist format |
 | `/codewiki-process` | Process tasks one sub-task at a time with verification and conventional commits |
@@ -235,9 +254,10 @@ Shared shell scripts in `.codewiki/hooks/`, referenced by each tool's native hoo
 | Hook | Trigger | What it does |
 | --- | --- | --- |
 | `pre-wiki-context.sh` | Before file edits (PreToolUse) | Reads `wiki/index.md`, finds pages relevant to the files being modified, outputs context for the agent |
-| `post-verify.sh` | After file edits (PostToolUse) | Checks for wiki-relevant changes and reminds the agent to consider wiki updates |
+| `post-verify.sh` | After file edits (PostToolUse) | Detects wiki-relevant changes and triggers the wiki-updater agent with change context |
+| `session-end.sh` | Session end (Stop/session_completed) | Triggers a lightweight absorb pass — extracts knowledge from session changes |
 
-Both scripts are POSIX-compatible, use `jq` with `grep` fallback, and always exit 0 (never block the agent).
+All scripts are POSIX-compatible, use `jq` with `grep` fallback, and always exit 0 (never block the agent).
 
 ## Agents
 
@@ -299,8 +319,8 @@ CodeWiki deliberately does **not** include:
 - embeddings or vector search
 - a database, server, or web UI
 - non-markdown ingestion
+- autonomous wiki writes without human approval (even auto-absorb proposes first)
 - autonomous semantic contradiction fixing
-- automatic wiki writes after tests pass
 - team workflow orchestration
 
 These can be revisited later, but the contract is intentionally small: local markdown, an installer CLI, and human-approved wiki knowledge.
@@ -314,7 +334,8 @@ CodeWiki v2 is under active development. The v1 runtime CLI has been replaced wi
 | 1. Clean Slate | Delete v1 runtime CLI code | ✅ Complete |
 | 2. Shared Infrastructure | Merge utils, scaffold, detection, reporting | ✅ Complete |
 | 3. Prompt Templates & Hook Scripts | 6 slash commands, 2 hooks, 2 agents | ✅ Complete |
-| 4. Claude Code Adapter + init Command | Full end-to-end install via `npx codewiki init` | 🔜 Next |
+| 3.1 Auto-Improvement Engine | absorb, breakdown, backlinks, session-end hook | 🔜 Next |
+| 4. Claude Code Adapter + init Command | Full end-to-end install via `npx codewiki init` | ⬜ Planned |
 | 5. Test Suite | Merge correctness, idempotency, npm pack coverage | ⬜ Planned |
 | 6. OpenCode Adapter | session_completed hook strategy | ⬜ Planned |
 | 7. Codex & Copilot Adapters | Post-spike adapters | ⬜ Planned |
