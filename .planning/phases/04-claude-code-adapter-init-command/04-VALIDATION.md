@@ -42,7 +42,7 @@ validated: 2026-04-08T18:51:57-03:00
 | 04-01-01 | 01 | 1 | CLI-06 | build + unit | `npm run build`, `npm run test:unit` | Adapter contracts/helpers compile and reporter tests cover grouped output | ✅ green |
 | 04-01-02 | 01 | 1 | CLI-06 | unit | `npm run test:unit` | `src/lib/__tests__/reporter.test.ts` verifies sectioned report output | ✅ green |
 | 04-02-01 | 02 | 2 | CC-03, CC-04 | unit | `npm run test:unit` | `src/lib/__tests__/merge.test.ts` covers object-array hook deduplication and marker merges | ✅ green |
-| 04-02-02 | 02 | 2 | CC-01, CC-02, CC-03, CC-04, CC-05, CLI-03, CLI-07 | full suite | `npm test` | Built CLI integration tests verify installed commands, agents, hooks, settings preservation, and rerun idempotency | ✅ green |
+| 04-02-02 | 02 | 2 | CC-01, CC-02, CC-03, CC-04, CC-05, CLI-03, CLI-07 | full suite | `npm test` | Built CLI integration tests verify installed commands, agents, hooks, settings preservation, rerun idempotency, mode 755 on hook scripts, and `--force` file replacement | ✅ green |
 | 04-03-01 | 03 | 2 | CLI-04 | unit | `npm run test:unit` | `src/lib/__tests__/scaffold.test.ts` verifies wiki-only scaffold output and empty tools array | ✅ green |
 | 04-03-02 | 03 | 2 | CLI-01, CLI-02, CLI-04, CLI-05, CLI-06, CLI-07 | full suite | `npm test` | `test/init.test.ts` and `src/commands/__tests__/init.test.ts` verify explicit tool selection, detection, TTY fallback, unsupported reporting, and reruns | ✅ green |
 
@@ -77,3 +77,19 @@ validated: 2026-04-08T18:51:57-03:00
 - [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** complete
+
+---
+
+## Validation Audit 2026-04-08
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 2 |
+| Resolved | 2 |
+| Escalated | 0 |
+
+**Gaps closed:**
+- **CC-05 (MISSING → COVERED):** Added `test/init.test.ts` test "init installs hook scripts with executable permissions (mode 755)" — verifies all three `.sh` files have mode 755 after `init --tool claude-code`.
+- **CLI-03 (PARTIAL → COVERED):** Added `test/init.test.ts` test "init --force replaces existing command and agent files" — verifies installed files are overwritten and stale content is gone after `init --force`.
+
+Full suite: **74 unit + 8 integration tests, all green.**
