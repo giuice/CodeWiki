@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { cliPath, listRecursive, mustRun, runCli, tempProject } from "./helpers.js";
 
@@ -190,4 +190,34 @@ test("init requires --tool when no AI tools are detected in non-tty execution", 
   const missingNameValue = runCli(tempProject(), ["init", "--name", "--force"]);
   assert.notEqual(missingNameValue.status, 0);
   assert.match(missingNameValue.stderr, /--name requires a project name/);
+});
+
+test("init installs hook scripts with executable permissions (mode 755)", () => {
+  const cwd = tempProject();
+  mustRun(cwd, ["init", "--tool", "claude-code"]);
+
+  for (const hookFile of [
+    ".codewiki/hooks/pre-wiki-context.sh",
+    ".codewiki/hooks/post-verify.sh",
+    ".codewiki/hooks/session-end.sh"
+  ]) {
+    const stats = statSync(path.join(cwd, hookFile));
+    const mode = stats.mode & 0o777;
+    assert.equal(mode, 0o755, `${hookFile} expected mode 755, got ${mode.toString(8)}`);
+  }
+});
+
+test("init --force replaces existing command and agent files", () => {
+  const cwd = tempProject();
+  mustRun(cwd, ["init", "--tool", "claude-code"]);
+
+  writeFileSync(path.join(cwd, ".claude/commands/codewiki/ingest.md"), "# Stale content\n");
+  writeFileSync(path.join(cwd, ".claude/agents/codewiki-verifier.md"), "# Stale agent\n");
+
+  const result = mustRun(cwd, ["init", "--tool", "claude-code", "--force"]);
+
+  assert.match(result.stdout, /↻/);
+  assert.match(result.stdout, /ingest\.md/);
+  assert.ok(!/# Stale content/.test(readFileSync(path.join(cwd, ".claude/commands/codewiki/ingest.md"), "utf8")));
+  assert.ok(!/# Stale agent/.test(readFileSync(path.join(cwd, ".claude/agents/codewiki-verifier.md"), "utf8")));
 });
