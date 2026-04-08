@@ -12,44 +12,68 @@ The core rule:
 
 > The agent proposes; the human approves; only approved knowledge enters `wiki/`.
 
-CodeWiki wraps a verification loop around coding work via automatically-installed hooks, slash commands, and agents:
+### The full developer workflow
 
 ```mermaid
 flowchart TD
-  A[Developer asks agent to change code] --> B[Pre-hook injects wiki context automatically]
-  B --> C[Agent reads relevant wiki pages<br/>entities, lessons, issues, decisions]
-  C --> D[Agent changes code with known context]
-  D --> E[Agent runs verification<br/>tests, typecheck, manual checks]
-  E --> F[Post-hook reminds about wiki updates]
-  F --> G{Human approves result?}
+  Init["<b>1. SETUP</b><br/>npx codewiki init"] --> Feed
 
-  G -- Yes --> H[Agent proposes wiki updates<br/>lesson/entity/issue/log/source summary]
-  H --> I{Human approves wiki update?}
-  I -- Yes --> J[Write approved updates to wiki/]
-  I -- No --> K[Keep proposal out of wiki/]
+  subgraph Feed["<b>2. FEED KNOWLEDGE</b>"]
+    direction LR
+    F1["Drop docs into raw/"] --> F2["/codewiki-ingest<br/>Agent digests source → proposes<br/>wiki pages (you approve)"]
+  end
 
-  G -- No --> L[Agent investigates failure]
-  L --> M[Create or update proposed issue/lesson<br/>explaining what failed]
-  M --> N[Human reviews strategy]
-  N --> D
+  Feed --> Plan
+
+  subgraph Plan["<b>3. PLAN A FEATURE</b>"]
+    direction LR
+    P1["/codewiki-prd<br/>Describe idea → agent asks<br/>clarifying questions → drafts PRD"] --> P2["/codewiki-tasks<br/>Agent reads PRD + codebase →<br/>generates task checklist"]
+  end
+
+  Plan --> Build
+
+  subgraph Build["<b>4. BUILD (task by task)</b>"]
+    direction TB
+    B1["/codewiki-process<br/>Agent picks next sub-task"] --> B2["Pre-hook auto-injects<br/>wiki context before edits"]
+    B2 --> B3["Agent codes with<br/>known lessons + issues"]
+    B3 --> B4["Agent runs tests,<br/>commits with conventional commits"]
+    B4 --> B5["Post-hook reminds<br/>about wiki updates"]
+    B5 --> B6{"You approve?"}
+    B6 -- "Yes" --> B7["Agent proposes wiki updates<br/>(lessons, entities, issues)"]
+    B7 --> B8{"You approve<br/>wiki update?"}
+    B8 -- "Yes" --> B9["Wiki grows smarter"]
+    B8 -- "No" --> B10["Proposal discarded"]
+    B6 -- "No" --> B11["Agent creates issue/lesson<br/>documenting failure"]
+    B11 --> B1
+    B9 --> B1
+    B10 --> B1
+  end
+
+  Build --> Maintain
+
+  subgraph Maintain["<b>5. MAINTAIN</b>"]
+    direction LR
+    M1["/codewiki-query<br/>Ask questions against<br/>accumulated wiki"] --> M2["/codewiki-lint<br/>Health-check: broken links,<br/>contradictions, stale claims"]
+  end
+
+  Maintain -->|"Next session starts<br/>smarter than the last"| Feed
+
+  style Init fill:#2d6a4f,color:#fff
+  style Feed fill:#1a3a5c,color:#fff
+  style Plan fill:#4a2c6a,color:#fff
+  style Build fill:#6a3b2d,color:#fff
+  style Maintain fill:#3a5c1a,color:#fff
 ```
 
-For read-only questions, use the `/codewiki-query` slash command inside your AI tool. For source ingestion, use `/codewiki-ingest`. All intelligence runs inside the AI tool — there is no runtime CLI.
+**Step by step:**
 
-### PRD-to-Tasks flow
+1. **Setup** — Run `npx codewiki init` once. It scaffolds the wiki and installs hooks, slash commands, and agents into your AI tool.
+2. **Feed knowledge** — Drop existing docs (PRDs, architecture notes, incident reports) into `raw/` and run `/codewiki-ingest` to digest them into wiki pages. The agent proposes; you approve.
+3. **Plan a feature** — Run `/codewiki-prd` with a feature idea. The agent asks clarifying questions and drafts a PRD. Then `/codewiki-tasks` generates a task breakdown with a checklist.
+4. **Build** — Run `/codewiki-process`. The agent works through tasks one sub-task at a time. Hooks automatically inject wiki context before edits and prompt for verification after. Every task goes through the human approval loop — both for code and for wiki updates.
+5. **Maintain** — Use `/codewiki-query` to ask questions against accumulated knowledge. Run `/codewiki-lint` to catch broken links, contradictions, and stale claims.
 
-CodeWiki also includes a structured planning pipeline for new features:
-
-```mermaid
-flowchart LR
-  A["/codewiki-prd<br/>Draft PRD with<br/>clarifying questions"] --> B["/codewiki-tasks<br/>Generate task breakdown<br/>from PRD"]
-  B --> C["/codewiki-process<br/>Execute tasks one at a time<br/>with verification + commits"]
-  C --> D[Wiki updates proposed<br/>after each task]
-```
-
-1. **`/codewiki-prd`** — Describe a feature. The agent asks clarifying questions, generates a PRD in `tasks/`, and waits for your review.
-2. **`/codewiki-tasks`** — Point it at a PRD. The agent generates parent tasks, waits for "Go", then creates sub-tasks with a checklist format.
-3. **`/codewiki-process`** — The agent works through tasks one sub-task at a time: implement → test → commit → wait for approval. Each task goes through the verification loop above.
+The wiki compounds over time. Every session starts with the full history of what worked, what failed, and why.
 
 ## Architecture
 
