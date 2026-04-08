@@ -15,6 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Clean Slate** - Delete v1 runtime CLI; empty src/ ready for v2
 - [x] **Phase 2: Shared Infrastructure** - Merge utils, scaffold, asset locator, reporter, detector
 - [x] **Phase 3: Prompt Templates and Hook Scripts** - All markdown prompts, agent definitions, hook scripts
+- [ ] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
 - [ ] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
 - [ ] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
 - [ ] **Phase 6: OpenCode Adapter** - session_completed-only hook strategy; commands and agents
@@ -68,9 +69,28 @@ Plans:
 - [x] 03-02-PLAN.md -- Create 2 hook scripts (pre-wiki-context.sh, post-verify.sh)
 - [x] 03-03-PLAN.md -- Create 2 agent definitions (wiki-updater, verifier)
 
+### Phase 03.1: Auto-Improvement Engine (INSERTED)
+
+**Goal**: Wiki auto-improves after every coding session — absorb extracts knowledge from changes, breakdown finds gaps, backlinks enable importance ranking, session-end hook triggers capture automatically
+**Depends on**: Phase 3
+**Requirements**: ABS-01 (absorb command), ABS-02 (breakdown command), ABS-03 (backlinks index), ABS-04 (session-end hook), ABS-05 (post-hook active trigger)
+**Success Criteria** (what must be TRUE):
+  1. `src/templates/claude/commands/codewiki/absorb.md` exists with instructions to extract knowledge from recent git changes, cross-reference wiki, propose updates with anti-cramming/anti-thinning rules
+  2. `src/templates/claude/commands/codewiki/breakdown.md` exists with instructions to find referenced-but-undocumented entities, rank by backlink count, propose new pages
+  3. `wiki/_backlinks.json` is included in the scaffold (empty initial state `{}`), and absorb/ingest/lint prompts reference it
+  4. `src/templates/hooks/session-end.sh` exists, passes `shellcheck --shell=sh`, exits 0 on empty input, and outputs session summary context
+  5. `src/templates/hooks/post-verify.sh` is updated to output structured change context that triggers wiki-updater agent (not just a reminder)
+  6. Existing ingest, query, and lint prompts are updated to reference `wiki/_backlinks.json`
+**Plans:** 3 plans
+
+Plans:
+- [ ] 03.1-01-PLAN.md — Create absorb.md and breakdown.md slash commands
+- [ ] 03.1-02-PLAN.md — Add _backlinks.json to scaffold, create session-end.sh, update post-verify.sh
+- [ ] 03.1-03-PLAN.md — Update ingest, lint, query prompts to reference _backlinks.json
+
 ### Phase 4: Claude Code Adapter + init Command
 **Goal**: `npx codewiki init` installs the wiki scaffold and Claude Code integration into a real project; re-running produces identical state
-**Depends on**: Phase 3
+**Depends on**: Phase 3.1
 **Requirements**: CLI-01, CLI-02, CLI-03, CLI-04, CLI-05, CLI-06, CLI-07, CC-01, CC-02, CC-03, CC-04, CC-05
 **Success Criteria** (what must be TRUE):
   1. Running `npx codewiki init` in a project with `.claude/` present creates all wiki directories, installs 6 slash commands to `.claude/commands/codewiki/`, installs 2 agents to `.claude/agents/`, and prints a structured install report
@@ -127,13 +147,14 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Clean Slate | 1/1 | Complete | 2026-04-07 |
 | 2. Shared Infrastructure | 3/3 | Complete | 2026-04-07 |
 | 3. Prompt Templates and Hook Scripts | 3/3 | Complete | 2026-04-08 |
+| 3.1 Auto-Improvement Engine (INSERTED) | 0/3 | Not started | - |
 | 4. Claude Code Adapter + init Command | 0/TBD | Not started | - |
 | 5. Test Suite | 0/TBD | Not started | - |
 | 6. OpenCode Adapter | 0/TBD | Not started | - |
