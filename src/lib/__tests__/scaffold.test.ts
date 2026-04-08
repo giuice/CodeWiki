@@ -28,13 +28,14 @@ afterEach(async () => {
 });
 
 describe("scaffoldProject", () => {
-  test("creates wiki index and log files", async () => {
+  test("creates wiki index, log, and backlinks files", async () => {
     const root = await makeTempRoot();
 
     await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
 
     await expect(existsAt(root, "wiki/index.md")).resolves.toBe(true);
     await expect(existsAt(root, "wiki/log.md")).resolves.toBe(true);
+    await expect(existsAt(root, "wiki/_backlinks.json")).resolves.toBe(true);
   });
 
   test("creates all wiki content directories plus raw and tasks", async () => {
