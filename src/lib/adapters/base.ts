@@ -33,7 +33,7 @@ export async function copyTemplateDir(
   const entries: ReportEntry[] = [];
 
   async function walk(currentSrc: string, currentDest: string): Promise<void> {
-    const items = await readdir(currentSrc, { withFileTypes: true });
+    const items = (await readdir(currentSrc, { withFileTypes: true })).sort((left, right) => left.name.localeCompare(right.name));
 
     for (const item of items) {
       const srcPath = path.join(currentSrc, item.name);
@@ -49,8 +49,16 @@ export async function copyTemplateDir(
       }
 
       const displayPath = path.relative(displayRoot, destPath).split(path.sep).join("/");
-      const result = await copyTemplateFile(srcPath, destPath, force);
-      entries.push({ ...result, path: displayPath });
+      try {
+        const result = await copyTemplateFile(srcPath, destPath, force);
+        entries.push({ ...result, path: displayPath });
+      } catch (error) {
+        entries.push({
+          action: "failed",
+          path: displayPath,
+          reason: error instanceof Error ? error.message : String(error)
+        });
+      }
     }
   }
 
