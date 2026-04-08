@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { formatReport } from "../reporter.js";
+import { formatReport, formatSectionedReport } from "../reporter.js";
 
 describe("formatReport", () => {
   test("formats a created entry with symbol, action, and path", () => {
@@ -23,5 +23,30 @@ describe("formatReport", () => {
     expect(output).toContain("↻");
     expect(output).toContain("✗");
     expect(output).toContain("Summary: 1 created, 1 skipped, 1 replaced, 1 failed");
+  });
+});
+
+describe("formatSectionedReport", () => {
+  test("groups entries by section and skips empty sections", () => {
+    const output = formatSectionedReport("demo", [
+      {
+        title: "Wiki scaffold",
+        entries: [{ action: "created", path: "wiki/index.md" }]
+      },
+      {
+        title: "Claude adapter",
+        entries: [{ action: "skipped", path: ".claude/settings.json", reason: "exists" }]
+      },
+      {
+        title: "Empty section",
+        entries: []
+      }
+    ]);
+
+    expect(output).toContain("CodeWiki initialized for demo.");
+    expect(output).toContain("Wiki scaffold:");
+    expect(output).toContain("Claude adapter:");
+    expect(output).not.toContain("Empty section:");
+    expect(output).toContain("Summary: 1 created, 1 skipped");
   });
 });
