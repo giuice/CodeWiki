@@ -19,10 +19,12 @@ matched wiki pages. Treat the wiki as the primary knowledge layer between the us
 ## Step 2: Read the wiki index first
 - Read `wiki/index.md` before anything else.
 - Use the index to identify candidate entity, decision, lesson, issue, and source pages.
+- Read `wiki/_backlinks.json` to identify high-importance pages. Pages with many backlinks are more likely to contain authoritative answers.
 
 ## Step 3: Search for relevant pages
 - Use `Grep` on the wiki for keywords, aliases, file names, and adjacent concepts from the question.
 - Use `Glob` to expand from promising matches into the specific markdown pages that matter.
+- Use `wiki/_backlinks.json` to prioritize pages with higher backlink counts when multiple pages match the query.
 - Prefer a small set of high-signal pages over broad, noisy retrieval.
 
 ## Step 4: Read matched pages

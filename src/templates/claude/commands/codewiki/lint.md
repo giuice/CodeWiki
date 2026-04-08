@@ -14,6 +14,7 @@ instead of silently drifting out of sync with the project.
 ## Step 1: Load the wiki catalog
 - Read `wiki/index.md` first.
 - Glob `wiki/**/*.md` to inventory every wiki page currently present.
+- Read `wiki/_backlinks.json` to identify high-importance pages (many backlinks) versus orphaned pages (zero backlinks).
 
 ## Step 2: Detect contradictions
 - Look for conflicting claims about the same entity, decision, issue status, or file ownership.
@@ -21,6 +22,7 @@ instead of silently drifting out of sync with the project.
 
 ## Step 3: Detect orphaned pages
 - Find pages that exist under `wiki/` but are not listed in `wiki/index.md`.
+- Cross-reference with `wiki/_backlinks.json`: pages with zero backlinks and missing index coverage are strong orphan candidates.
 - Flag each orphan with its path and likely category.
 
 ## Step 4: Detect stale content
