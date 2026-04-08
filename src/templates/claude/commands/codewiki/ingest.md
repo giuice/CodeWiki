@@ -23,6 +23,7 @@ until the user approves the proposal.
 - Use `Glob` and `Grep` to find existing wiki pages that match the source topic.
 - Read any relevant pages so you do not duplicate or overwrite existing knowledge blindly.
 - Read templates from `.codewiki/templates/` before creating any new page.
+- Read `wiki/_backlinks.json` to understand which pages are most referenced and interconnected.
 
 ## Step 3: Extract candidate knowledge
 - Pull out candidate entities, decisions, lessons, issues, source summaries, and useful cross-links.
@@ -46,6 +47,7 @@ until the user approves the proposal.
 - After approval, create or update only the approved pages.
 - Use `.codewiki/templates/` as the default structure for new pages.
 - Update `wiki/index.md` so new material is discoverable.
+- Update `wiki/_backlinks.json` by scanning all modified and new pages for `[[wikilink]]` references. Add new backlink entries; do not remove existing ones unless a link was actually deleted.
 - End with a short summary of what changed and what still needs human review.
 
 ## Step 7: Guardrails
