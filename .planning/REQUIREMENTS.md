@@ -25,26 +25,26 @@
 
 ### Prompt Files (Slash Commands)
 
-- [ ] **CMD-01**: `/codewiki-ingest` — instructs agent to digest a raw source into wiki
-- [ ] **CMD-02**: `/codewiki-query` — instructs agent to search wiki and synthesize answer
-- [ ] **CMD-03**: `/codewiki-lint` — instructs agent to check wiki for contradictions, orphans, stale content, file drift
-- [ ] **CMD-04**: `/codewiki-prd` — adapted from `docs/prompts/create-prd.md`, full interaction model preserved
-- [ ] **CMD-05**: `/codewiki-tasks` — adapted from `docs/prompts/generate-tasks.md`, "Go" gate preserved
-- [ ] **CMD-06**: `/codewiki-process` — adapted from `docs/prompts/process-task-list.md`, one-sub-task-at-a-time preserved
-- [ ] **CMD-07**: All command files have `description:` frontmatter so they appear in `/help`
+- [x] **CMD-01**: `/codewiki-ingest` — instructs agent to digest a raw source into wiki
+- [x] **CMD-02**: `/codewiki-query` — instructs agent to search wiki and synthesize answer
+- [x] **CMD-03**: `/codewiki-lint` — instructs agent to check wiki for contradictions, orphans, stale content, file drift
+- [x] **CMD-04**: `/codewiki-prd` — adapted from `docs/prompts/create-prd.md`, full interaction model preserved
+- [x] **CMD-05**: `/codewiki-tasks` — adapted from `docs/prompts/generate-tasks.md`, "Go" gate preserved
+- [x] **CMD-06**: `/codewiki-process` — adapted from `docs/prompts/process-task-list.md`, one-sub-task-at-a-time preserved
+- [x] **CMD-07**: All command files have `description:` frontmatter so they appear in `/help`
 
 ### Hook Scripts
 
-- [ ] **HOOK-01**: `pre-wiki-context.sh` — reads wiki/index.md, greps for relevant pages, outputs context to stdout
-- [ ] **HOOK-02**: `post-verify.sh` — checks if modified files relate to wiki entities, outputs reminder
-- [ ] **HOOK-03**: Hook scripts always exit 0 (never block agent)
-- [ ] **HOOK-04**: Hook scripts are POSIX sh compatible (pass `shellcheck --shell=sh`)
-- [ ] **HOOK-05**: Hook scripts are executable (mode 755) after installation
+- [x] **HOOK-01**: `pre-wiki-context.sh` — reads wiki/index.md, greps for relevant pages, outputs context to stdout
+- [x] **HOOK-02**: `post-verify.sh` — checks if modified files relate to wiki entities, outputs reminder
+- [x] **HOOK-03**: Hook scripts always exit 0 (never block agent)
+- [x] **HOOK-04**: Hook scripts are POSIX sh compatible (pass `shellcheck --shell=sh`)
+- [x] **HOOK-05**: Hook scripts are executable (mode 755) after installation
 
 ### Agent Definitions
 
-- [ ] **AGENT-01**: `codewiki-wiki-updater` subagent — proposes wiki updates from code changes
-- [ ] **AGENT-02**: `codewiki-verifier` subagent — checks proposed wiki changes for contradictions
+- [x] **AGENT-01**: `codewiki-wiki-updater` subagent — proposes wiki updates from code changes
+- [x] **AGENT-02**: `codewiki-verifier` subagent — checks proposed wiki changes for contradictions
 
 ### Claude Code Adapter
 
@@ -124,20 +124,20 @@
 | MERGE-02 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | MERGE-03 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | MERGE-04 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
-| CMD-01 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| CMD-02 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| CMD-03 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| CMD-04 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| CMD-05 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| CMD-06 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| CMD-07 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| HOOK-01 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| HOOK-02 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| HOOK-03 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| HOOK-04 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| HOOK-05 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| AGENT-01 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
-| AGENT-02 | Phase 3 (Prompt Templates and Hook Scripts) | Pending |
+| CMD-01 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| CMD-02 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| CMD-03 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| CMD-04 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| CMD-05 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| CMD-06 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| CMD-07 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| HOOK-01 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| HOOK-02 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| HOOK-03 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| HOOK-04 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| HOOK-05 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| AGENT-01 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| AGENT-02 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
 | CLI-01 | Phase 4 (Claude Code Adapter + init Command) | Pending |
 | CLI-02 | Phase 4 (Claude Code Adapter + init Command) | Pending |
 | CLI-03 | Phase 4 (Claude Code Adapter + init Command) | Pending |
@@ -174,4 +174,4 @@
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-07 — Phase 2 shared infrastructure requirements verified and traceability refreshed*
+*Last updated: 2026-04-08 — Phase 3 prompt templates, hooks, and agents verified and traceability refreshed*
