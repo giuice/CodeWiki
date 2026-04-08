@@ -36,6 +36,21 @@ flowchart TD
 
 For read-only questions, use the `/codewiki-query` slash command inside your AI tool. For source ingestion, use `/codewiki-ingest`. All intelligence runs inside the AI tool — there is no runtime CLI.
 
+### PRD-to-Tasks flow
+
+CodeWiki also includes a structured planning pipeline for new features:
+
+```mermaid
+flowchart LR
+  A["/codewiki-prd<br/>Draft PRD with<br/>clarifying questions"] --> B["/codewiki-tasks<br/>Generate task breakdown<br/>from PRD"]
+  B --> C["/codewiki-process<br/>Execute tasks one at a time<br/>with verification + commits"]
+  C --> D[Wiki updates proposed<br/>after each task]
+```
+
+1. **`/codewiki-prd`** — Describe a feature. The agent asks clarifying questions, generates a PRD in `tasks/`, and waits for your review.
+2. **`/codewiki-tasks`** — Point it at a PRD. The agent generates parent tasks, waits for "Go", then creates sub-tasks with a checklist format.
+3. **`/codewiki-process`** — The agent works through tasks one sub-task at a time: implement → test → commit → wait for approval. Each task goes through the verification loop above.
+
 ## Architecture
 
 ```mermaid
