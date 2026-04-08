@@ -44,6 +44,7 @@ describe("scaffoldProject", () => {
     await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
 
     for (const relativePath of [
+      ".codewiki/hooks",
       "wiki/entities",
       "wiki/decisions",
       "wiki/lessons",
@@ -77,7 +78,7 @@ describe("scaffoldProject", () => {
 
     await scaffoldProject({ force: false, projectName: "demo", root, tools: [] });
 
-    expect(await readdir(path.join(root, ".codewiki/adapters"))).toEqual([]);
+    await expect(existsAt(root, ".codewiki/adapters")).resolves.toBe(false);
     expect(await readFile(path.join(root, ".codewiki/config.yml"), "utf8")).toMatch(/^tools: \[\]$/m);
   });
 

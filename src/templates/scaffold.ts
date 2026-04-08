@@ -1,5 +1,4 @@
 import type { SupportedTool } from "../core/types.js";
-import { adapterReadme } from "./adapter-templates.js";
 import { configTemplate, decisionTemplate, entityTemplate, indexTemplate, issueTemplate, lessonTemplate, logTemplate, sourceSummaryTemplate } from "./page-templates.js";
 
 export interface ScaffoldFile {
@@ -7,17 +6,10 @@ export interface ScaffoldFile {
   content: string;
 }
 
-function uniqueTools(tools: readonly SupportedTool[]): SupportedTool[] {
-  return [...new Set(tools)];
-}
-
-export function scaffoldDirectories(tools: readonly SupportedTool[]): string[] {
-  const selectedTools = uniqueTools(tools);
-
+export function scaffoldDirectories(_tools: readonly SupportedTool[]): string[] {
   return [
     ".codewiki/templates",
-    ".codewiki/adapters",
-    ...selectedTools.map((tool) => `.codewiki/adapters/${tool}`),
+    ".codewiki/hooks",
     "raw",
     "tasks",
     "wiki/entities",
@@ -28,11 +20,9 @@ export function scaffoldDirectories(tools: readonly SupportedTool[]): string[] {
   ];
 }
 
-export function scaffoldFiles(projectName: string, tools: readonly SupportedTool[]): ScaffoldFile[] {
-  const selectedTools = uniqueTools(tools);
-
+export function scaffoldFiles(projectName: string, _tools: readonly SupportedTool[]): ScaffoldFile[] {
   return [
-    { path: ".codewiki/config.yml", content: configTemplate(projectName, selectedTools) },
+    { path: ".codewiki/config.yml", content: configTemplate(projectName, []) },
     { path: ".codewiki/templates/entity.md", content: entityTemplate },
     { path: ".codewiki/templates/decision.md", content: decisionTemplate },
     { path: ".codewiki/templates/lesson.md", content: lessonTemplate },
@@ -40,10 +30,6 @@ export function scaffoldFiles(projectName: string, tools: readonly SupportedTool
     { path: ".codewiki/templates/source-summary.md", content: sourceSummaryTemplate },
     { path: "wiki/index.md", content: indexTemplate(projectName) },
     { path: "wiki/log.md", content: logTemplate },
-    { path: "wiki/_backlinks.json", content: "{}\n" },
-    ...selectedTools.flatMap((tool) => [
-      { path: `.codewiki/adapters/${tool}/README.md`, content: adapterReadme(tool) },
-      ...(tool === "codex" ? [{ path: `.codewiki/adapters/${tool}/AGENTS.fragment.md`, content: adapterReadme(tool) }] : [])
-    ])
+    { path: "wiki/_backlinks.json", content: "{}\n" }
   ];
 }
