@@ -12,6 +12,25 @@ The current codebase (`src/`) implements a runtime CLI that does wiki parsing, t
 
 All "intelligence" (reading wiki, finding relevant pages, proposing updates, asking for human approval) moves to **markdown prompt files** that the AI tool (Claude Code, Codex, Copilot, OpenCode) executes natively.
 
+## Workflow target
+
+After the 3.1 auto-improvement work, the intended developer loop is:
+
+1. Run `npx codewiki init` once.
+2. Load project knowledge with `raw/` plus `/codewiki-ingest`.
+3. Plan changes with `/codewiki-prd` and `/codewiki-tasks`.
+4. Execute through `/codewiki-process`, letting hooks inject wiki context before edits and emit wiki-update proposals after verification.
+5. Use `session-end.sh` or `/codewiki-absorb` to capture durable lessons from the session diff.
+6. Use `/codewiki-breakdown`, `/codewiki-lint`, and `/codewiki-query` to strengthen and consult the wiki between features.
+
+## Refactor note
+
+This plan predates the current template-tree refactor. When older task text below mentions `src/prompts/...`, read it as the shipped template assets under `src/templates/...`:
+
+- command markdown lives under `src/templates/claude/commands/codewiki/`
+- shared hook scripts live under `src/templates/hooks/`
+- installed file wiring lives in `src/templates/scaffold.ts`
+
 ---
 
 ## Research Tasks (Do These First)

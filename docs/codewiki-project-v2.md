@@ -93,7 +93,7 @@ The exact files depend on the `--tool` flag. Example for Claude Code:
 ```
 project-root/
 ├── .claude/
-│   ├── settings.json              # Hooks: PreToolUse, PostToolUse
+│   ├── settings.json              # Tool-specific hook wiring
 │   ├── commands/
 │   │   └── codewiki/
 │   │       ├── ingest.md          # /codewiki-ingest slash command
@@ -117,7 +117,8 @@ project-root/
 │   │   └── source-summary.md
 │   └── hooks/                     # Hook scripts (shared across tools)
 │       ├── pre-wiki-context.sh    # Reads wiki/index.md, finds relevant pages
-│       └── post-verify.sh         # Prompts for verification after changes
+│       ├── post-verify.sh         # Emits structured change context for wiki updates
+│       └── session-end.sh         # Summarizes session work for absorb
 ├── raw/                           # Immutable source documents
 │   └── (user drops markdown here)
 ├── wiki/
@@ -160,7 +161,21 @@ Digested versions of raw documents. One page per raw source.
 
 **`wiki/log.md`** — Chronological, append-only. Records every operation (ingest, query, verification, lint).
 
+**`wiki/_backlinks.json`** — Reverse-link index used to rank important topics, detect orphan pages, and drive breakdown/query/lint prioritization. Updated whenever ingest, absorb, or lint changes the wiki graph.
+
 ## 5. Core Workflows
+
+### 5.0 Recommended Developer Workflow
+
+For day-to-day use, developers should follow this order:
+
+1. Run `npx codewiki init` once to scaffold the wiki, prompts, hooks, and tool-specific instructions.
+2. Add existing project material to `raw/` and run `/codewiki-ingest` until the wiki reflects the current project state.
+3. For net-new work, use `/codewiki-prd` and then `/codewiki-tasks` before writing code.
+4. Implement through `/codewiki-process` so task progression, tests, commits, pre-hook context injection, and post-verify wiki proposals stay in one loop.
+5. Review every wiki proposal from the post-verify flow before allowing writes to `wiki/`.
+6. At session end, rely on `session-end.sh` or run `/codewiki-absorb` manually to capture durable lessons from the recent diff.
+7. Use `/codewiki-breakdown`, `/codewiki-lint`, and `/codewiki-query` as the ongoing maintenance loop between features.
 
 ### 5.1 The Verification Loop (Primary Flow)
 
@@ -252,7 +267,7 @@ High-backlink pages indicate important entities. The breakdown command uses this
 A hook that fires when the AI tool session ends (or on `SessionEnd` / `session_completed` events). It:
 
 1. Summarizes what was accomplished in the session.
-2. Triggers a lightweight `absorb` pass over session changes.
+2. Emits a lightweight session summary that the tool can hand to `/codewiki-absorb` or an equivalent absorb flow.
 3. Proposes wiki updates for any new knowledge worth capturing.
 
 This ensures knowledge capture happens even when the developer forgets to run `/codewiki-absorb` manually.
@@ -272,7 +287,7 @@ Slash command, not CLI. The agent:
 
 Three slash commands adapted from the original prompts:
 
-1. **`/codewiki-prd`** — Agent asks clarifying questions, generates a PRD in `raw/`, following the create-prd prompt template. Human reviews and refines. (Adapted from `docs/prompts/create-prd.md`)
+1. **`/codewiki-prd`** — Agent asks clarifying questions, generates a PRD in `tasks/`, following the create-prd prompt template. Human reviews and refines. (Adapted from `docs/prompts/create-prd.md`)
 
 2. **`/codewiki-tasks`** — Agent analyzes PRD + codebase, generates parent tasks (waits for "Go"), then generates sub-tasks with checklist format. Output goes to `/tasks/tasks-[prd-name].md`. (Adapted from `docs/prompts/generate-tasks.md`)
 
