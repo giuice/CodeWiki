@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { deduplicateHookArray, deepMerge, mergeMarkerSection } from "../merge.js";
+import { deduplicateHookArray, deduplicateHookEntries, deepMerge, mergeMarkerSection } from "../merge.js";
 
 describe("deepMerge", () => {
   test("preserves existing keys when adding new keys", () => {
@@ -44,6 +44,21 @@ describe("deduplicateHookArray", () => {
         ["codewiki/pre.sh", "codewiki/post.sh"]
       )
     ).toEqual(["codewiki/pre.sh", "user/hook.sh", "codewiki/post.sh"]);
+  });
+});
+
+describe("deduplicateHookEntries", () => {
+  test("preserves first occurrence of each object entry", () => {
+    expect(
+      deduplicateHookEntries([
+        { matcher: "Write|Edit", hooks: [{ command: "a" }] },
+        { matcher: "Write|Edit", hooks: [{ command: "a" }] },
+        { matcher: "Write|Edit", hooks: [{ command: "b" }] }
+      ])
+    ).toEqual([
+      { matcher: "Write|Edit", hooks: [{ command: "a" }] },
+      { matcher: "Write|Edit", hooks: [{ command: "b" }] }
+    ]);
   });
 });
 

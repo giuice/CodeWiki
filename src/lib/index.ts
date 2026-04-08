@@ -1,4 +1,4 @@
-export { deepMerge, deduplicateHookArray, mergeMarkerSection } from "./merge.js";
+export { deepMerge, deduplicateHookArray, deduplicateHookEntries, mergeMarkerSection } from "./merge.js";
 export { scaffoldProject } from "./scaffold.js";
 export type { ScaffoldOptions } from "./scaffold.js";
 export { detectTools } from "./detect.js";

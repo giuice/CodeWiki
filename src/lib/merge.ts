@@ -52,6 +52,20 @@ export function deduplicateHookArray(existing: string[], incoming: string[]): st
   return merged;
 }
 
+export function deduplicateHookEntries<T>(entries: T[]): T[] {
+  const seen = new Set<string>();
+
+  return entries.filter((entry) => {
+    const key = JSON.stringify(entry);
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
 export function mergeMarkerSection(existing: string, newContent: string, force: boolean): string {
   const startIndex = existing.indexOf(START_MARKER);
   const endIndex = existing.indexOf(END_MARKER);
