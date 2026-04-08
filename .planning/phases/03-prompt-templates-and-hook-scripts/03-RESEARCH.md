@@ -198,7 +198,7 @@ Key POSIX rules for shellcheck compliance:
 ```sh
 # Parse JSON payload for file paths
 if command -v jq >/dev/null 2>&1; then
-    files=$(printf '%s' "$payload" | jq -r '.[] // empty' 2>/dev/null) || files=""
+    files=$(printf '%s' "$payload" | jq -r '.. | strings' 2>/dev/null) || files=""
 else
     # Fallback: extract quoted strings that look like file paths
     files=$(printf '%s' "$payload" | grep -oE '"[^"]*\.[a-zA-Z]+"' | tr -d '"') || files=""
@@ -385,17 +385,13 @@ done
 | A2 | `local` keyword triggers SC2039 in shellcheck --shell=sh | Pitfall 1 | May need to restructure variable scoping in hooks |
 | A3 | JSON payload shape passed to post-verify.sh by Claude Code hooks | Code Examples | grep fallback handles unknown shapes; low risk |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Exact Claude Code agent definition format**
-   - What we know: Commands use YAML frontmatter with `description:`, `allowed-tools:`
-   - What's unclear: Whether agents use the same frontmatter keys or different ones (e.g., `tools:` vs `allowed-tools:`)
-   - Recommendation: Create agents with same format as commands; adjust if Claude Code rejects them
+   - RESOLVED: Use same frontmatter format as commands (`description:`, `allowed-tools:`). If Claude Code requires different keys for agents, the fix is a trivial frontmatter rename -- risk accepted per Assumption A1. No blocker.
 
 2. **Hook script payload JSON schema**
-   - What we know: Claude Code passes JSON to PreToolUse/PostToolUse hooks
-   - What's unclear: Exact field names and nesting
-   - Recommendation: Use defensive parsing (jq `.. | strings` to extract all string values) and grep fallback
+   - RESOLVED: Use defensive parsing (`jq '.. | strings'` to extract all string values) with grep fallback. This handles any JSON shape without knowing the exact schema. Risk accepted per Assumption A3 and D-09 (jq/grep fallback by design).
 
 ## Sources
 
