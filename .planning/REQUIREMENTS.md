@@ -7,13 +7,13 @@
 
 ### CLI Installer
 
-- [ ] **CLI-01**: `npx codewiki init` works without a global install
-- [ ] **CLI-02**: `--tool claude-code,codex` flag installs only specified adapters
-- [ ] **CLI-03**: `--force` flag overwrites existing prompt/command files
-- [ ] **CLI-04**: `--name <name>` flag sets project name in config
-- [ ] **CLI-05**: Auto-detect AI tools present (check for `.claude/`, `.codex/`, `opencode.json`, `.github/copilot-instructions.md`)
-- [ ] **CLI-06**: Structured install report shows ✓ Created / ⚠ Skipped / ✗ Failed per file
-- [ ] **CLI-07**: Re-running `init` without `--force` produces identical state (idempotent)
+- [x] **CLI-01**: `npx codewiki init` works without a global install
+- [x] **CLI-02**: `--tool claude-code,codex` flag installs only specified adapters
+- [x] **CLI-03**: `--force` flag overwrites existing prompt/command files
+- [x] **CLI-04**: `--name <name>` flag sets project name in config
+- [x] **CLI-05**: Auto-detect AI tools present (check for `.claude/`, `.codex/`, `opencode.json`, `.github/copilot-instructions.md`)
+- [x] **CLI-06**: Structured install report shows ✓ Created / ⚠ Skipped / ✗ Failed per file
+- [x] **CLI-07**: Re-running `init` without `--force` produces identical state (idempotent)
 
 ### Wiki Scaffold
 
@@ -56,11 +56,11 @@
 
 ### Claude Code Adapter
 
-- [ ] **CC-01**: Installs 6 slash commands to `.claude/commands/codewiki/`
-- [ ] **CC-02**: Installs 2 subagents to `.claude/agents/`
-- [ ] **CC-03**: Deep-merges PreToolUse/PostToolUse hooks into `.claude/settings.json` without clobbering existing hooks
-- [ ] **CC-04**: Appends CodeWiki instructions to `CLAUDE.md` using `<!-- codewiki:start/end -->` markers
-- [ ] **CC-05**: Installs hook scripts to `.codewiki/hooks/` with mode 755
+- [x] **CC-01**: Installs 8 slash commands to `.claude/commands/codewiki/`
+- [x] **CC-02**: Installs 2 subagents to `.claude/agents/`
+- [x] **CC-03**: Deep-merges PreToolUse/PostToolUse hooks into `.claude/settings.json` without clobbering existing hooks
+- [x] **CC-04**: Appends CodeWiki instructions to `CLAUDE.md` using `<!-- codewiki:start/end -->` markers
+- [x] **CC-05**: Installs hook scripts to `.codewiki/hooks/` with mode 755
 
 ### Codex Adapter
 
@@ -151,18 +151,18 @@
 | ABS-03 | Phase 3.1 (Auto-Improvement Engine) | Complete (2026-04-08) |
 | ABS-04 | Phase 3.1 (Auto-Improvement Engine) | Complete (2026-04-08) |
 | ABS-05 | Phase 3.1 (Auto-Improvement Engine) | Complete (2026-04-08) |
-| CLI-01 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CLI-02 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CLI-03 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CLI-04 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CLI-05 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CLI-06 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CLI-07 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CC-01 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CC-02 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CC-03 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CC-04 | Phase 4 (Claude Code Adapter + init Command) | Pending |
-| CC-05 | Phase 4 (Claude Code Adapter + init Command) | Pending |
+| CLI-01 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CLI-02 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CLI-03 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CLI-04 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CLI-05 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CLI-06 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CLI-07 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CC-01 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CC-02 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CC-03 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CC-04 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| CC-05 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | BUILD-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | BUILD-02 | Phase 5 (Test Suite) | Pending |
 | OC-01 | Phase 6 (OpenCode Adapter) | Pending |
@@ -187,4 +187,4 @@
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-08 — Phase 3.1 auto-improvement engine verified and traceability refreshed*
+*Last updated: 2026-04-08 — Phase 4 Claude installer and init orchestration verified and traceability refreshed*

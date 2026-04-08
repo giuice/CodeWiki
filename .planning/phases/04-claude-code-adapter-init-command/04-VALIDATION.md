@@ -1,15 +1,16 @@
 ---
 phase: 4
 slug: claude-code-adapter-init-command
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-08
+validated: 2026-04-08T18:51:57-03:00
 ---
 
 # Phase 4 — Validation Strategy
 
-> Per-phase validation contract for feedback sampling during execution.
+> Per-phase validation contract and actual validation outcome for the Claude installer and `init` orchestration work.
 
 ---
 
@@ -17,50 +18,44 @@ created: 2026-04-08
 
 | Property | Value |
 |----------|-------|
-| **Framework** | vitest ^4.1.3 |
-| **Config file** | implicit (vitest finds src/**/*.test.ts) |
-| **Quick run command** | `npx vitest run` |
+| **Framework** | vitest ^4.1.3 + `node --test` for built CLI integration |
+| **Config file** | implicit (`src/**/*.test.ts`) + compiled `dist/test/**/*.test.js` |
+| **Quick run command** | `npm run test:unit` |
 | **Full suite command** | `npm test` |
-| **Estimated runtime** | ~5 seconds |
+| **Observed runtime** | ~2 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `npx vitest run`
-- **After every plan wave:** Run `npm test`
-- **Before `/gsd-verify-work`:** Full suite must be green
-- **Max feedback latency:** 5 seconds
+- **After task groups:** `npm run test:unit`
+- **After phase implementation:** `npm test`
+- **Before verification closeout:** full suite green
+- **Max feedback latency achieved:** under 2 seconds during final validation
 
 ---
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 04-01-01 | 01 | 1 | CLI-01 | — | N/A | integration | `node dist/bin/codewiki.js init --tool claude-code` | Partial | ⬜ pending |
-| 04-01-02 | 01 | 1 | CLI-02 | — | N/A | unit | `npx vitest run -t "tool flag"` | Partial | ⬜ pending |
-| 04-01-03 | 01 | 1 | CLI-03 | — | N/A | unit | `npx vitest run -t "force"` | Partial | ⬜ pending |
-| 04-01-04 | 01 | 1 | CLI-05 | — | N/A | unit | `npx vitest run src/lib/__tests__/detect.test.ts` | ✅ | ⬜ pending |
-| 04-01-05 | 01 | 1 | CLI-06 | — | N/A | unit | `npx vitest run -t "report"` | Partial | ⬜ pending |
-| 04-01-06 | 01 | 1 | CLI-07 | — | N/A | integration | `npx vitest run -t "idempotent"` | ❌ W0 | ⬜ pending |
-| 04-02-01 | 02 | 1 | CC-01 | — | N/A | integration | `npx vitest run -t "claude commands"` | ❌ W0 | ⬜ pending |
-| 04-02-02 | 02 | 1 | CC-02 | — | N/A | integration | `npx vitest run -t "claude agents"` | ❌ W0 | ⬜ pending |
-| 04-02-03 | 02 | 1 | CC-03 | — | N/A | unit | `npx vitest run -t "settings merge"` | ❌ W0 | ⬜ pending |
-| 04-02-04 | 02 | 1 | CC-04 | — | N/A | unit | `npx vitest run src/lib/__tests__/merge.test.ts` | ✅ | ⬜ pending |
-| 04-02-05 | 02 | 1 | CC-05 | — | N/A | integration | `npx vitest run -t "hook permissions"` | ❌ W0 | ⬜ pending |
+| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | Evidence | Status |
+|---------|------|------|-------------|-----------|-------------------|----------|--------|
+| 04-01-01 | 01 | 1 | CLI-06 | build + unit | `npm run build`, `npm run test:unit` | Adapter contracts/helpers compile and reporter tests cover grouped output | ✅ green |
+| 04-01-02 | 01 | 1 | CLI-06 | unit | `npm run test:unit` | `src/lib/__tests__/reporter.test.ts` verifies sectioned report output | ✅ green |
+| 04-02-01 | 02 | 2 | CC-03, CC-04 | unit | `npm run test:unit` | `src/lib/__tests__/merge.test.ts` covers object-array hook deduplication and marker merges | ✅ green |
+| 04-02-02 | 02 | 2 | CC-01, CC-02, CC-03, CC-04, CC-05, CLI-03, CLI-07 | full suite | `npm test` | Built CLI integration tests verify installed commands, agents, hooks, settings preservation, and rerun idempotency | ✅ green |
+| 04-03-01 | 03 | 2 | CLI-04 | unit | `npm run test:unit` | `src/lib/__tests__/scaffold.test.ts` verifies wiki-only scaffold output and empty tools array | ✅ green |
+| 04-03-02 | 03 | 2 | CLI-01, CLI-02, CLI-04, CLI-05, CLI-06, CLI-07 | full suite | `npm test` | `test/init.test.ts` and `src/commands/__tests__/init.test.ts` verify explicit tool selection, detection, TTY fallback, unsupported reporting, and reruns | ✅ green |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ✅ green · ⚠️ flaky · ❌ red*
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] `src/lib/__tests__/claude-adapter.test.ts` — stubs for CC-01 through CC-05
-- [ ] `test/init-integration.test.ts` — stubs for CLI-01, CLI-07 (idempotent re-run in temp dir)
-- [ ] Extend `src/lib/__tests__/merge.test.ts` — hook deduplication for object arrays
-
-*Existing infrastructure covers CLI-04, CLI-05, CC-04.*
+- [x] Extend `src/lib/__tests__/merge.test.ts` with hook-object dedup coverage
+- [x] Expand `test/init.test.ts` into built CLI coverage for explicit installs, detection, unsupported tools, and idempotent reruns
+- [x] Add `src/commands/__tests__/init.test.ts` for the TTY fallback prompt path
+- [x] Refresh `src/lib/__tests__/scaffold.test.ts` for the wiki-only scaffold contract
 
 ---
 
@@ -68,17 +63,17 @@ created: 2026-04-08
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| npx codewiki init end-to-end in real project | CLI-01 | Requires npm publish or npm link | 1. `npm link` in CodeWiki, 2. `cd /tmp/test-project && npm init -y && mkdir .claude`, 3. `npx codewiki init`, 4. Verify output |
+| `npx codewiki init` from a published package in a real external project | CLI-01 | Requires npm publish or npm link outside the repo test harness | 1. `npm link` in CodeWiki, 2. `cd /tmp/test-project && npm init -y && mkdir .claude`, 3. `npx codewiki init`, 4. verify the sectioned report and installed assets |
 
 ---
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 5s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All planned tasks ended with automated verification or broader suite coverage
+- [x] Sampling continuity stayed within the defined cadence
+- [x] Wave 0 coverage gaps were closed by concrete tests
+- [x] No watch-mode flags were used in automated validation
+- [x] Feedback latency stayed comfortably under 5 seconds in the final pass
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** complete

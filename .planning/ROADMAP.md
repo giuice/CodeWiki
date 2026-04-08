@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Shared Infrastructure** - Merge utils, scaffold, asset locator, reporter, detector
 - [x] **Phase 3: Prompt Templates and Hook Scripts** - All markdown prompts, agent definitions, hook scripts
 - [x] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
-- [ ] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
+- [x] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
 - [ ] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
 - [ ] **Phase 6: OpenCode Adapter** - session_completed-only hook strategy; commands and agents
 - [ ] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps
@@ -93,16 +93,16 @@ Plans:
 **Depends on**: Phase 3.1
 **Requirements**: CLI-01, CLI-02, CLI-03, CLI-04, CLI-05, CLI-06, CLI-07, CC-01, CC-02, CC-03, CC-04, CC-05
 **Success Criteria** (what must be TRUE):
-  1. Running `npx codewiki init` in a project with `.claude/` present creates all wiki directories, installs 6 slash commands to `.claude/commands/codewiki/`, installs 2 agents to `.claude/agents/`, and prints a structured install report
+  1. Running `npx codewiki init` in a project with `.claude/` present creates all wiki directories, installs 8 slash commands to `.claude/commands/codewiki/`, installs 2 agents to `.claude/agents/`, and prints a structured install report
   2. Running `npx codewiki init --tool claude-code` on a project that also has `.codex/` installs only the Claude Code adapter (not Codex)
   3. Running `npx codewiki init` twice without `--force` produces no duplicate hook entries in `.claude/settings.json` and no duplicate `<!-- codewiki:start -->` blocks in `CLAUDE.md`
   4. Running `npx codewiki init --force` replaces existing CodeWiki marker sections in `CLAUDE.md` without touching content outside the markers
   5. Running `npx codewiki init` on a project with existing `.claude/settings.json` hooks preserves those hooks alongside the newly added CodeWiki hooks
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 Plans:
-- [ ] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
-- [ ] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
-- [ ] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
+- [x] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
+- [x] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [x] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ### Phase 5: Test Suite
 **Goal**: vitest suite covers merge correctness, idempotency, and npm pack asset inclusion; tests are the living spec for merge behavior
@@ -175,7 +175,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Shared Infrastructure | 3/3 | Complete | 2026-04-07 |
 | 3. Prompt Templates and Hook Scripts | 3/3 | Complete | 2026-04-08 |
 | 3.1 Auto-Improvement Engine (INSERTED) | 3/3 | Complete | 2026-04-08 |
-| 4. Claude Code Adapter + init Command | 0/TBD | Not started | - |
+| 4. Claude Code Adapter + init Command | 3/3 | Complete | 2026-04-08 |
 | 5. Test Suite | 0/TBD | Not started | - |
 | 6. OpenCode Adapter | 0/TBD | Not started | - |
 | 7. Codex and Copilot Adapters | 0/TBD | Not started | - |

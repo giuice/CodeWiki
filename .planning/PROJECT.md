@@ -18,6 +18,7 @@ Target users: solo developers using AI coding agents who have experienced agents
 - MERGE-01..MERGE-04 validated in Phase 2 — merge utilities are covered by focused Vitest tests and regression-safe edge-case checks.
 - BUILD-01 validated early in Phase 2 — `npm run build` now copies template assets into `dist/templates/`.
 - ABS-01..ABS-05 validated in Phase 3.1 — auto-improvement prompts, backlinks scaffold state, and structured hook outputs are now implemented and test-covered.
+- CLI-01..CLI-07 and CC-01..CC-05 validated in Phase 4 — the adapter pipeline, Claude installer, detection flow, rerun idempotency, and sectioned install reporting are covered by unit plus built CLI integration tests.
 
 ### Active
 
@@ -42,7 +43,7 @@ Target users: solo developers using AI coding agents who have experienced agents
 
 ## Context
 
-- **Existing codebase:** `src/` now has an init-only CLI, shared infrastructure in `src/lib/`, and the full Phase 3/3.1 prompt and hook asset set in `src/templates/`; adapter installers remain to be implemented.
+- **Existing codebase:** `src/` now has an init-only CLI, shared infrastructure in `src/lib/`, a generic adapter pipeline in `src/lib/adapters/`, a working Claude installer, and the full Phase 3/3.1 prompt and hook asset set in `src/templates/`.
 - **Architecture model:** GSD (`get-shit-done`) — the CLI is a scaffolder/installer only, like how GSD installs prompts and configs. Study GSD's hook scripts and install pattern before implementing.
 - **Hook formats:** Each tool uses different hook config formats (`.claude/settings.json` for Claude Code, `.codex/hooks.json` for Codex, `.github/hooks/*.json` for Copilot, `opencode.json` for OpenCode). Research required before implementation.
 - **Original prompts:** `docs/prompts/create-prd.md`, `generate-tasks.md`, `process-task-list.md` are the source of truth for the `/codewiki-prd`, `/codewiki-tasks`, `/codewiki-process` slash command content.
@@ -67,6 +68,8 @@ Target users: solo developers using AI coding agents who have experienced agents
 | Marker comments `<!-- codewiki:start/end -->` | Safe idempotent merging of instruction file sections | — Pending |
 | Keep `wiki/` as plain markdown | No database, no vendor lock-in; agent reads/writes natively | — Pending |
 | Auto-improvement uses dedicated prompts plus `_backlinks.json` | Keeps prompt context small while giving the wiki a shared ranking/maintenance primitive | Validated in Phase 3.1 |
+| Generic adapter pipeline powers `init` | Keeps tool-specific install behavior out of the command handler and makes future adapters additive | Validated in Phase 4 |
+| Install `session-end.sh` but leave it unwired in Claude | Ships the asset now while waiting for a confirmed Claude lifecycle hook for session completion | Validated in Phase 4 |
 
 ## Evolution
 
@@ -86,4 +89,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after Phase 3.1 completion*
+*Last updated: 2026-04-08 after Phase 4 completion*
