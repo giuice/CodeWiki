@@ -26,10 +26,20 @@ fi
 
 [ -z "$_cwiki_files" ] && exit 0
 
+_cwiki_matched=""
+
 for _cwiki_entity_file in "$_cwiki_entities"/*.md; do
     [ -f "$_cwiki_entity_file" ] || continue
     _cwiki_entity_name=$(basename "$_cwiki_entity_file" .md)
     if printf '%s' "$_cwiki_files" | grep -Fqi "$_cwiki_entity_name"; then
-        printf 'Wiki entity "%s" may need updating.\n' "$_cwiki_entity_name"
+        _cwiki_matched="${_cwiki_matched}${_cwiki_entity_name}\n"
     fi
 done
+
+[ -z "$_cwiki_matched" ] && exit 0
+
+printf 'CODEWIKI_CHANGE_CONTEXT\n'
+printf 'Affected wiki entities:\n'
+printf '%b' "$_cwiki_matched"
+printf 'Action: Run /codewiki-absorb to extract knowledge from these changes\n'
+printf 'END_CODEWIKI_CHANGE_CONTEXT\n'

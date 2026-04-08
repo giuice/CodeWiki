@@ -46,10 +46,11 @@ describe("HOOK-02: post-verify.sh exits 0 with empty/malformed JSON", () => {
     expect(exitCode).toBe("EXIT:0");
   });
 
-  test("script contains entity match reminder output pattern", async () => {
+  test("script contains structured change context output pattern", async () => {
     const content = await readHook("post-verify.sh");
-    expect(content).toContain("Wiki entity");
-    expect(content).toContain("may need updating");
+    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain("END_CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain("codewiki-absorb");
   });
 });
 
