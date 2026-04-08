@@ -98,7 +98,11 @@ Plans:
   3. Running `npx codewiki init` twice without `--force` produces no duplicate hook entries in `.claude/settings.json` and no duplicate `<!-- codewiki:start -->` blocks in `CLAUDE.md`
   4. Running `npx codewiki init --force` replaces existing CodeWiki marker sections in `CLAUDE.md` without touching content outside the markers
   5. Running `npx codewiki init` on a project with existing `.claude/settings.json` hooks preserves those hooks alongside the newly added CodeWiki hooks
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
+- [ ] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [ ] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ### Phase 5: Test Suite
 **Goal**: vitest suite covers merge correctness, idempotency, and npm pack asset inclusion; tests are the living spec for merge behavior
@@ -109,7 +113,11 @@ Plans:
   2. A test simulating two consecutive `init` runs on a project asserts exactly one CodeWiki hook entry exists in `.claude/settings.json` after both runs
   3. A test runs `npm pack --dry-run` and asserts `dist/templates/claude/commands/ingest.md` appears in the file list
   4. Hook script tests assert exit code 0 for both scripts when called with an empty JSON payload and when `wiki/index.md` is absent
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
+- [ ] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [ ] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ### Phase 6: OpenCode Adapter
 **Goal**: `npx codewiki init` on a project with `opencode.json` installs slash commands, agents, and a session_completed hook (no PreToolUse)
@@ -120,7 +128,11 @@ Plans:
   2. The resulting `opencode.json` contains a `session_completed` hook entry pointing to `.codewiki/hooks/post-verify.sh` and no PreToolUse entry
   3. Re-running `npx codewiki init` twice does not create duplicate hook entries in `opencode.json` or duplicate marker sections in `AGENTS.md`
   4. Running `npx codewiki init --tool opencode` on a project without `opencode.json` still installs the OpenCode adapter (explicit flag overrides detection)
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
+- [ ] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [ ] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ### Phase 7: Codex and Copilot Adapters
 **Goal**: Codex and Copilot adapters are implemented after per-tool command path and hook format are confirmed via spikes
@@ -131,7 +143,11 @@ Plans:
   2. Running `npx codewiki init` on a project with `.github/copilot-instructions.md` creates `.github/hooks/codewiki-hooks.json` with `"version": 1` and appends to `.github/copilot-instructions.md` using marker comments
   3. If Codex per-project command path is confirmed, 6 slash commands are installed to that directory; if global-only, the install report notes the limitation
   4. If Copilot has no confirmed slash command directory, the install report documents the limitation rather than silently skipping
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
+- [ ] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [ ] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ### Phase 8: npm Publish Hardening
 **Goal**: The package publishes to npm correctly and `npx codewiki init` works in a fresh project with all prompt files present in the tarball
@@ -142,7 +158,11 @@ Plans:
   2. `package.json` has `engines: { "node": ">=20.11.0" }` and zero runtime dependencies (Commander.js and optional picocolors only)
   3. Running `npx codewiki@latest init` in a clean temporary directory (no global install) completes successfully and creates the wiki scaffold
   4. README documents the four supported tools, their hook strategies, and the `--tool`, `--force`, `--name` flags
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
+- [ ] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [ ] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ## Progress
 
