@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 03 completed and verified
-last_updated: "2026-04-08T00:32:02.391Z"
-last_activity: 2026-04-08 - Completed quick task 260407-ulj: Update README.md to reflect current project direction and Phase 3 functionality
+stopped_at: Phase 03.1 completed and verified
+last_updated: "2026-04-08T15:04:57-03:00"
+last_activity: 2026-04-08 -- Phase 03.1 completed and verified
 progress:
-  total_phases: 8
-  completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  total_phases: 9
+  completed_phases: 4
+  total_plans: 10
+  completed_plans: 10
   percent: 100
 ---
 
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-07)
+See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
 **Current focus:** Phase 04 — Claude Code Adapter + init Command
 
 ## Current Position
 
-Phase: 4 of 8 (Claude Code Adapter + init Command)
+Phase: 4 of 9 (Claude Code Adapter + init Command)
 Plan: 0 of TBD in current phase
 Status: Ready to plan
-Last activity: 2026-04-08 -- Phase 03 completed and verified
+Last activity: 2026-04-08 -- Phase 03.1 completed and verified
 
 Progress: [██████████] 100%
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 7
+- Total plans completed: 10
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -47,10 +47,11 @@ Progress: [██████████] 100%
 | 01 | 1 | 10m | 10m |
 | 02 | 3 | 6m | 2m |
 | 03 | 3 | - | - |
+| 03.1 | 3 | - | - |
 
 **Recent Trend:**
 
-- Last 4 plans: 02-03, 03-01, 03-02, 03-03
+- Last 4 plans: 03-03, 03.1-01, 03.1-02, 03.1-03
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -66,10 +67,16 @@ Recent decisions affecting current work:
 - Roadmap: Phase 3 hook scripts are the highest-risk deliverable — write and test in isolation before wiring to init
 - Roadmap: Claude Code adapter built first (fully specified); Codex/Copilot deferred until per-tool command paths confirmed via spikes
 - Roadmap: OpenCode gets session_completed hook only (no PreToolUse available in OpenCode)
+- Phase 03.1: auto-improvement uses dedicated absorb/breakdown prompts plus a shared `_backlinks.json` index instead of a monolithic wiki skill
+- Phase 03.1: post-verify is an active structured trigger for wiki updates, and session-end performs lightweight auto-capture from git diff context
 
 ### Pending Todos
 
 None yet.
+
+### Roadmap Evolution
+
+- Phase 03.1 inserted after Phase 3: Auto-Improvement Engine (URGENT) — adds absorb, breakdown, backlinks, session-end hook to make wiki auto-improve instead of passively remind. Inspired by Farzaa wiki skill and Karpathy/Spisak knowledge base patterns.
 
 ### Blockers/Concerns
 
@@ -85,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T23:36:04.398Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-prompt-templates-and-hook-scripts/03-CONTEXT.md
+Last session: 2026-04-08T15:04:57-03:00
+Stopped at: Phase 03.1 completed and verified
+Resume file: .planning/ROADMAP.md

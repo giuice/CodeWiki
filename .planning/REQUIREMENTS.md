@@ -46,6 +46,14 @@
 - [x] **AGENT-01**: `codewiki-wiki-updater` subagent — proposes wiki updates from code changes
 - [x] **AGENT-02**: `codewiki-verifier` subagent — checks proposed wiki changes for contradictions
 
+### Auto-Improvement Engine
+
+- [x] **ABS-01**: `/codewiki-absorb` extracts durable wiki knowledge from recent git changes with human approval gating
+- [x] **ABS-02**: `/codewiki-breakdown` finds referenced-but-undocumented entities and ranks them by backlink importance
+- [x] **ABS-03**: `wiki/_backlinks.json` is scaffolded and maintained by wiki prompts that read or update structural knowledge
+- [x] **ABS-04**: `session-end.sh` summarizes session changes and exits 0 under all conditions
+- [x] **ABS-05**: `post-verify.sh` emits structured change context that actively routes the runtime toward wiki-update follow-up work
+
 ### Claude Code Adapter
 
 - [ ] **CC-01**: Installs 6 slash commands to `.claude/commands/codewiki/`
@@ -138,6 +146,11 @@
 | HOOK-05 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
 | AGENT-01 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
 | AGENT-02 | Phase 3 (Prompt Templates and Hook Scripts) | Complete (2026-04-08) |
+| ABS-01 | Phase 3.1 (Auto-Improvement Engine) | Complete (2026-04-08) |
+| ABS-02 | Phase 3.1 (Auto-Improvement Engine) | Complete (2026-04-08) |
+| ABS-03 | Phase 3.1 (Auto-Improvement Engine) | Complete (2026-04-08) |
+| ABS-04 | Phase 3.1 (Auto-Improvement Engine) | Complete (2026-04-08) |
+| ABS-05 | Phase 3.1 (Auto-Improvement Engine) | Complete (2026-04-08) |
 | CLI-01 | Phase 4 (Claude Code Adapter + init Command) | Pending |
 | CLI-02 | Phase 4 (Claude Code Adapter + init Command) | Pending |
 | CLI-03 | Phase 4 (Claude Code Adapter + init Command) | Pending |
@@ -166,12 +179,12 @@
 | BUILD-04 | Phase 8 (npm Publish Hardening) | Pending |
 
 **Coverage:**
-- v1 requirements: 49 total
-- Mapped to phases: 49
+- v1 requirements: 54 total
+- Mapped to phases: 54
 - Unmapped: 0 ✓
 
 **Note:** Phase 1 (Clean Slate) has no v1 requirements assigned — it is a prerequisite cleanup that removes v1 runtime code to create a clean foundation. All v1 requirements map to Phases 2-8.
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-08 — Phase 3 prompt templates, hooks, and agents verified and traceability refreshed*
+*Last updated: 2026-04-08 — Phase 3.1 auto-improvement engine verified and traceability refreshed*

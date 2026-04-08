@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Clean Slate** - Delete v1 runtime CLI; empty src/ ready for v2
 - [x] **Phase 2: Shared Infrastructure** - Merge utils, scaffold, asset locator, reporter, detector
 - [x] **Phase 3: Prompt Templates and Hook Scripts** - All markdown prompts, agent definitions, hook scripts
-- [ ] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
+- [x] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
 - [ ] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
 - [ ] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
 - [ ] **Phase 6: OpenCode Adapter** - session_completed-only hook strategy; commands and agents
@@ -81,12 +81,12 @@ Plans:
   4. `src/templates/hooks/session-end.sh` exists, passes `shellcheck --shell=sh`, exits 0 on empty input, and outputs session summary context
   5. `src/templates/hooks/post-verify.sh` is updated to output structured change context that triggers wiki-updater agent (not just a reminder)
   6. Existing ingest, query, and lint prompts are updated to reference `wiki/_backlinks.json`
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 03.1-01-PLAN.md — Create absorb.md and breakdown.md slash commands
-- [ ] 03.1-02-PLAN.md — Add _backlinks.json to scaffold, create session-end.sh, update post-verify.sh
-- [ ] 03.1-03-PLAN.md — Update ingest, lint, query prompts to reference _backlinks.json
+- [x] 03.1-01-PLAN.md — Create absorb.md and breakdown.md slash commands
+- [x] 03.1-02-PLAN.md — Add _backlinks.json to scaffold, create session-end.sh, update post-verify.sh
+- [x] 03.1-03-PLAN.md — Update ingest, lint, query prompts to reference _backlinks.json
 
 ### Phase 4: Claude Code Adapter + init Command
 **Goal**: `npx codewiki init` installs the wiki scaffold and Claude Code integration into a real project; re-running produces identical state
@@ -154,7 +154,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Clean Slate | 1/1 | Complete | 2026-04-07 |
 | 2. Shared Infrastructure | 3/3 | Complete | 2026-04-07 |
 | 3. Prompt Templates and Hook Scripts | 3/3 | Complete | 2026-04-08 |
-| 3.1 Auto-Improvement Engine (INSERTED) | 0/3 | Not started | - |
+| 3.1 Auto-Improvement Engine (INSERTED) | 3/3 | Complete | 2026-04-08 |
 | 4. Claude Code Adapter + init Command | 0/TBD | Not started | - |
 | 5. Test Suite | 0/TBD | Not started | - |
 | 6. OpenCode Adapter | 0/TBD | Not started | - |
