@@ -91,7 +91,7 @@
 ### Build & Publish
 
 - [x] **BUILD-01**: `npm run build` copies `src/templates/**` to `dist/templates/` (postbuild step)
-- [ ] **BUILD-02**: `npm pack --dry-run` lists `dist/templates/claude/commands/ingest.md` (prompt files in tarball)
+- [x] **BUILD-02**: `npm pack --dry-run` lists `dist/templates/claude/commands/codewiki/ingest.md` (prompt files in tarball)
 - [ ] **BUILD-03**: `engines.node >= "20.11.0"` set in package.json
 - [ ] **BUILD-04**: Zero npm runtime dependencies (Commander.js + optional picocolors only)
 
@@ -164,7 +164,7 @@
 | CC-04 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | CC-05 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | BUILD-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
-| BUILD-02 | Phase 5 (Test Suite) | Pending |
+| BUILD-02 | Phase 5 (Test Suite) | Complete (2026-04-10) |
 | OC-01 | Phase 6 (OpenCode Adapter) | Pending |
 | OC-02 | Phase 6 (OpenCode Adapter) | Pending |
 | OC-03 | Phase 6 (OpenCode Adapter) | Pending |
@@ -187,4 +187,4 @@
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-08 — Phase 4 Claude installer and init orchestration verified and traceability refreshed*
+*Last updated: 2026-04-10 — Phase 5 plan 01 executed, BUILD-02 validated, and traceability refreshed*

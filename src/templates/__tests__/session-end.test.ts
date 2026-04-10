@@ -26,6 +26,16 @@ describe("ABS-04: session-end.sh summarizes recent work and never blocks", () =>
     expect(exitCode).toBe("EXIT:0");
   });
 
+  test("session-end.sh exits 0 when empty JSON payload {} is piped as stdin", () => {
+    // SC-4: hook scripts exit 0 when called with an empty JSON payload
+    const output = execSync(`echo "{}" | sh "${SESSION_END_PATH}" 2>/dev/null; echo "EXIT:$?"`, {
+      encoding: "utf8",
+      timeout: 5000
+    });
+    const exitCode = output.trim().split("\n").pop();
+    expect(exitCode).toBe("EXIT:0");
+  });
+
   test("session-end.sh passes shellcheck", () => {
     try {
       execSync(`npx --yes shellcheck --shell=sh "${SESSION_END_PATH}"`, {

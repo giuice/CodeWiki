@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Prompt Templates and Hook Scripts** - All markdown prompts, agent definitions, hook scripts
 - [x] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
 - [x] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
-- [ ] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
+- [x] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
 - [ ] **Phase 6: OpenCode Adapter** - session_completed-only hook strategy; commands and agents
 - [ ] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps
 - [ ] **Phase 8: npm Publish Hardening** - Build script, pack verification, engines field, README
@@ -115,7 +115,7 @@ Plans:
   4. Hook script tests assert exit code 0 for both scripts when called with an empty JSON payload and when `wiki/index.md` is absent
 **Plans:** 1 plan
 Plans:
-- [ ] 05-01-PLAN.md — Add pack tarball test (BUILD-02) and session-end empty-JSON-payload edge case
+- [x] 05-01-PLAN.md — Add pack tarball test (BUILD-02) and session-end empty-JSON-payload edge case
 
 ### Phase 6: OpenCode Adapter
 **Goal**: `npx codewiki init` on a project with `opencode.json` installs slash commands, agents, and a session_completed hook (no PreToolUse)
@@ -168,7 +168,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Prompt Templates and Hook Scripts | 3/3 | Complete | 2026-04-08 |
 | 3.1 Auto-Improvement Engine (INSERTED) | 3/3 | Complete | 2026-04-08 |
 | 4. Claude Code Adapter + init Command | 3/3 | Complete | 2026-04-08 |
-| 5. Test Suite | 0/1 | Not started | - |
+| 5. Test Suite | 1/1 | Complete | 2026-04-10 |
 | 6. OpenCode Adapter | 0/TBD | Not started | - |
 | 7. Codex and Copilot Adapters | 0/TBD | Not started | - |
 | 8. npm Publish Hardening | 0/TBD | Not started | - |

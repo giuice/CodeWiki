@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 4 completed and verified
-last_updated: "2026-04-08T18:51:57-03:00"
-last_activity: 2026-04-08 -- Phase 04 completed and verified
+stopped_at: Phase 05 completed and verified
+last_updated: "2026-04-10T18:41:04.025Z"
+last_activity: 2026-04-10 -- Phase 05 completed and verified
 progress:
   total_phases: 9
-  completed_phases: 5
-  total_plans: 13
-  completed_plans: 13
+  completed_phases: 6
+  total_plans: 14
+  completed_plans: 14
   percent: 100
 ---
 
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-08)
+See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 05 — Test Suite
+**Current focus:** Phase 06 — OpenCode Adapter
 
 ## Current Position
 
-Phase: 5 of 9 (Test Suite)
+Phase: 6 of 9 (opencode adapter)
 Plan: 0 of TBD in current phase
 Status: Ready to plan
-Last activity: 2026-04-08 -- Phase 04 completed and verified
+Last activity: 2026-04-10 -- Phase 05 completed and verified
 
 Progress: [██████████] 100%
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -49,10 +49,11 @@ Progress: [██████████] 100%
 | 03 | 3 | - | - |
 | 03.1 | 3 | - | - |
 | 04 | 3 | 7m | 2m |
+| 05 | 1 | 8m | 8m |
 
 **Recent Trend:**
 
-- Last 4 plans: 03.1-03, 04-01, 04-02, 04-03
+- Last 4 plans: 04-01, 04-02, 04-03, 05-01
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -72,6 +73,8 @@ Recent decisions affecting current work:
 - Phase 03.1: post-verify is an active structured trigger for wiki updates, and session-end performs lightweight auto-capture from git diff context
 - Phase 04: `init` is now a thin adapter orchestrator that detects tools, scaffolds shared assets, and reports unsupported selections explicitly
 - Phase 04: Claude installs `session-end.sh` but reports it as inactive until a supported Claude session lifecycle hook is confirmed
+- Phase 05: pack coverage reads `npm pack --dry-run --json` for file assertions because plain dry-run stdout on the current npm version omits the tarball file list
+- Phase 05: compiled node:test integration files now run with `--test-concurrency=1` so pack verification cannot delete `dist/` while other integration files are executing
 
 ### Pending Todos
 
@@ -95,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T21:22:33.681Z
-Stopped at: Phase 4 completed and verified
+Last session: 2026-04-10T18:41:04.025Z
+Stopped at: Phase 05 completed and verified
 Resume file: .planning/ROADMAP.md
