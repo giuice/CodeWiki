@@ -315,17 +315,19 @@ test("session-end.sh exits 0 with empty JSON payload stdin", () => {
 | A1 | The pack test should live in `test/pack.test.ts` (node:test) rather than vitest to avoid prepack/clean collision | Architecture Patterns | If the test command order changes, vitest placement could work; low risk given current script order |
 | A2 | `spawnSync("npm", ...)` works without shell:true on Linux | Common Pitfalls | If npm is not on PATH, use `process.env.npm_execpath` or shell:true |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Path discrepancy in BUILD-02**
    - What we know: REQUIREMENTS.md says `dist/templates/claude/commands/ingest.md`; actual tarball path is `dist/templates/claude/commands/codewiki/ingest.md`
    - What's unclear: Whether to update REQUIREMENTS.md to match reality or update the test description to note the discrepancy
    - Recommendation: Use the real path in the test, add a comment noting the REQUIREMENTS.md path was pre-`codewiki/` subdirectory
+   - **RESOLVED:** Plan uses the real path `dist/templates/claude/commands/codewiki/ingest.md` with an inline comment documenting the discrepancy vs. REQUIREMENTS.md.
 
 2. **Test file exclusion from npm tarball**
    - What we know: Compiled test files (dist/test/, dist/lib/__tests__/, etc.) are currently included in the published package
    - What's unclear: Should Phase 5 add a `.npmignore` or update the `files` field to exclude them
    - Recommendation: Out of scope for Phase 5 (assigned to Phase 8 BUILD-03/BUILD-04). Document as a known issue in pack test comments.
+   - **RESOLVED:** Out of scope for Phase 5. Deferred to Phase 8 (BUILD-03/BUILD-04). Pack test in Phase 5 does NOT assert test file exclusion.
 
 ## Environment Availability
 
