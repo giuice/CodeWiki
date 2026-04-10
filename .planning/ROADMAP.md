@@ -126,9 +126,10 @@ Plans:
   2. The resulting `opencode.json` contains a `session_completed` hook entry pointing to `.codewiki/hooks/post-verify.sh` and no PreToolUse entry
   3. Re-running `npx codewiki init` twice does not create duplicate hook entries in `opencode.json` or duplicate marker sections in `AGENTS.md`
   4. Running `npx codewiki init --tool opencode` on a project without `opencode.json` still installs the OpenCode adapter (explicit flag overrides detection)
-**Plans:** TBD
+**Plans:** 2 plans
 Plans:
-- [ ] TBD
+- [ ] 06-01-PLAN.md — Create OpenCode command, agent, and AGENTS.md template assets
+- [ ] 06-02-PLAN.md — Implement the OpenCode adapter, init wiring, and idempotent regression coverage
 
 ### Phase 7: Codex and Copilot Adapters
 **Goal**: Codex and Copilot adapters are implemented after per-tool command path and hook format are confirmed via spikes
@@ -169,6 +170,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3.1 Auto-Improvement Engine (INSERTED) | 3/3 | Complete | 2026-04-08 |
 | 4. Claude Code Adapter + init Command | 3/3 | Complete | 2026-04-08 |
 | 5. Test Suite | 1/1 | Complete | 2026-04-10 |
-| 6. OpenCode Adapter | 0/TBD | Not started | - |
+| 6. OpenCode Adapter | 0/2 | Not started | - |
 | 7. Codex and Copilot Adapters | 0/TBD | Not started | - |
 | 8. npm Publish Hardening | 0/TBD | Not started | - |
