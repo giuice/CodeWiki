@@ -27,7 +27,7 @@
 | Shared hook scripts in `.codewiki/hooks/` | One update propagates to all tools | LOW | All tool configs point to same `.codewiki/hooks/pre-wiki-context.sh` |
 | Marker-comment merge | Safe instruction file updates without destroying user content | MEDIUM | `<!-- codewiki:start -->` / `<!-- codewiki:end -->` |
 | Pre-hook wiki context injection | Wiki knowledge arrives automatically before file edits | MEDIUM | Most differentiating feature — passive context delivery |
-| 6 slash commands with tool-native frontmatter | Correct format per tool, not just file copies | MEDIUM | Claude Code and OpenCode have different frontmatter requirements |
+| 8 slash commands with tool-native frontmatter | Correct format per tool, not just file copies | MEDIUM | Claude Code and OpenCode have different frontmatter requirements |
 | System instructions explain verification loop | Agent understands the wiki pattern without user prompting | LOW | Appended to CLAUDE.md / AGENTS.md / copilot-instructions.md |
 
 ### Anti-Features (Deliberately NOT Building)

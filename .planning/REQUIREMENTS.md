@@ -76,7 +76,7 @@
 
 ### OpenCode Adapter
 
-- [ ] **OC-01**: Installs 6 slash commands to `.opencode/commands/codewiki/`
+- [ ] **OC-01**: Installs 8 slash commands to `.opencode/commands/codewiki/`
 - [ ] **OC-02**: Installs 2 subagents to `.opencode/agents/`
 - [ ] **OC-03**: Merges `session_completed` hook into `opencode.json` experimental.hooks (no PreToolUse — not available)
 - [ ] **OC-04**: Appends CodeWiki instructions to `AGENTS.md` using marker comments

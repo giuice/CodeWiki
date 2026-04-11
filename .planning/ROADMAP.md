@@ -122,7 +122,7 @@ Plans:
 **Depends on**: Phase 5
 **Requirements**: OC-01, OC-02, OC-03, OC-04
 **Success Criteria** (what must be TRUE):
-  1. Running `npx codewiki init` on a project with `opencode.json` installs 6 slash commands to `.opencode/commands/codewiki/` and 2 agents to `.opencode/agents/`
+  1. Running `npx codewiki init` on a project with `opencode.json` installs 8 slash commands to `.opencode/commands/codewiki/` and 2 agents to `.opencode/agents/`
   2. The resulting `opencode.json` contains a `session_completed` hook entry pointing to `.codewiki/hooks/post-verify.sh` and no PreToolUse entry
   3. Re-running `npx codewiki init` twice does not create duplicate hook entries in `opencode.json` or duplicate marker sections in `AGENTS.md`
   4. Running `npx codewiki init --tool opencode` on a project without `opencode.json` still installs the OpenCode adapter (explicit flag overrides detection)
