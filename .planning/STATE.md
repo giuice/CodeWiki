@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 05 completed and verified
-last_updated: "2026-04-10T18:41:04.025Z"
-last_activity: 2026-04-10 -- Phase 05 completed and verified
+stopped_at: Phase 06 planned; execution not started
+last_updated: "2026-04-11T16:50:00-03:00"
+last_activity: 2026-04-11 -- Completed quick task 260411-mzx: reconcile v2 docs to 8-command canon + Q1 OpenCode resolution
 progress:
   total_phases: 9
   completed_phases: 6
-  total_plans: 14
+  total_plans: 16
   completed_plans: 14
-  percent: 100
+  percent: 67
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-10)
 ## Current Position
 
 Phase: 6 of 9 (opencode adapter)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-04-10 -- Phase 05 completed and verified
+Plan: 2 plans created; execution not started
+Status: Ready to execute
+Last activity: 2026-04-11 -- Completed quick task 260411-mzx: reconcile v2 docs to 8-command canon + Q1 OpenCode resolution
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -86,8 +86,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 7 (Codex adapter): Codex per-project command path unconfirmed — spike required before Phase 7 planning
-- Phase 7 (Copilot adapter): No confirmed file-based slash command directory — spike required before Phase 7 planning
+- Future Codex adapter work: per-project command path remains unconfirmed — spike required before that phase is planned
+- Future Copilot adapter work: no confirmed file-based slash command directory — spike required before that phase is planned
 - Phase 3 (hook scripts): Cross-tool JSON payload shapes for Codex and OpenCode are MEDIUM confidence — verify with actual tool invocations before finalizing hook script field parsing
 
 ### Quick Tasks Completed
@@ -95,9 +95,10 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260407-ulj | Update README.md to reflect current project direction and Phase 3 functionality | 2026-04-08 | 6ce8cae | [260407-ulj-update-readme-md-to-reflect-current-proj](./quick/260407-ulj-update-readme-md-to-reflect-current-proj/) |
+| 260411-mzx | Reconcile v2 docs to 8-command canon + Q1 OpenCode resolution (session_completed → post-verify.sh) | 2026-04-11 | cace4e9 | [260411-mzx-reconcile-v2-docs-to-8-command-canon-plu](./quick/260411-mzx-reconcile-v2-docs-to-8-command-canon-plu/) |
 
 ## Session Continuity
 
 Last session: 2026-04-10T18:41:04.025Z
-Stopped at: Phase 05 completed and verified
+Stopped at: Phase 06 planned; execution not started
 Resume file: .planning/ROADMAP.md
