@@ -1,3 +1,9 @@
+> **SUPERSEDED** — This is CodeWiki v1. The canonical product spec is now
+> [`docs/codewiki-project-v2.md`](./codewiki-project-v2.md). The v2 architecture
+> is CLI-as-installer with all intelligence in markdown prompts; v1 described a
+> runtime CLI that has since been removed. This file is kept for historical
+> reference only.
+
 # CodeWiki — Product Requirements Document
 
 ## 1. Problem Statement
