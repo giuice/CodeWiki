@@ -23,15 +23,17 @@
 - [x] **WIKI-04**: Creates `.codewiki/config.yml` with project settings
 - [x] **WIKI-05**: Creates `.codewiki/templates/` with all 5 page templates (entity, decision, lesson, issue, source-summary)
 
-### Prompt Files (Slash Commands)
+### Prompt Files (Skills)
 
-- [x] **CMD-01**: `/codewiki-ingest` — instructs agent to digest a raw source into wiki
-- [x] **CMD-02**: `/codewiki-query` — instructs agent to search wiki and synthesize answer
-- [x] **CMD-03**: `/codewiki-lint` — instructs agent to check wiki for contradictions, orphans, stale content, file drift
-- [x] **CMD-04**: `/codewiki-prd` — adapted from `docs/prompts/create-prd.md`, full interaction model preserved
-- [x] **CMD-05**: `/codewiki-tasks` — adapted from `docs/prompts/generate-tasks.md`, "Go" gate preserved
-- [x] **CMD-06**: `/codewiki-process` — adapted from `docs/prompts/process-task-list.md`, one-sub-task-at-a-time preserved
-- [x] **CMD-07**: All command files have `description:` frontmatter so they appear in `/help`
+> **Install surface canon (2026-04-11):** CodeWiki installs **eight Skills**, one per logical command (`ingest`, `query`, `lint`, `absorb`, `breakdown`, `prd`, `tasks`, `process`). Each skill is its own `SKILL.md` with YAML frontmatter (`name`, `description`, `argument-hint`), following `docs/skills/wiki.md` as a file-format reference only (not as a packaging model — CodeWiki does NOT bundle subcommands into one skill). See `docs/codewiki-project-v2.md` §12 Decision 8.
+
+- [x] **CMD-01**: `codewiki-ingest` skill — instructs agent to digest a raw source into wiki
+- [x] **CMD-02**: `codewiki-query` skill — instructs agent to search wiki and synthesize answer
+- [x] **CMD-03**: `codewiki-lint` skill — instructs agent to check wiki for contradictions, orphans, stale content, file drift
+- [x] **CMD-04**: `codewiki-prd` skill — adapted from `docs/prompts/create-prd.md`, full interaction model preserved
+- [x] **CMD-05**: `codewiki-tasks` skill — adapted from `docs/prompts/generate-tasks.md`, "Go" gate preserved
+- [x] **CMD-06**: `codewiki-process` skill — adapted from `docs/prompts/process-task-list.md`, one-sub-task-at-a-time preserved
+- [x] **CMD-07**: All SKILL.md files have `name` + `description` frontmatter so each skill surfaces independently in the tool's skill index (richer description than command frontmatter because the description is how the agent auto-matches natural-language requests to the right skill)
 
 ### Hook Scripts
 

@@ -266,9 +266,9 @@ High-backlink pages indicate important entities. The breakdown command uses this
 
 #### 5.2.4 Session-End Hook (shipped but dormant in v1)
 
-`init` installs `session-end.sh` as a shell asset in `.codewiki/hooks/` on every tool. It is **not wired into any tool's hook configuration in v1** because none of the four target tools currently exposes a confirmed session-lifecycle event that CodeWiki is willing to rely on:
+`init` installs `session-end.sh` as a shell asset in `.codewiki/hooks/` on every tool. It is **not wired into any tool's hook configuration in v1** because no target tool currently exposes a session-lifecycle event that can drive an **interactive absorb flow** (where the agent proposes wiki updates and the human approves them before anything is written):
 
-- **Claude Code** — no confirmed `SessionEnd` lifecycle hook; only `PreToolUse`/`PostToolUse` on `Write|Edit` are confirmed in Phase 4 research.
+- **Claude Code** — `SessionEnd` hook **does exist** (verified 2026-04-11) but it fires at session termination, which is literally the last thing before shutdown. By the time it fires, the agent is gone, so it cannot execute an interactive absorb skill and cannot surface proposals for human approval. A shell script at that point can only write state to disk for the *next* session to pick up — not the interactive loop CodeWiki needs. **Decision: do not rely on it.**
 - **OpenCode** — has `experimental.hooks.session_completed`, but Phase 6 routes that event to `post-verify.sh` (the batch-absorb entry point), not to `session-end.sh`. Wiring both scripts to the same event would double-fire.
 - **Codex** — no confirmed session-lifecycle hook; research only confirmed `PreToolUse`.
 - **Copilot** — only `preToolUse` / `postToolUse` confirmed.
