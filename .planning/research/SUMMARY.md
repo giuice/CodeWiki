@@ -98,7 +98,7 @@ Based on the architecture's build-order dependencies and the pitfall-to-phase ma
 
 ### Phase 3: Write Prompt Templates and Hook Scripts
 **Rationale:** The adapters copy files — they need the files to exist first. Hook scripts are the riskiest deliverable (three failure modes: exit code discipline, POSIX compatibility, cross-tool JSON schema). Writing and testing hooks as a standalone phase before the init command is wired up reduces debugging surface.
-**Delivers:** `src/templates/shared/hooks/pre-wiki-context.sh`, `post-verify.sh`; all 6 slash command `.md` files for Claude Code; agent definition `.md` files; wiki starter templates; `settings-fragment.json`
+**Delivers:** `src/templates/shared/hooks/pre-wiki-context.sh`, `post-verify.sh`; all 8 slash command `.md` files for Claude Code (6 from Phase 3, 2 added in Phase 3.1); agent definition `.md` files; wiki starter templates; `settings-fragment.json`
 **Avoids:** Pitfall 2 (hook exit codes) — tested in isolation before wiring; Pitfall 6 (POSIX bashisms) — shellcheck gating; Pitfall 7 (JSON schema divergence) — test with sample payloads per tool
 
 ### Phase 4: Claude Code Adapter + init Command

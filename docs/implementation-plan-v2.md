@@ -23,6 +23,11 @@ After the 3.1 auto-improvement work, the intended developer loop is:
 5. Use `session-end.sh` or `/codewiki-absorb` to capture durable lessons from the session diff.
 6. Use `/codewiki-breakdown`, `/codewiki-lint`, and `/codewiki-query` to strengthen and consult the wiki between features.
 
+> **Command count note:** Phase 3 shipped 6 commands (`ingest`, `query`, `lint`,
+> `prd`, `tasks`, `process`); Phase 3.1 added `absorb` and `breakdown`, bringing
+> the total to **8 slash commands**. Older sections of this doc that still say
+> "6 commands" are stale — the canonical count is 8.
+
 ## Refactor note
 
 This plan predates the current template-tree refactor. When older task text below mentions `src/prompts/...`, read it as the shipped template assets under `src/templates/...`:
@@ -335,6 +340,8 @@ This project uses CodeWiki for persistent, verified knowledge management.
 - `/codewiki-ingest` — Ingest a raw source document into the wiki
 - `/codewiki-query` — Query the wiki for information
 - `/codewiki-lint` — Health-check the wiki
+- `/codewiki-absorb` — Absorb session lessons into the wiki at end-of-session
+- `/codewiki-breakdown` — Break a large wiki page into smaller cross-linked pages
 - `/codewiki-prd` — Generate a PRD for a new feature
 - `/codewiki-tasks` — Generate tasks from a PRD
 - `/codewiki-process` — Process tasks one at a time
@@ -431,13 +438,13 @@ The init command should:
    
    Claude Code:
      ✓ Hooks: .claude/settings.json (PreToolUse, PostToolUse)
-     ✓ Commands: .claude/commands/codewiki/ (6 commands)
+     ✓ Commands: .claude/commands/codewiki/ (8 commands)
      ✓ Agents: .claude/agents/ (2 agents)
      ✓ Instructions: CLAUDE.md (appended)
    
    Codex:
      ✓ Instructions: AGENTS.md (appended)
-     ✓ Commands: .codex/commands/codewiki/ (6 commands)
+     ✓ Commands: .codex/commands/codewiki/ (8 commands)
    
    Wiki structure:
      ✓ wiki/index.md, wiki/log.md
@@ -472,7 +479,7 @@ Same as current test but verify:
 #### Task 7.2: Test init installs Claude Code adapter
 Run init with `--tool claude-code` and verify:
 - `.claude/settings.json` exists and contains `PreToolUse` and `PostToolUse` hooks
-- `.claude/commands/codewiki/ingest.md` exists (and all 6 commands)
+- `.claude/commands/codewiki/ingest.md` exists (and all 8 commands)
 - `.claude/agents/codewiki-wiki-updater.md` exists
 - `CLAUDE.md` contains `## CodeWiki` section
 - `.codewiki/hooks/pre-wiki-context.sh` exists and is executable
@@ -548,7 +555,7 @@ cd "$tmpdir"
 node /path/to/dist/bin/codewiki.js init --tool claude-code --name test-project
 # Verify:
 cat .claude/settings.json          # Should have hooks
-ls .claude/commands/codewiki/      # Should have 6 .md files
+ls .claude/commands/codewiki/      # Should have 8 .md files
 ls .claude/agents/                 # Should have 2 .md files
 cat CLAUDE.md                      # Should have CodeWiki section
 cat wiki/index.md                  # Should exist

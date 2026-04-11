@@ -346,7 +346,7 @@ CodeWiki v2 is under active development. The v1 runtime CLI has been replaced wi
 | 1. Clean Slate | Delete v1 runtime CLI code | ✅ Complete |
 | 2. Shared Infrastructure | Merge utils, scaffold, detection, reporting | ✅ Complete |
 | 3. Prompt Templates & Hook Scripts | 6 slash commands, 2 hooks, 2 agents | ✅ Complete |
-| 3.1 Auto-Improvement Engine | absorb, breakdown, backlinks, session-end hook | ✅ Complete |
+| 3.1 Auto-Improvement Engine | +2 slash commands (absorb, breakdown), backlinks, session-end hook | ✅ Complete |
 | 4. Claude Code Adapter + init Command | Full end-to-end install via `npx codewiki init` | ⬜ Planned |
 | 5. Test Suite | Merge correctness, idempotency, npm pack coverage | ⬜ Planned |
 | 6. OpenCode Adapter | session_completed hook strategy | ⬜ Planned |

@@ -134,7 +134,7 @@ slash command prompts (ingest.md, query.md, etc.)
 ### Launch With (v1)
 
 - [ ] Wiki scaffold (`wiki/`, `raw/`, `tasks/`, `.codewiki/`) — core value without any tool adapter
-- [ ] Claude Code adapter (hooks + 6 commands + 2 agents + instruction section) — first tool, most mature
+- [ ] Claude Code adapter (hooks + 8 commands + 2 agents + instruction section) — first tool, most mature
 - [ ] Shared hook scripts in `.codewiki/hooks/` — context injection pattern
 - [ ] No-clobber merge for `.claude/settings.json` and `CLAUDE.md` — idempotency
 - [ ] `--force` flag for overwrite — upgrade path

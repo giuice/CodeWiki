@@ -82,15 +82,15 @@ src/
 │   └── reporter.ts         # install report output
 └── templates/              # NOT compiled — copied verbatim by postbuild
     ├── claude/
-    │   ├── commands/       # 6 slash command .md files
+    │   ├── commands/       # 8 slash command .md files
     │   ├── agents/         # 2 subagent .md files
     │   └── settings-fragment.json  # hooks to merge into .claude/settings.json
     ├── codex/
-    │   └── commands/       # same 6 command .md files (different frontmatter if needed)
+    │   └── commands/       # same 8 command .md files (different frontmatter if needed)
     ├── copilot/
     │   └── hooks/          # .github/hooks/codewiki-hooks.json
     ├── opencode/
-    │   ├── commands/       # same 6 command .md files
+    │   ├── commands/       # same 8 command .md files
     │   └── agents/         # 2 subagent .md files
     └── shared/
         ├── hooks/
