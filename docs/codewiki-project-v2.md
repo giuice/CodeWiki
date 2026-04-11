@@ -2,11 +2,12 @@
 
 ## Changelog from v1
 
-- **Architecture rewrite.** The CLI is now a scaffolder/installer only (like GSD). All intelligence lives in markdown prompts, slash commands, hooks, and agents that the AI tool executes natively. The CLI runs zero application logic at runtime.
-- **Multi-tool support updated.** All four tools (Claude Code, Codex, Copilot, OpenCode) now support hooks natively. Adapter strategy updated with accurate config formats.
-- **PRD/Tasks/Process prompts.** First-class slash commands adapted from the original prompts in `docs/prompts/`, not thin CLI wrappers.
-- **CLI commands removed.** `codewiki ingest`, `codewiki query`, `codewiki lint`, `codewiki prd`, `codewiki tasks`, `codewiki status` are no longer CLI commands that run TypeScript logic. They become slash commands/skills inside the AI tools.
+- **Architecture rewrite.** The CLI is now a scaffolder/installer only (like GSD). All intelligence lives in markdown prompts — **installed as Skills**, plus hooks — that the AI tool executes natively. The CLI runs zero application logic at runtime.
+- **Multi-tool support updated.** All four tools (Claude Code, Codex, Copilot, OpenCode) accept Skills as the install surface for CodeWiki's commands and accept hook scripts as the install surface for automation. Adapter strategy updated with accurate config formats.
+- **PRD/Tasks/Process prompts.** First-class **Skills** adapted from the original prompts in `docs/prompts/`, not thin CLI wrappers and not loose slash-command files.
+- **CLI commands removed.** `codewiki ingest`, `codewiki query`, `codewiki lint`, `codewiki prd`, `codewiki tasks`, `codewiki status` are no longer CLI commands that run TypeScript logic. They become **Skills** inside the AI tools — one skill per logical command, eight total.
 - **Section 7 (CLI Interface) rewritten.** The CLI has exactly one command: `init`.
+- **Install surface = Skills.** The v2 PRD replaces v1's "slash commands" language throughout. CodeWiki installs **eight Skills** (one per logical command), not eight loose slash-command markdown files. `docs/skills/wiki.md` is cited as a **format reference** only — CodeWiki does not bundle subcommands into a single skill the way `wiki.md` does; each of the eight CodeWiki commands is its own skill so the tool loads only the prompt it needs (§12 decision 8).
 
 ---
 
@@ -32,7 +33,7 @@ The wiki is a **compounding artifact** — it gets richer with every feature bui
 - **Multi-tool by design.** The wiki is the value, not the tool integration. Works with Claude Code, Codex, Copilot, OpenCode, or any tool that can read markdown and execute commands.
 - **The wiki is just markdown files in the project.** No database, no server, no vendor lock-in. Browse in VS Code, grep in terminal, diff in git.
 - **The CLI is just an installer.** `npx codewiki init` scaffolds the wiki structure and installs hooks, commands, and agents into your AI tool. The CLI runs zero logic at runtime — the AI tool does all the work.
-- **Prompt-native.** All intelligence lives in markdown prompt files (slash commands, agents, hooks). The AI tool reads these natively. No TypeScript middleware between the agent and the wiki.
+- **Prompt-native.** All intelligence lives in markdown prompt files installed as **Skills** (one per command) and hooks. The AI tool reads these natively. No TypeScript middleware between the agent and the wiki.
 
 ## 3. Target User
 
@@ -68,15 +69,17 @@ Solo developers using AI coding agents on real projects. Developers who have exp
 │                                             │
 │  Hooks ─── pre-tool: inject wiki context    │
 │        └── post-tool: verification prompt   │
+│        └── session-end: dormant asset       │
 │                                             │
-│  Commands/Skills ─── /codewiki-ingest       │
-│                  ├── /codewiki-query         │
-│                  ├── /codewiki-lint          │
-│                  ├── /codewiki-absorb        │
-│                  ├── /codewiki-breakdown     │
-│                  ├── /codewiki-prd           │
-│                  ├── /codewiki-tasks         │
-│                  └── /codewiki-process       │
+│  Skills (8, one per command)                │
+│     ├── codewiki-ingest                     │
+│     ├── codewiki-query                      │
+│     ├── codewiki-lint                       │
+│     ├── codewiki-absorb                     │
+│     ├── codewiki-breakdown                  │
+│     ├── codewiki-prd                        │
+│     ├── codewiki-tasks                      │
+│     └── codewiki-process                    │
 │                                             │
 │  Agents ─── codewiki-wiki-updater           │
 │         └── codewiki-verifier               │
@@ -93,17 +96,16 @@ The exact files depend on the `--tool` flag. Example for Claude Code:
 ```
 project-root/
 ├── .claude/
-│   ├── settings.json              # Tool-specific hook wiring
-│   ├── commands/
-│   │   └── codewiki/
-│   │       ├── ingest.md          # /codewiki-ingest slash command
-│   │       ├── query.md           # /codewiki-query slash command
-│   │       ├── lint.md            # /codewiki-lint slash command
-│   │       ├── absorb.md          # /codewiki-absorb slash command
-│   │       ├── breakdown.md       # /codewiki-breakdown slash command
-│   │       ├── prd.md             # /codewiki-prd slash command
-│   │       ├── tasks.md           # /codewiki-tasks slash command
-│   │       └── process.md         # /codewiki-process slash command
+│   ├── settings.json                         # Tool-specific hook wiring
+│   ├── skills/                               # 8 Skills — one skill per command
+│   │   ├── codewiki-ingest/SKILL.md          # /codewiki-ingest
+│   │   ├── codewiki-query/SKILL.md           # /codewiki-query
+│   │   ├── codewiki-lint/SKILL.md            # /codewiki-lint
+│   │   ├── codewiki-absorb/SKILL.md          # /codewiki-absorb
+│   │   ├── codewiki-breakdown/SKILL.md       # /codewiki-breakdown
+│   │   ├── codewiki-prd/SKILL.md             # /codewiki-prd
+│   │   ├── codewiki-tasks/SKILL.md           # /codewiki-tasks
+│   │   └── codewiki-process/SKILL.md         # /codewiki-process
 │   └── agents/
 │       ├── codewiki-wiki-updater.md
 │       └── codewiki-verifier.md
@@ -134,7 +136,7 @@ project-root/
 └── (rest of project)
 ```
 
-For Codex, `AGENTS.md` is used instead of `CLAUDE.md`, commands go to `.codex/commands/`, hooks to `.codex/hooks.json`, etc.
+For Codex, `AGENTS.md` is used instead of `CLAUDE.md`, Skills go to Codex's skills directory (path **TBD per platform research** — see §6.1 and `.planning/research/FEATURES.md`), hooks to `.codex/hooks.json`, etc. The skill **file format** (one SKILL.md per command with YAML frontmatter — `name`, `description`, `argument-hint`) is the same across all four tools; only the on-disk directory per tool varies.
 
 ### 4.4 Wiki Page Types
 
@@ -174,7 +176,7 @@ For day-to-day use, developers should follow this order:
 3. For net-new work, use `/codewiki-prd` and then `/codewiki-tasks` before writing code.
 4. Implement through `/codewiki-process` so task progression, tests, commits, pre-hook context injection, and post-verify wiki proposals stay in one loop.
 5. Review every wiki proposal from the post-verify flow before allowing writes to `wiki/`.
-6. At session end, rely on `session-end.sh` or run `/codewiki-absorb` manually to capture durable lessons from the recent diff.
+6. At session end, run `/codewiki-absorb` manually to capture durable lessons from the recent diff. (`session-end.sh` ships as a dormant asset on all four tools — see §5.2.4 — so the manual invocation is the primary end-of-session path in v1.)
 7. Use `/codewiki-breakdown`, `/codewiki-lint`, and `/codewiki-query` as the ongoing maintenance loop between features.
 
 ### 5.1 The Verification Loop (Primary Flow)
@@ -262,19 +264,28 @@ A reverse-link map tracking which wiki pages reference each other. Maintained au
 
 High-backlink pages indicate important entities. The breakdown command uses this to prioritize gap-filling.
 
-#### 5.2.4 Session-End Hook
+#### 5.2.4 Session-End Hook (shipped but dormant in v1)
 
-A hook that fires when the AI tool session ends (or on `SessionEnd` / `session_completed` events). It:
+`init` installs `session-end.sh` as a shell asset in `.codewiki/hooks/` on every tool. It is **not wired into any tool's hook configuration in v1** because none of the four target tools currently exposes a confirmed session-lifecycle event that CodeWiki is willing to rely on:
 
-1. Summarizes what was accomplished in the session.
-2. Emits a lightweight session summary that the tool can hand to `/codewiki-absorb` or an equivalent absorb flow.
-3. Proposes wiki updates for any new knowledge worth capturing.
+- **Claude Code** — no confirmed `SessionEnd` lifecycle hook; only `PreToolUse`/`PostToolUse` on `Write|Edit` are confirmed in Phase 4 research.
+- **OpenCode** — has `experimental.hooks.session_completed`, but Phase 6 routes that event to `post-verify.sh` (the batch-absorb entry point), not to `session-end.sh`. Wiring both scripts to the same event would double-fire.
+- **Codex** — no confirmed session-lifecycle hook; research only confirmed `PreToolUse`.
+- **Copilot** — only `preToolUse` / `postToolUse` confirmed.
 
-This ensures knowledge capture happens even when the developer forgets to run `/codewiki-absorb` manually.
+**Primary end-of-session path in v1 is manual** — the developer runs `/codewiki-absorb` before closing the session. The `session-end.sh` script ships so the shell logic is ready the moment any tool publishes a usable lifecycle hook, at which point a future phase wires it into the corresponding tool config without touching the script itself.
+
+When eventually activated, `session-end.sh` will:
+
+1. Summarize what was accomplished in the session.
+2. Emit a lightweight session summary that the tool can hand to the absorb skill.
+3. Propose wiki updates for any new knowledge worth capturing.
+
+Until a platform hook lands, the install report prints the script path with an `(inactive — activation pending platform hook)` marker so users know it is present but not firing.
 
 ### 5.3 Source Ingestion (`/codewiki-ingest`)
 
-Slash command, not CLI. The agent:
+Skill, not CLI. Invoked from the AI tool's native skill interface. The agent:
 1. Reads the raw source document.
 2. Discusses key takeaways with the developer.
 3. Creates a source summary page in `wiki/sources/`.
@@ -285,7 +296,7 @@ Slash command, not CLI. The agent:
 
 ### 5.4 PRD-to-Tasks Flow
 
-Three slash commands adapted from the original prompts:
+Three Skills adapted from the original prompts (each shipped as its own SKILL.md):
 
 1. **`/codewiki-prd`** — Agent asks clarifying questions, generates a PRD in `tasks/`, following the create-prd prompt template. Human reviews and refines. (Adapted from `docs/prompts/create-prd.md`)
 
@@ -295,11 +306,11 @@ Three slash commands adapted from the original prompts:
 
 ### 5.5 Wiki Query (`/codewiki-query`)
 
-Slash command. Agent reads `wiki/index.md` and `wiki/_backlinks.json`, finds relevant pages (prioritizing high-backlink pages), synthesizes an answer with references. If the answer is valuable, the agent files it back into the wiki as a new page or enriches an existing one (with human approval). This **output filing** ensures every question makes the next answer better.
+Skill. Agent reads `wiki/index.md` and `wiki/_backlinks.json`, finds relevant pages (prioritizing high-backlink pages), synthesizes an answer with references. If the answer is valuable, the agent files it back into the wiki as a new page or enriches an existing one (with human approval). This **output filing** ensures every question makes the next answer better.
 
 ### 5.6 Wiki Lint (`/codewiki-lint`)
 
-Slash command. The agent scans for:
+Skill. The agent scans for:
 - Contradictions between pages.
 - Stale claims superseded by newer lessons.
 - Orphan pages with no inbound links (using `_backlinks.json`).
@@ -316,22 +327,33 @@ Agent proposes fixes. Human approves. Rebuilds `wiki/_backlinks.json` after chan
 
 ### 6.1 What `init` Installs Per Tool
 
-All four tools now support hooks, commands, and instructions natively:
+All four tools accept CodeWiki's two install surfaces: **Skills** (8 SKILL.md files, one per command) and **hooks** (shell scripts wired into the tool's event config). Instruction files and agents are supplementary where supported.
 
-| Tool | Hooks | Commands/Skills | Instructions | Agents |
-|------|-------|----------------|--------------|--------|
-| **Claude Code** | `.claude/settings.json` — `PreToolUse`/`PostToolUse` on `Write\|Edit` | `.claude/commands/codewiki/*.md` | Appends to `CLAUDE.md` | `.claude/agents/codewiki-*.md` |
-| **Codex** | `.codex/hooks.json` — lifecycle hooks | `.codex/commands/codewiki/*.md` or slash commands | Appends to `AGENTS.md` | `.codex/agents/codewiki-*.md` (if supported) |
-| **Copilot** | `.github/hooks/codewiki-*.json` — `preToolUse`/`postToolUse` | Slash commands via custom agents | Appends to `.github/copilot-instructions.md` | Custom agent definitions |
-| **OpenCode** | `opencode.json` `experimental.hooks.session_completed` → `post-verify.sh` (no PreToolUse equivalent — pre-hook context comes from `AGENTS.md` instructions) | `.opencode/commands/codewiki/*.md` | Appends to `AGENTS.md` (OpenCode reads it) | `.opencode/agents/codewiki-*.md` |
+| Tool | Hooks | Skills (8 total, one per command) | Instructions | Agents |
+|------|-------|-----------------------------------|--------------|--------|
+| **Claude Code** | `.claude/settings.json` — `PreToolUse`/`PostToolUse` on `Write\|Edit` (+ dormant `session-end.sh` asset) | `.claude/skills/codewiki-<name>/SKILL.md` (confirmed) | Appends to `CLAUDE.md` | `.claude/agents/codewiki-*.md` |
+| **Codex** | `.codex/hooks.json` — lifecycle hooks (+ dormant `session-end.sh` asset) | Codex skills directory — **research gap**, path TBD (see FEATURES.md Open Question) | Appends to `AGENTS.md` | `.codex/agents/codewiki-*.md` (if supported) |
+| **Copilot** | `.github/hooks/codewiki-*.json` — `preToolUse`/`postToolUse` (+ dormant `session-end.sh` asset) | Copilot skills mechanism — **research gap**, path TBD (see FEATURES.md Open Question) | Appends to `.github/copilot-instructions.md` | Custom agent definitions |
+| **OpenCode** | `opencode.json` `experimental.hooks.session_completed` → `post-verify.sh` (no PreToolUse equivalent — pre-hook context comes from `AGENTS.md` instructions; + dormant `session-end.sh` asset) | OpenCode skills directory — **research gap**, path TBD (see FEATURES.md Open Question) | Appends to `AGENTS.md` (OpenCode reads it) | `.opencode/agents/codewiki-*.md` |
+
+**Skill file format is uniform across tools.** Each SKILL.md has YAML frontmatter (`name`, `description`, `argument-hint`) following the `docs/skills/wiki.md` reference format. Only the on-disk directory per tool varies; the prompt content is portable. Skills directory confirmation for Codex, Copilot, and OpenCode is a **prerequisite spike for Phases 5, 6, and 7** (see ROADMAP.md).
+
+**Hook Strategy Matrix.** Each tool exposes different hook events; CodeWiki wires what each tool supports and ships `session-end.sh` as a dormant asset until a session-lifecycle hook is confirmed (see §5.2.4):
+
+| Tool | Pre-edit hook | Post-edit hook | Session-lifecycle hook |
+|------|--------------|----------------|------------------------|
+| Claude Code | ✅ `PreToolUse` → `pre-wiki-context.sh` | ✅ `PostToolUse` → `post-verify.sh` | ❌ dormant |
+| Codex | ✅ `PreToolUse` → `pre-wiki-context.sh` | ⚠️ unconfirmed | ❌ dormant |
+| Copilot | ✅ `preToolUse` → `pre-wiki-context.sh` | ✅ `postToolUse` → `post-verify.sh` | ❌ dormant |
+| OpenCode | ❌ none (context via `AGENTS.md`) | ✅ `session_completed` → `post-verify.sh` | ❌ dormant (event already used by post-verify) |
 
 ### 6.2 Adapter Contents
 
 Each adapter installs:
 
-- **Hook scripts** — Shell scripts in `.codewiki/hooks/` that are referenced by the tool's hook config. Shared across tools; the tool-specific config just points to them.
-- **Slash commands** — Markdown prompt files placed in the tool's native command directory. Same prompt content, adapted path.
-- **System instructions** — Appended to the tool's instruction file (CLAUDE.md, AGENTS.md, copilot-instructions.md). Tells the agent about the wiki, the verification loop, and how to use the slash commands.
+- **Hook scripts** — Shell scripts in `.codewiki/hooks/` that are referenced by the tool's hook config. Shared across tools; the tool-specific config just points to them. Includes `session-end.sh` as a dormant asset on every tool.
+- **Skills** — Eight SKILL.md files (one per command) placed in the tool's native skills directory. Same prompt content per command; only the on-disk directory varies per tool. Frontmatter format matches `docs/skills/wiki.md`.
+- **System instructions** — Appended to the tool's instruction file (CLAUDE.md, AGENTS.md, copilot-instructions.md). Tells the agent about the wiki, the verification loop, and how to invoke the eight skills. For tools where the skills directory is unconfirmed at Phase-7 start, the instruction file also carries an embedded fallback description of each skill so the eight-command surface remains reachable via natural-language invocation.
 - **Agents** (where supported) — Subagent definitions for wiki-updater and verifier workflows.
 
 ### 6.3 Tool Auto-Detection
@@ -376,7 +398,7 @@ The original v1 had `codewiki ingest`, `codewiki query`, `codewiki lint`, etc. a
 - It adds a middleware layer between the agent and the wiki, losing the AI's ability to reason about context.
 - It can't do the interactive parts (ask clarifying questions, propose wiki updates, wait for human approval) — those require the AI tool's conversation loop.
 
-The slash commands are pure markdown prompts. The AI tool reads them and executes the workflow natively. The wiki is just markdown files the agent can read and write directly.
+The eight Skills are pure markdown prompts (one SKILL.md per command). The AI tool reads them and executes the workflow natively. The wiki is just markdown files the agent can read and write directly.
 
 ## 8. Page Templates
 
@@ -437,11 +459,11 @@ lint:
 
 5. **File drift → Lightweight hash-based detection.** (Unchanged from v1.)
 
-6. **PRD integration → Slash commands from original prompts.** The three prompts (`create-prd.md`, `generate-tasks.md`, `process-task-list.md`) become slash commands installed by `init`. They preserve the original prompt's interaction model (clarifying questions, "Go" confirmation, one-sub-task-at-a-time).
+6. **PRD integration → Skills from original prompts.** The three prompts (`create-prd.md`, `generate-tasks.md`, `process-task-list.md`) become Skills installed by `init` (one SKILL.md per prompt). They preserve the original prompt's interaction model (clarifying questions, "Go" confirmation, one-sub-task-at-a-time).
 
 7. **Shared hook scripts.** Hook scripts live in `.codewiki/hooks/` and are referenced by each tool's config. This avoids duplicating shell logic per tool. The tool-specific config (`.claude/settings.json`, `.codex/hooks.json`, etc.) just points to the shared scripts.
 
-8. **Auto-improvement engine → Separate commands, not unified skill.** The absorb, breakdown, and lint commands are separate slash commands rather than subcommands of a single skill. This keeps each command's token footprint small — the AI tool only loads the prompt it needs. Inspired by Farzaa's wiki skill pattern but adapted for token efficiency.
+8. **Install surface → Eight Skills, one per command (not a single bundled skill, not loose slash-command files).** CodeWiki ships exactly eight Skills — `codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process` — each as its own SKILL.md with YAML frontmatter. This is explicitly **not** the `docs/skills/wiki.md` model of "one skill with many subcommands under one SKILL.md"; CodeWiki cites `wiki.md` as a file-format reference only, not as a packaging model. Rationale: (a) **token efficiency** — the AI tool only loads the prompt it needs per invocation; a bundled skill pays the full token cost even for a single query; (b) **discoverability** — each skill's frontmatter `description` surfaces independently in the tool's skill index so the agent can pick the right command without reading an unrelated prompt; (c) **independent evolution** — a change to `absorb` doesn't force a re-review of the entire bundled prompt; (d) **portability** — the same per-command structure maps cleanly to any tool's skill directory once the directory path is confirmed per tool. This decision supersedes v1's "slash commands" language throughout the doc.
 
 9. **Backlink index → JSON file, not computed on the fly.** `wiki/_backlinks.json` is a pre-computed reverse-link map maintained by absorb/ingest/lint. This avoids scanning all wiki pages on every query — the agent reads one file to find high-importance pages. Inspired by Farzaa's `_backlinks.json` pattern.
 
