@@ -2,7 +2,7 @@
 
 **Domain:** npm CLI installer for AI coding tool integrations (Claude Code, Codex, Copilot, OpenCode)
 **Researched:** 2026-04-07
-**Confidence:** HIGH for Claude Code/GSD patterns; MEDIUM for Codex/Copilot hook formats; LOW for OpenCode pre-hook capabilities
+**Confidence:** HIGH for Claude Code/GSD patterns; MEDIUM for Codex/Copilot hook formats; OpenCode has no PreToolUse equivalent — post-hook uses `session_completed` (confirmed)
 
 ## Feature Landscape
 
@@ -90,13 +90,12 @@
 {
   "experimental": {
     "hooks": {
-      "file_edited": { "command": "bash .codewiki/hooks/post-verify.sh" },
-      "session_completed": { "command": "bash .codewiki/hooks/session-end.sh" }
+      "session_completed": { "command": "bash .codewiki/hooks/post-verify.sh" }
     }
   }
 }
 ```
-- **No pre-tool hook available.** `file_edited` is post-edit only. Wiki context injection before coding is NOT possible in OpenCode via hooks.
+- **No pre-tool hook available.** OpenCode has no PreToolUse equivalent. CodeWiki uses `session_completed` (fires once at end-of-session) to trigger `post-verify.sh` for batch wiki absorb. Pre-edit wiki context must come from `AGENTS.md` instructions, not hooks.
 - Commands go in `.opencode/commands/<name>.md`; agents in `.opencode/agents/<name>.md`.
 
 ## Command/Skill Installation Paths

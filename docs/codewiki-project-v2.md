@@ -323,7 +323,7 @@ All four tools now support hooks, commands, and instructions natively:
 | **Claude Code** | `.claude/settings.json` — `PreToolUse`/`PostToolUse` on `Write\|Edit` | `.claude/commands/codewiki/*.md` | Appends to `CLAUDE.md` | `.claude/agents/codewiki-*.md` |
 | **Codex** | `.codex/hooks.json` — lifecycle hooks | `.codex/commands/codewiki/*.md` or slash commands | Appends to `AGENTS.md` | `.codex/agents/codewiki-*.md` (if supported) |
 | **Copilot** | `.github/hooks/codewiki-*.json` — `preToolUse`/`postToolUse` | Slash commands via custom agents | Appends to `.github/copilot-instructions.md` | Custom agent definitions |
-| **OpenCode** | `opencode.json` `experimental.hooks` — `file_edited` | `.opencode/commands/codewiki/*.md` | Appends to `AGENTS.md` (OpenCode reads it) | `.opencode/agents/codewiki-*.md` |
+| **OpenCode** | `opencode.json` `experimental.hooks.session_completed` → `post-verify.sh` (no PreToolUse equivalent — pre-hook context comes from `AGENTS.md` instructions) | `.opencode/commands/codewiki/*.md` | Appends to `AGENTS.md` (OpenCode reads it) | `.opencode/agents/codewiki-*.md` |
 
 ### 6.2 Adapter Contents
 
