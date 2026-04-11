@@ -27,6 +27,54 @@ Everything in this handoff — and every doc this session touched — flows from
 | `96ada8a` | **v2 PRD reframed as 8 Skills canon.** Rewrote §4.2 diagram, §4.3 tree, §5.3–5.6 prose, §6.1 table + new Hook Strategy Matrix, §6.2 adapter contents, §7.3 closing, §12 Decision 6 + Decision 8. Added SUPERSEDED banner to `docs/codewiki-project.md` (already existed from `5efd16e`). |
 | `5449b74` | REQUIREMENTS.md `Prompt Files (Skills)` section rewrite with CMD-01..07 reworded + canon note. v2 PRD §5.2.4 precision fix: SessionEnd exists but fires too late for interactive absorb. |
 
+## 1.5 2026-04-11 evening research — canon resolved for all four tools
+
+Next session (this one) verified skills and hook surfaces against official docs for all four tools. Research reference: `docs/research-reference.md`. This closes most of §4's gaps and surfaces two new constraints the original plan didn't know about.
+
+### Skills directories — verified
+
+| Tool | Reads from | `.claude/`? | `.agents/`? |
+|---|---|:---:|:---:|
+| Claude Code | `.claude/skills/<name>/SKILL.md` + personal/enterprise/plugin | ✅ | ❌ |
+| OpenCode | 6 paths incl. `.opencode/`, `.claude/`, `.agents/` | ✅ | ✅ |
+| Copilot | `.github/skills/`, `.claude/skills/`, `.agents/skills/` (+ personal variants) | ✅ | ✅ |
+| Codex | `.agents/skills/` only (CWD → repo root + `$HOME`) | ❌ | ✅ |
+
+**No single directory covers all four.** Claude Code reads only `.claude/`; Codex reads only `.agents/`. The minimum-duplication install is a **dual tree**:
+
+- `.claude/skills/codewiki-<name>/SKILL.md` — Claude Code only
+- `.agents/skills/codewiki-<name>/SKILL.md` — Codex + Copilot + OpenCode
+
+Tool-selection-conditional:
+- `--tool claude-code` alone → `.claude/skills/` only
+- Any subset without Claude Code → `.agents/skills/` only
+- Claude Code + anything else → **both** trees (8 files × 2 dirs = 16 files, plain copy, no symlinks — Windows compat)
+
+Single source of truth for templates: `src/templates/skills/codewiki-<name>/SKILL.md`. Adapters decide where to copy.
+
+### Hook events — verified
+
+| Tool | Pre-edit | Post-edit | Session-lifecycle (agent alive?) | Install format |
+|---|---|---|---|---|
+| Claude Code | `PreToolUse` matcher `Edit\|Write` | `PostToolUse` matcher `Edit\|Write` | `SessionEnd` = agent gone, dormant. `PreCompact` = agent alive before compaction, viable for lightweight absorb. | JSON `.claude/settings.json` + shell |
+| Codex | ⚠️ `PreToolUse` is **Bash-only** per docs | ⚠️ `PostToolUse` is **Bash-only** | Only `SessionStart` and `Stop` exist. No session-end. | JSON `.codex/hooks.json` + shell |
+| Copilot | `preToolUse` ✅ | `postToolUse` ✅ | `sessionEnd` exists, timing unknown | JSON `.github/hooks/*.json` + shell |
+| OpenCode | `tool.execute.before` ✅ | `file.edited` ✅ (also `tool.execute.after`) | `session.idle`, `session.compacted`, `session.deleted` exist, timings unknown | **TS plugin file** via Bun `$` — NOT JSON |
+
+### Three constraints the original plan didn't see
+
+1. **Codex `PreToolUse`/`PostToolUse` are Bash-only.** Confirmed in Codex hook docs: *"PreToolUse only supports Bash tool interception"* / *"PostToolUse only supports Bash tool results."* CodeWiki's pre-edit and post-edit hooks cannot wire to file edits on Codex. **Fallback:** `UserPromptSubmit` → `pre-wiki-context.sh` (fires per user prompt, stdout injected into Claude's context) and `Stop` → `post-verify.sh` (fires at end of turn). Coarser than the other three tools but functional — the verification loop still exists on Codex, just at prompt/turn granularity rather than per-edit.
+
+2. **OpenCode's install artifact is a TypeScript plugin file, not JSON config.** OpenCode plugins subscribe to events via a TS module and exec shell via Bun's `$` API. CodeWiki's OpenCode adapter templates `.opencode/plugins/codewiki.ts` (~30 lines) that dispatches `tool.execute.before` / `file.edited` / `session.idle` to the existing shell scripts. **The scripts themselves stay unchanged** — this preserves the "one shared script library" pattern (Decision 7). The plugin is a dispatcher; the logic lives in `pre-wiki-context.sh` / `post-verify.sh` / `session-end.sh` as before.
+
+3. **The "session_completed → post-verify.sh" OpenCode workaround from the original §6.1 is dead.** OpenCode has real per-edit hooks now that the full event list is known. No more overloading post-verify.sh with session-level scope. `session.idle` (pending timing spike) becomes the natural session-end.sh trigger on OpenCode. Similarly `sessionEnd` on Copilot (pending timing spike). **`session-end.sh` may activate on up to 2 of 4 tools in v1** — substantially better than the previous "dormant on all four."
+
+### Provisional decisions (accepted by user 2026-04-11 evening)
+
+- **Skills install trees:** Dual tree (`.claude/skills/` + `.agents/skills/`), tool-selection-conditional, plain file duplication, no symlinks.
+- **Codex fallback:** Ship v1 with `UserPromptSubmit` → `pre-wiki-context.sh` and `Stop` → `post-verify.sh`. Not dormant.
+- **OpenCode plugin file:** Static TS template at `src/templates/opencode/plugins/codewiki.ts`, copied verbatim at install time, same pattern as the shell scripts.
+
 ## 2. The real problem — this is a code migration, not a doc patch
 
 **Phase 4 is marked complete.** `CC-01..CC-05` are all `[x]` in REQUIREMENTS.md (see `.planning/REQUIREMENTS.md` traceability lines 161–165). The Claude Code adapter code that shipped in Phase 4 writes prompt files to:
@@ -47,10 +95,10 @@ Aligning docs without touching code would create a worse drift: docs describe sk
 
 A decimal insert phase that re-does Phase 4's output with Skills as the install target. Rough shape:
 
-1. **Source template move:** `src/templates/claude/commands/codewiki/*.md` → `src/templates/claude/skills/codewiki-<name>/SKILL.md`. Each file gains `name:` in frontmatter and a richer `description:` (the description is what the agent uses to auto-match natural-language requests to the right skill).
-2. **Adapter change:** The Claude Code adapter (wherever the Phase 4 code writes files into `.claude/commands/...`) now writes into `.claude/skills/codewiki-<name>/SKILL.md`. Each skill is a directory, not a flat file — the installer has to mkdir per skill.
+1. **Source template move:** `src/templates/claude/commands/codewiki/*.md` → `src/templates/skills/codewiki-<name>/SKILL.md` (no `claude/` subfolder — skills are the portable surface, reused across tool adapters per §1.5). Each file gains `name:` in frontmatter and a richer `description:` (the description is what the agent uses to auto-match natural-language requests to the right skill).
+2. **Adapter change:** The Claude Code adapter (wherever the Phase 4 code writes files into `.claude/commands/...`) now writes into `.claude/skills/codewiki-<name>/SKILL.md`. Each skill is a directory, not a flat file — the installer has to mkdir per skill. When the `--tool` selection also includes Codex, Copilot, or OpenCode, the same 8 files are also copied into `.agents/skills/codewiki-<name>/SKILL.md` (dual-tree install per §1.5).
 3. **Settings merge:** No change to `.claude/settings.json` hook wiring — skills don't live in settings.json. But verify: is there anything in settings.json that references the old commands/codewiki path? (Probably not, but check.)
-4. **Requirements update:** Rewrite CC-01 from "Installs 8 slash commands to `.claude/commands/codewiki/`" to "Installs 8 Skills to `.claude/skills/codewiki-<name>/SKILL.md`". Re-run validation.
+4. **Requirements update:** Rewrite CC-01 from "Installs 8 slash commands to `.claude/commands/codewiki/`" to "Installs 8 Skills to `.claude/skills/codewiki-<name>/SKILL.md` (+ dual-tree to `.agents/skills/` when non-Claude tools are also selected)". Re-run validation.
 5. **Integration test:** Run `npx codewiki init` into a scratch dir, confirm skills layout, confirm one skill actually loads when invoked in Claude Code.
 6. **`session-end.sh`:** Installs as a dormant shell asset, exactly as the v2 PRD §5.2.4 now says. Claude Code's SessionEnd hook exists but fires too late for the interactive absorb flow — verified 2026-04-11 — so it's not wired. Manual `/codewiki-absorb` remains the primary end-of-session path.
 7. **Doc cascade** (follows the code change, not the other way around):
@@ -63,25 +111,36 @@ A decimal insert phase that re-does Phase 4's output with Skills as the install 
    - `.planning/phases/06-opencode-adapter/06-0*-PLAN.md` — OpenCode adapter now installs Skills too, not commands
    - `docs/docs-reconciliation-handoff.md` and `docs/inconsistences.md` — banner as SUPERSEDED, point at this file
 
-## 4. Open research gaps (don't guess these — spike them)
+## 4. Open research gaps — closed and replaced
 
-These are real platform questions. Claude Code's skills directory is confirmed (`.claude/skills/<name>/SKILL.md`). The other three are not:
+**Skills directories:** All four resolved in the 2026-04-11 evening research pass. See §1.5 for the full matrix. Canonical decision: dual-tree install of `.claude/skills/` + `.agents/skills/` when both are required.
 
-| Tool | Skills directory | Status |
-|---|---|---|
-| Claude Code | `.claude/skills/codewiki-<name>/SKILL.md` | **Confirmed** (`SKILL.md` in a per-skill directory, YAML frontmatter with `name`, `description`, `argument-hint`) |
-| Codex | unknown | **Research gap** — does Codex have a file-based skills mechanism? If yes, what directory? If no, fallback is embedding skill prompts in `AGENTS.md` with marker comments |
-| Copilot | unknown | **Research gap** — does Copilot have any file-based skills mechanism? If no, fallback is embedding skill prompts in `.github/copilot-instructions.md` |
-| OpenCode | unknown | **Research gap** — OpenCode has `.opencode/agents/` and `.opencode/commands/` per research; does it have `.opencode/skills/`? If no, fallback is embedding skill prompts in `AGENTS.md` |
+**Hook events:** Event surfaces verified for all four tools. See §1.5 for the full matrix. Two new constraints discovered: Codex `PreToolUse`/`PostToolUse` are Bash-only (CodeWiki falls back to `UserPromptSubmit`/`Stop`), and OpenCode's hook install artifact is a TS plugin file (not JSON).
 
-**The user has asserted "all these tools accept skills."** The v2 PRD §6.1 takes this on faith but marks each non-Claude directory as a research gap. Phase 5/6/7 must run a spike to confirm each tool's mechanism before shipping — don't invent paths in docs or code.
+**Remaining spikes** — three timing questions that cannot be resolved from documentation alone:
 
-## 5. The SessionEnd question, resolved
+| Spike | Question | Blocks | Phase |
+|---|---|---|---|
+| OpenCode `session.idle` | Does this event fire while the agent is alive and able to invoke a skill interactively, or only after termination? | `session-end.sh` activation on OpenCode | 6 |
+| Copilot `sessionEnd` | Same timing question — fires with agent alive or at termination? | `session-end.sh` activation on Copilot | 7 |
+| Codex file-edit hooks | Is there any undocumented file-edit matcher for `PreToolUse`/`PostToolUse`, or is Bash-only permanent? Is there a planned expansion in OpenAI's Codex roadmap? | Whether Codex fallback (UserPromptSubmit/Stop) is v1-final or temporary | 5 |
 
-- **Claude Code SessionEnd hook exists.** Verified by user 2026-04-11 against current Claude Code docs.
-- **Why we can't use it for absorb:** SessionEnd fires at session termination — it IS the last thing, with the agent already gone. No opportunity for the agent to read diffs, propose wiki updates, or wait for human approval. A shell script at that moment can only write state to disk for a future session.
-- **Why manual `/codewiki-absorb` is correct:** Matches the `wiki.md` philosophy — absorb is a deliberate batch operation, not a reflex. The user fires it intentionally when the session produced something worth capturing.
-- **`session-end.sh` fate:** Ships as a dormant shell asset (the install report marks it `inactive — activation pending platform hook`). Stays on disk so the shell logic is ready if a future Claude Code version adds a mid-session "pre-end" hook CodeWiki can actually drive an interactive flow from. Not wired anywhere in v1.
+These are ~10-minute probes each, not full research tasks — register a minimal hook/plugin, log the agent state when the event fires, confirm.
+
+## 5. The SessionEnd question, resolved per tool
+
+The original afternoon answer ("Claude Code SessionEnd fires too late, all four tools dormant") was right for Claude Code but too pessimistic for the other three. Evening research revealed more candidates.
+
+- **Claude Code.** `SessionEnd` fires at termination (agent gone) — dormant, unchanged. **But** `PreCompact` exists: fires before context compaction with the agent alive. Semantically "session is running out, capture what happened before compaction eats the context." Viable host for a lightweight absorb flow. Phase 4.1 evaluates wiring `session-end.sh` to `PreCompact` as an optional live hook on Claude Code. Manual `/codewiki-absorb` remains the primary end-of-session path.
+- **Codex.** Only `SessionStart` and `Stop`. No session-end hook exists. `Stop` fires per turn (too frequent for session-end semantics). **Dormant (confirmed final for v1).**
+- **Copilot.** `sessionEnd` exists. Timing undocumented — Phase 7 spike. If alive at fire time, wire `session-end.sh` to it.
+- **OpenCode.** `session.idle`, `session.compacted`, `session.deleted` all exist. `session.idle` is the most promising candidate semantically (agent finished a turn, waiting for next input). Timing undocumented — Phase 6 spike. If alive, wire `session-end.sh` via the OpenCode TS plugin.
+
+**`session-end.sh` fate, updated:** Ships as a dormant shell asset on Claude Code and Codex (Claude Code may gain a `PreCompact` wiring as an optional live hook per Phase 4.1 evaluation). May activate on OpenCode and Copilot in v1 pending the timing spikes. The install report marks each tool's status individually (`active` / `inactive — activation pending platform spike` / `inactive — no suitable event exists`). Matches the "one script, one feature" principle: session-end.sh handles session-end absorb; post-verify.sh handles per-edit verify; nothing is overloaded.
+
+Validation addendum: here, `active` means the host tool can run `session-end.sh` and surface its structured summary. It does **not** imply a documented hook-to-skill bridge that can directly invoke `/codewiki-absorb`; current official hook docs across the researched tools document shell execution and context surfacing, not deterministic skill chaining.
+
+**Why manual `/codewiki-absorb` is still correct even when session-end.sh activates:** Matches the `docs/skills/wiki.md` philosophy — absorb is a deliberate batch operation, not a reflex. Even with live triggers on OpenCode and Copilot, the manual invocation stays canonical for sessions where the automatic hook isn't appropriate (errors, partial absorb, etc.).
 
 ## 6. Memory pointers (for fast context reload next session)
 
@@ -93,10 +152,10 @@ These are real platform questions. Claude Code's skills directory is confirmed (
 
 ## 7. How to resume
 
-1. **Read this file first.** Do NOT read `docs/docs-reconciliation-handoff.md` — it was built on the wrong canon.
+1. **Read this file first**, especially §1.5 (evening research: verified skills + hook matrix across all four tools). Do NOT read `docs/docs-reconciliation-handoff.md` — it was built on the wrong canon.
 2. **Read `/home/giuice/.claude/projects/-home-giuice-Desenv-CodeWiki/memory/feedback_skills_canon.md`** to ground on what the user actually wants.
 3. **Decide:** is the next step (a) `/gsd-insert-phase 04.1 Skills Migration` with full planning, or (b) a quick-task that rewrites the Claude adapter inline and cascades docs? The user has been cost-sensitive and frustrated; (b) is likely faster but (a) is cleaner. Ask the user which.
-4. **Before any code changes:** grep the codebase for `commands/codewiki` to see every file that points at the old path. That's your migration surface.
+4. **Before any code changes:** grep the codebase for `commands/codewiki` to see every file that points at the old path. That's your migration surface. Target paths are `.claude/skills/codewiki-<name>/SKILL.md` (Claude Code) + `.agents/skills/codewiki-<name>/SKILL.md` (Codex/Copilot/OpenCode, dual-tree when applicable) — see §1.5.
 5. **After code changes land:** the doc cascade from §3.7 becomes mechanical find-and-replace.
 6. **Finally:** delete `docs/docs-reconciliation-handoff.md` and `docs/inconsistences.md`, and delete this file.
 
