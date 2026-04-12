@@ -3,8 +3,8 @@ import path from "node:path";
 
 import { describe, expect, test } from "vitest";
 
-const LINT_PATH = path.resolve("src/templates/claude/commands/codewiki/lint.md");
-const QUERY_PATH = path.resolve("src/templates/claude/commands/codewiki/query.md");
+const LINT_PATH = path.resolve("src/templates/skills/codewiki-lint/SKILL.md");
+const QUERY_PATH = path.resolve("src/templates/skills/codewiki-query/SKILL.md");
 
 describe("ABS-03B: lint.md and query.md use backlinks for ranking", () => {
   test("lint.md uses wiki/_backlinks.json for catalog loading and orphan detection", async () => {
