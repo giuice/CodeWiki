@@ -22,6 +22,7 @@ Target users: solo developers using AI coding agents who have experienced agents
 - CLI-01..CLI-07 and CC-01..CC-05 validated in Phase 4 — the adapter pipeline, Claude installer, detection flow, rerun idempotency, and sectioned install reporting are covered by unit plus built CLI integration tests.
 - SM-01 validated in Phase 4.1.1 — the eight canonical CodeWiki skill sources now live under `src/templates/skills/codewiki-<name>/SKILL.md` with preserved prompt bodies and skill discovery frontmatter.
 - SM-02..SM-04 validated in Phases 4.1.2-4.1.3 — installer output, regression coverage, and tarball verification now follow the canonical skill install surface for Claude and mixed-tool runs.
+- SM-05 validated in Phase 4.1.4 — planning artifacts (ROADMAP, REQUIREMENTS, STATE, CONVENTIONS) refreshed to reflect the skills canon and parser-safe sub-phase numbering consistently
 
 ### Active
 
@@ -92,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-12 after Phase 4.1.3 completion*
+*Last updated: 2026-04-12 after Phase 4.1.4 completion*
