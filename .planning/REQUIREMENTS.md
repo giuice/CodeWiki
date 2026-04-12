@@ -41,7 +41,7 @@
 - [x] **SM-02**: Claude installs 8 skills to `.claude/skills/codewiki-<name>/SKILL.md`
 - [x] **SM-03**: When non-Claude tools are selected, the installer also writes the same 8 skills to `.agents/skills/codewiki-<name>/SKILL.md`; Claude-only installs do not create the `.agents/skills/` tree
 - [x] **SM-04**: Regression coverage asserts skill install paths in init tests and pack coverage for `dist/templates/skills/codewiki-ingest/SKILL.md`
-- [ ] **SM-05**: Planning artifacts (`ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, and active phase contexts/plans) reflect the skills canon and parser-safe split structure
+- [x] **SM-05**: Planning artifacts (`ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, and active phase contexts/plans) reflect the skills canon and parser-safe split structure
 - [ ] **SM-06**: Project docs (README, implementation docs, handoff docs) reflect the skills canon and dual-tree install rules
 
 ### Hook Scripts
@@ -67,7 +67,7 @@
 
 ### Claude Code Adapter
 
-- [x] **CC-01**: Installs 8 slash commands to `.claude/commands/codewiki/`
+- [x] **CC-01**: Installs 8 skills to `.claude/skills/codewiki-<name>/SKILL.md`
 - [x] **CC-02**: Installs 2 subagents to `.claude/agents/`
 - [x] **CC-03**: Deep-merges PreToolUse/PostToolUse hooks into `.claude/settings.json` without clobbering existing hooks
 - [x] **CC-04**: Appends CodeWiki instructions to `CLAUDE.md` using `<!-- codewiki:start/end -->` markers
@@ -75,7 +75,7 @@
 
 ### Codex Adapter
 
-- [ ] **CODEX-01**: Installs 6 slash commands to correct Codex command directory (per-project or global, confirmed by research spike)
+- [ ] **CODEX-01**: Installs 6 skills to correct Codex skill directory (per-project or global, confirmed by research spike)
 - [ ] **CODEX-02**: Merges hook config into Codex hooks.json without clobbering existing hooks
 - [ ] **CODEX-03**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
 
@@ -83,11 +83,11 @@
 
 - [ ] **COP-01**: Creates `.github/hooks/codewiki-hooks.json` with `"version": 1` and preToolUse/postToolUse entries
 - [ ] **COP-02**: Appends CodeWiki instructions to `.github/copilot-instructions.md` using marker comments
-- [ ] **COP-03**: Documents slash command limitation (no file-based slash command directory confirmed)
+- [ ] **COP-03**: Documents skill directory limitation (no file-based skill directory confirmed)
 
 ### OpenCode Adapter
 
-- [ ] **OC-01**: Installs 8 slash commands to `.opencode/commands/codewiki/`
+- [ ] **OC-01**: Installs 8 skills to `.opencode/skills/codewiki-<name>/SKILL.md`
 - [ ] **OC-02**: Installs 2 subagents to `.opencode/agents/`
 - [ ] **OC-03**: Merges `session_completed` hook into `opencode.json` experimental.hooks (no PreToolUse — not available)
 - [ ] **OC-04**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
@@ -102,7 +102,7 @@
 ### Build & Publish
 
 - [x] **BUILD-01**: `npm run build` copies `src/templates/**` to `dist/templates/` (postbuild step)
-- [x] **BUILD-02**: `npm pack --dry-run` lists `dist/templates/claude/commands/codewiki/ingest.md` (prompt files in tarball)
+- [x] **BUILD-02**: `npm pack --dry-run` lists `dist/templates/skills/codewiki-ingest/SKILL.md` (prompt files in tarball)
 - [ ] **BUILD-03**: `engines.node >= "20.11.0"` set in package.json
 - [ ] **BUILD-04**: Zero npm runtime dependencies (Commander.js + optional picocolors only)
 
@@ -175,10 +175,10 @@
 | CC-04 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | CC-05 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | SM-01 | Phase 4.1.1 (Skill Template Source) | Complete (2026-04-12) |
-| SM-02 | Phase 4.1.2 (Adapter Skill Install Paths) | Planned |
-| SM-03 | Phase 4.1.2 (Adapter Skill Install Paths) | Planned |
+| SM-02 | Phase 4.1.2 (Adapter Skill Install Paths) | Complete (2026-04-12) |
+| SM-03 | Phase 4.1.2 (Adapter Skill Install Paths) | Complete (2026-04-12) |
 | SM-04 | Phase 4.1.3 (Skills Regression Coverage) | Complete (2026-04-12) |
-| SM-05 | Phase 4.1.4 (Planning Docs Canon Refresh) | Planned |
+| SM-05 | Phase 4.1.4 (Planning Docs Canon Refresh) | Complete (2026-04-12) |
 | SM-06 | Phase 4.1.5 (Product Docs Canon Refresh) | Planned |
 | BUILD-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | BUILD-02 | Phase 5 (Test Suite) | Complete (2026-04-10) |
@@ -204,4 +204,4 @@
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-12 — Phase 4.1.1 executed, SM-01 validated, and traceability refreshed*
+*Last updated: 2026-04-12 — Phase 4.1.4 — planning docs canon refresh and SM traceability update*
