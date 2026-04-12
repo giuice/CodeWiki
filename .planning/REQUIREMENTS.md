@@ -59,8 +59,8 @@
 
 ### Auto-Improvement Engine
 
-- [x] **ABS-01**: `/codewiki-absorb` extracts durable wiki knowledge from recent git changes with human approval gating
-- [x] **ABS-02**: `/codewiki-breakdown` finds referenced-but-undocumented entities and ranks them by backlink importance
+- [x] **ABS-01**: `codewiki-absorb` skill extracts durable wiki knowledge from recent git changes with human approval gating
+- [x] **ABS-02**: `codewiki-breakdown` skill finds referenced-but-undocumented entities and ranks them by backlink importance
 - [x] **ABS-03**: `wiki/_backlinks.json` is scaffolded and maintained by wiki prompts that read or update structural knowledge
 - [x] **ABS-04**: `session-end.sh` summarizes session changes and exits 0 under all conditions
 - [x] **ABS-05**: `post-verify.sh` emits structured change context that actively routes the runtime toward wiki-update follow-up work

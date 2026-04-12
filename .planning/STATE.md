@@ -101,7 +101,7 @@ None yet.
 ### Blockers/Concerns
 
 - Future Codex adapter work: per-project command path remains unconfirmed — spike required before that phase is planned
-- Future Copilot adapter work: no confirmed file-based slash command directory — spike required before that phase is planned
+- Future Copilot adapter work: no confirmed file-based skill directory — spike required before that phase is planned
 - Phase 3 (hook scripts): Cross-tool JSON payload shapes for Codex and OpenCode are MEDIUM confidence — verify with actual tool invocations before finalizing hook script field parsing
 
 ### Quick Tasks Completed
