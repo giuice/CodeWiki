@@ -110,7 +110,7 @@ Plans:
 **Goal**: Migrate Phase 4's shipped slash-command install surface to per-command Skills so installer output matches the verified v2 skills canon across adapters
 **Requirements**: CMD-01, CMD-02, CMD-03, CMD-04, CMD-05, CMD-06, CMD-07, CC-01, BUILD-02
 **Depends on:** Phase 4
-**Planning Note**: Use the globally installed Claude skill `/create-skill` to create each of the eight CodeWiki skills; do not hand-author them ad hoc during planning or execution
+**Planning Note**: Use `/create-skill` as a format reference for SKILL.md structure (frontmatter, description style), then migrate existing command content into that format. Do not discard verified prompt content and start from scratch.
 **Canonical Refs**: `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`
 **Success Criteria** (what must be TRUE):
   1. `src/templates/skills/codewiki-<name>/SKILL.md` exists for all 8 skills with `name:` and enriched `description:` frontmatter
