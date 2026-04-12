@@ -75,7 +75,7 @@
 
 ### Codex Adapter
 
-- [ ] **CODEX-01**: Installs 6 skills to correct Codex skill directory (per-project or global, confirmed by research spike)
+- [ ] **CODEX-01**: Installs 8 skills to correct Codex skill directory (per-project or global, confirmed by research spike)
 - [ ] **CODEX-02**: Merges hook config into Codex hooks.json without clobbering existing hooks
 - [ ] **CODEX-03**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
 

@@ -233,7 +233,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Running `npx codewiki init` on a project with `.codex/` present merges CodeWiki hooks into Codex hook config without clobbering existing hooks, and appends instructions to `AGENTS.md` using marker comments
   2. Running `npx codewiki init` on a project with `.github/copilot-instructions.md` creates `.github/hooks/codewiki-hooks.json` with `"version": 1` and appends to `.github/copilot-instructions.md` using marker comments
-  3. If Codex per-project command path is confirmed, 6 skills are installed to that directory; if global-only, the install report notes the limitation
+  3. If Codex per-project command path is confirmed, 8 skills are installed to that directory; if global-only, the install report notes the limitation
   4. If Copilot has no confirmed skill directory, the install report documents the limitation rather than silently skipping
 **Plans:** TBD
 Plans:
