@@ -100,7 +100,32 @@ Target users: solo developers using AI coding agents who have experienced agents
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
-Conventions not yet established. Will populate as patterns emerge during development.
+### Phase Atomicity (MANDATORY — context window survival)
+
+Every GSD phase, sub-phase, and plan MUST fit within a single agent context window. Phases that exceed context limits waste tokens, produce incomplete work, and force expensive re-reads. This is the #1 operational constraint.
+
+**Hard limits per plan:**
+- **≤3 tasks** per plan file
+- **≤5 files touched** per plan (including test files)
+- **≤1 concern** per plan — code changes OR doc updates, never both together
+
+**Phase decomposition rules:**
+- If a phase has more than 2 plans, consider splitting into decimal sub-phases (e.g., 4.1a, 4.1b)
+- Code migration and doc cascade are ALWAYS separate sub-phases
+- Test updates are their own sub-phase if they touch more than 3 test files
+- Each sub-phase must have a single verifiable deliverable
+- If you need to read more than 500 lines of context files to understand the plan, the plan is too broad — split it
+
+**What agents must do:**
+- Before planning: estimate total files and tasks. If >5 files or >3 tasks, split BEFORE writing the plan
+- During execution: if context is filling up, stop, commit what works, and create a continuation sub-phase
+- Never combine "move files + update imports + update tests + update docs" in one plan — that's 4 sub-phases
+
+**Anti-patterns (these ALWAYS blow context):**
+- "Doc cascade" plans that touch 8+ markdown files in one pass
+- Plans that grep-and-replace across the entire codebase
+- Phases that include both implementation and comprehensive testing
+- Plans that read multiple large reference docs before starting work
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
