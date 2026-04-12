@@ -1,7 +1,6 @@
 ---
 name: codewiki-lint
 description: Check wiki for contradictions, orphans, stale content, and drift
-argument-hint: ""
 allowed-tools: [Read, Glob, Grep, Bash]
 ---
 

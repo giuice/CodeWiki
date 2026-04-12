@@ -133,7 +133,7 @@ Plans:
 **Requirements**: SM-01
 **Success Criteria** (what must be TRUE):
   1. Eight files exist under `src/templates/skills/codewiki-<name>/SKILL.md` for ingest, query, lint, absorb, breakdown, prd, tasks, and process
-  2. Each migrated file has `name`, `description`, and `argument-hint` frontmatter suitable for skill discovery
+  2. Each migrated file has `name` and `description` frontmatter suitable for skill discovery; skills with required positional input also define `argument-hint`
   3. The migrated files preserve the existing prompt purpose/process behavior from the old command templates
   4. The legacy files in `src/templates/claude/commands/codewiki/` are no longer the source of truth for the migrated skills
 **Plans:** 4 plans

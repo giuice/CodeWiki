@@ -1,7 +1,6 @@
 ---
 name: codewiki-absorb
 description: Extract knowledge from recent code changes into wiki
-argument-hint: ""
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 

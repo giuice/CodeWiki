@@ -25,7 +25,7 @@
 
 ### Prompt Files (Skills)
 
-> **Install surface canon (2026-04-11):** CodeWiki installs **eight Skills**, one per logical command (`ingest`, `query`, `lint`, `absorb`, `breakdown`, `prd`, `tasks`, `process`). Each skill is its own `SKILL.md` with YAML frontmatter (`name`, `description`, `argument-hint`), following `docs/skills/wiki.md` as a file-format reference only (not as a packaging model — CodeWiki does NOT bundle subcommands into one skill). See `docs/codewiki-project-v2.md` §12 Decision 8.
+> **Install surface canon (2026-04-11):** CodeWiki installs **eight Skills**, one per logical command (`ingest`, `query`, `lint`, `absorb`, `breakdown`, `prd`, `tasks`, `process`). Each skill is its own `SKILL.md` with YAML frontmatter (`name`, `description`, and `argument-hint` only when the skill requires positional input), following `docs/skills/wiki.md` as a file-format reference only (not as a packaging model — CodeWiki does NOT bundle subcommands into one skill). See `docs/codewiki-project-v2.md` §12 Decision 8.
 
 - [x] **CMD-01**: `codewiki-ingest` skill — instructs agent to digest a raw source into wiki
 - [x] **CMD-02**: `codewiki-query` skill — instructs agent to search wiki and synthesize answer
@@ -37,7 +37,7 @@
 
 ### Skills Migration
 
-- [x] **SM-01**: Source templates live under `src/templates/skills/codewiki-<name>/SKILL.md`; each migrated skill preserves the existing prompt behavior and exposes `name`, `description`, and `argument-hint` frontmatter
+- [x] **SM-01**: Source templates live under `src/templates/skills/codewiki-<name>/SKILL.md`; each migrated skill preserves the existing prompt behavior and exposes `name` + `description` frontmatter, with `argument-hint` present only for skills that take required positional input
 - [ ] **SM-02**: Claude installs 8 skills to `.claude/skills/codewiki-<name>/SKILL.md`
 - [ ] **SM-03**: When non-Claude tools are selected, the installer also writes the same 8 skills to `.agents/skills/codewiki-<name>/SKILL.md`; Claude-only installs do not create the `.agents/skills/` tree
 - [ ] **SM-04**: Regression coverage asserts skill install paths in init tests and pack coverage for `dist/templates/skills/codewiki-ingest/SKILL.md`

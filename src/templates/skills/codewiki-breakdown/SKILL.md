@@ -1,7 +1,6 @@
 ---
 name: codewiki-breakdown
 description: Find undocumented entities referenced in wiki and propose new pages
-argument-hint: ""
 allowed-tools: [Read, Glob, Grep, Bash]
 ---
 
