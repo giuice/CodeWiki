@@ -129,14 +129,20 @@ These are ~10-minute probes each, not full research tasks — register a minimal
 
 ## 5. The SessionEnd question, resolved per tool
 
-The original afternoon answer ("Claude Code SessionEnd fires too late, all four tools dormant") was right for Claude Code but too pessimistic for the other three. Evening research revealed more candidates.
+The original afternoon answer ("Claude Code SessionEnd fires too late, all four tools dormant") was right for Claude Code but too pessimistic for the other three. Follow-up research resolved two key points.
 
 - **Claude Code.** `SessionEnd` fires at termination (agent gone) — dormant, unchanged. **But** `PreCompact` exists: fires before context compaction with the agent alive. Semantically "session is running out, capture what happened before compaction eats the context." Viable host for a lightweight absorb flow. Phase 4.1 evaluates wiring `session-end.sh` to `PreCompact` as an optional live hook on Claude Code. Manual `/codewiki-absorb` remains the primary end-of-session path.
 - **Codex.** Only `SessionStart` and `Stop`. No session-end hook exists. `Stop` fires per turn (too frequent for session-end semantics). **Dormant (confirmed final for v1).**
-- **Copilot.** `sessionEnd` exists. Timing undocumented — Phase 7 spike. If alive at fire time, wire `session-end.sh` to it.
-- **OpenCode.** `session.idle`, `session.compacted`, `session.deleted` all exist. `session.idle` is the most promising candidate semantically (agent finished a turn, waiting for next input). Timing undocumented — Phase 6 spike. If alive, wire `session-end.sh` via the OpenCode TS plugin.
+- **Copilot.** `sessionEnd` exists, but the official hooks docs make it a terminal cleanup/logging hook with ignored output. The useful post-turn event is **`agentStop`**: docs define it as "the main agent finishes a turn," and its output is processed (`decision: "block"` + `reason` can force continuation). Therefore `sessionEnd` should not be the CodeWiki integration target for automatic absorb/validation; `agentStop` should.
+- **OpenCode.** `session.idle`, `session.compacted`, `session.deleted` all exist. OpenCode's open-source runtime makes `session.idle` semantics explicit: it is published when session status becomes `idle`, and that transition happens when the active run finishes. So `session.idle` means **turn completed, waiting for next input**, not true session teardown. Good candidate for post-turn summary; wrong label for literal session-end.
 
-**`session-end.sh` fate, updated:** Ships as a dormant shell asset on Claude Code and Codex (Claude Code may gain a `PreCompact` wiring as an optional live hook per Phase 4.1 evaluation). May activate on OpenCode and Copilot in v1 pending the timing spikes. The install report marks each tool's status individually (`active` / `inactive — activation pending platform spike` / `inactive — no suitable event exists`). Matches the "one script, one feature" principle: session-end.sh handles session-end absorb; post-verify.sh handles per-edit verify; nothing is overloaded.
+**`session-end.sh` fate, updated:** Ships as a shared summary script on all tools, but the host wiring differs by semantics:
+- Claude Code: dormant for true session-end; `PreCompact` remains a possible future summary hook.
+- Codex: no true session-end hook; `Stop` remains turn-scoped only.
+- Copilot: use `agentStop` for post-turn follow-up if we automate; keep `sessionEnd` for cleanup/logging only.
+- OpenCode: use `session.idle` as post-turn summary trigger, not as teardown.
+
+This preserves the "one script, one feature" principle, but the feature should now be described as **post-turn/session-summary capture**, not literal guaranteed teardown interception across all tools.
 
 Validation addendum: here, `active` means the host tool can run `session-end.sh` and surface its structured summary. It does **not** imply a documented hook-to-skill bridge that can directly invoke `/codewiki-absorb`; current official hook docs across the researched tools document shell execution and context surfacing, not deterministic skill chaining.
 
