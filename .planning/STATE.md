@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 04.1.2 complete; Phase 04.1.3 ready to plan
-last_updated: "2026-04-12T11:16:17.503Z"
-last_activity: 2026-04-12 -- Completed Phase 04.1.2 Adapter Skill Install Paths and advanced to Phase 04.1.3 planning
+stopped_at: Phase 04.1.3 complete; Phase 04.1.4 ready to plan
+last_updated: "2026-04-12T12:06:45Z"
+last_activity: 2026-04-12 -- Completed Phase 04.1.3 Skills Regression Coverage and advanced to Phase 04.1.4 planning
 progress:
   total_phases: 15
-  completed_phases: 8
-  total_plans: 21
-  completed_plans: 21
-  percent: 53
+  completed_phases: 9
+  total_plans: 23
+  completed_plans: 23
+  percent: 60
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 04.1.3 — Skills Regression Coverage
+**Current focus:** Phase 04.1.4 — Planning Docs Canon Refresh
 
 ## Current Position
 
-Phase: 04.1.3 of 15 (skills regression coverage)
+Phase: 04.1.4 of 15 (planning docs canon refresh)
 Plan: Not planned yet
-Status: Ready to plan Phase 04.1.3
-Last activity: 2026-04-12 -- Completed Phase 04.1.2 Adapter Skill Install Paths and advanced to Phase 04.1.3 planning
+Status: Ready to plan Phase 04.1.4
+Last activity: 2026-04-12 -- Completed Phase 04.1.3 Skills Regression Coverage and advanced to Phase 04.1.4 planning
 
-Progress: [█████░░░░░] 53%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 21
+- Total plans completed: 23
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -52,10 +52,11 @@ Progress: [█████░░░░░] 53%
 | 04.1.1 | 4 | - | - |
 | 05 | 1 | 8m | 8m |
 | 04.1.2 | 3 | - | - |
+| 04.1.3 | 2 | - | - |
 
 **Recent Trend:**
 
-- Last 4 plans: 04.1.1-01, 04.1.1-02, 04.1.1-03, 04.1.1-04
+- Last 4 plans: 04.1.2-02, 04.1.2-03, 04.1.3-01, 04.1.3-02
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -111,5 +112,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-12T11:08:36.233Z
-Stopped at: Phase 04.1.2 complete; Phase 04.1.3 ready to plan
+Stopped at: Phase 04.1.3 complete; Phase 04.1.4 ready to plan
 Resume file: .planning/ROADMAP.md
