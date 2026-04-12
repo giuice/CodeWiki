@@ -73,15 +73,15 @@ export class ClaudeCodeAdapter implements ToolAdapter {
     const report: ReportEntry[] = [];
 
     await Promise.all([
-      ensureDir(options.root, ".claude/commands/codewiki"),
+      ensureDir(options.root, ".claude/skills"),
       ensureDir(options.root, ".claude/agents"),
       ensureDir(options.root, ".codewiki/hooks")
     ]);
 
     report.push(
       ...(await this.copyAssetDirectory(
-        path.join(options.templateDir, "claude", "commands", "codewiki"),
-        ensureInsideRoot(options.root, ".claude/commands/codewiki"),
+        path.join(options.templateDir, "skills"),
+        ensureInsideRoot(options.root, ".claude/skills"),
         options
       ))
     );
