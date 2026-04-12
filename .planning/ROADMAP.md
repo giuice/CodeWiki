@@ -153,9 +153,11 @@ Plans:
   2. Tool selections including Codex, Copilot, or OpenCode install the same eight skills into `.agents/skills/codewiki-<name>/SKILL.md`
   3. Claude-only installs do not create a redundant `.agents/skills/` tree
   4. Hook wiring, agent installation, and instruction-file merging remain unchanged by the skill-path migration
-**Plans:** 0 plans
+**Plans:** 3 plans
 Plans:
-- [ ] TBD (run /gsd-plan-phase 4.1.2)
+- [x] 04.1.2-01-PLAN.md — Repoint Claude adapter from command assets to `.claude/skills`
+- [ ] 04.1.2-02-PLAN.md — Add the shared `.agents/skills` installer for non-Claude selections
+- [ ] 04.1.2-03-PLAN.md — Update init reporting for combined skill installs and pending non-Claude integrations
 
 ### Phase 4.1.3: Skills Regression Coverage (INSERTED)
 
@@ -264,7 +266,7 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 4. Claude Code Adapter + init Command | 3/3 | Complete | 2026-04-08 |
 | 4.1 Skills Migration (INSERTED) | 1/5 child phases | In progress | 2026-04-12 |
 | 4.1.1 Skill Template Source (INSERTED) | 4/4 | Complete | 2026-04-12 |
-| 4.1.2 Adapter Skill Install Paths (INSERTED) | 0/0 | Not started | - |
+| 4.1.2 Adapter Skill Install Paths (INSERTED) | 0/3 | Planned | - |
 | 4.1.3 Skills Regression Coverage (INSERTED) | 0/0 | Not started | - |
 | 4.1.4 Planning Docs Canon Refresh (INSERTED) | 0/0 | Not started | - |
 | 4.1.5 Product Docs Canon Refresh (INSERTED) | 0/0 | Not started | - |

@@ -38,7 +38,7 @@
 ### Skills Migration
 
 - [x] **SM-01**: Source templates live under `src/templates/skills/codewiki-<name>/SKILL.md`; each migrated skill preserves the existing prompt behavior and exposes `name` + `description` frontmatter, with `argument-hint` present only for skills that take required positional input
-- [ ] **SM-02**: Claude installs 8 skills to `.claude/skills/codewiki-<name>/SKILL.md`
+- [x] **SM-02**: Claude installs 8 skills to `.claude/skills/codewiki-<name>/SKILL.md`
 - [ ] **SM-03**: When non-Claude tools are selected, the installer also writes the same 8 skills to `.agents/skills/codewiki-<name>/SKILL.md`; Claude-only installs do not create the `.agents/skills/` tree
 - [ ] **SM-04**: Regression coverage asserts skill install paths in init tests and pack coverage for `dist/templates/skills/codewiki-ingest/SKILL.md`
 - [ ] **SM-05**: Planning artifacts (`ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, and active phase contexts/plans) reflect the skills canon and parser-safe split structure
