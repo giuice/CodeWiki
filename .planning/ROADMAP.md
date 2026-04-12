@@ -182,9 +182,9 @@ Plans:
   1. `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md`, and `.planning/STATE.md` describe the split phase structure and skill canon consistently
   2. Traceability exists for SM-01 through SM-06
   3. Active phase contexts/plans no longer instruct future work to use unsupported `4.1a` numbering or slash-command canon language
-**Plans:** 0 plans
+**Plans:** 1 plan
 Plans:
-- [ ] TBD (run /gsd-plan-phase 4.1.4)
+- [ ] 04.1.4-01-PLAN.md — Refresh ROADMAP.md, REQUIREMENTS.md, STATE.md, CONVENTIONS.md with skills-canon language and parser-safe numbering
 
 ### Phase 4.1.5: Product Docs Canon Refresh (INSERTED)
 
