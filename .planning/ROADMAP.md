@@ -17,7 +17,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Prompt Templates and Hook Scripts** - All markdown prompts, agent definitions, hook scripts
 - [x] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
 - [x] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
-- [ ] **Phase 4.1: Skills Migration** - Migrate Phase 4 output from slash commands to per-command Skills and align installer/docs/tests to the skills canon (INSERTED)
+- [ ] **Phase 4.1: Skills Migration** - Umbrella corrective phase split into atomic skill/template, adapter, test, and doc sub-phases (INSERTED)
+- [ ] **Phase 4.1.1: Skill Template Source** - Move the eight source templates into per-skill SKILL.md directories and preserve prompt behavior (INSERTED)
+- [ ] **Phase 4.1.2: Adapter Skill Install Paths** - Install skills into .claude/skills and conditional .agents/skills trees (INSERTED)
+- [ ] **Phase 4.1.3: Skills Regression Coverage** - Update init and pack verification to assert skill-based install surfaces (INSERTED)
+- [ ] **Phase 4.1.4: Planning Docs Canon Refresh** - Align roadmap, requirements, state, and active planning artifacts to the skills canon (INSERTED)
+- [ ] **Phase 4.1.5: Product Docs Canon Refresh** - Align README, implementation docs, and handoff docs to the skills canon (INSERTED)
 - [x] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
 - [ ] **Phase 6: OpenCode Adapter** - session_completed-only hook strategy; commands and agents
 - [ ] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps
@@ -105,17 +110,91 @@ Plans:
 - [x] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
 - [x] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
-### Phase 04.1: Skills Migration (INSERTED)
+### Phase 4.1: Skills Migration (INSERTED)
 
-**Goal**: Migrate Phase 4's shipped slash-command install surface to per-command Skills so installer output matches the verified v2 skills canon across adapters
-**Requirements**: TBD
+**Goal**: Replace the shipped slash-command install surface with the verified eight-skill canon across templates, adapters, tests, and docs without violating GSD atomicity
+**Requirements**: SM-01, SM-02, SM-03, SM-04, SM-05, SM-06
 **Depends on:** Phase 4
-**Planning Note**: Use the globally installed Claude skill `/create-skill` to create each of the eight CodeWiki skills; do not hand-author them ad hoc during planning or execution
-**Canonical Refs**: `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`
-**Plans:** 0 plans
+**Planning Note**: This umbrella phase is executed through child phases 4.1.1-4.1.5 because the local GSD parser supports chained decimals like 4.1.1 but not suffixes like 4.1a. Use `/create-skill` as a reference for metadata quality and structure, not as a generator.
+**Canonical Refs**: `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`, `docs/skills/wiki.md`
+**Plans:** 0 direct plans / 5 child phases
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 04.1 to break down)
+- [ ] 4.1.1 — Skill Template Source
+- [ ] 4.1.2 — Adapter Skill Install Paths
+- [ ] 4.1.3 — Skills Regression Coverage
+- [ ] 4.1.4 — Planning Docs Canon Refresh
+- [ ] 4.1.5 — Product Docs Canon Refresh
+
+### Phase 4.1.1: Skill Template Source (INSERTED)
+
+**Goal**: The eight CodeWiki source templates live under `src/templates/skills/codewiki-<name>/SKILL.md` with skill-native frontmatter and unchanged prompt intent
+**Depends on**: Phase 4
+**Requirements**: SM-01
+**Success Criteria** (what must be TRUE):
+  1. Eight files exist under `src/templates/skills/codewiki-<name>/SKILL.md` for ingest, query, lint, absorb, breakdown, prd, tasks, and process
+  2. Each migrated file has `name`, `description`, and `argument-hint` frontmatter suitable for skill discovery
+  3. The migrated files preserve the existing prompt purpose/process behavior from the old command templates
+  4. The legacy files in `src/templates/claude/commands/codewiki/` are no longer the source of truth for the migrated skills
+**Plans:** 4 plans
+Plans:
+- [ ] 04.1.1-01-PLAN.md — Migrate ingest and query into skill directories
+- [ ] 04.1.1-02-PLAN.md — Migrate lint and absorb into skill directories
+- [ ] 04.1.1-03-PLAN.md — Migrate breakdown and prd into skill directories
+- [ ] 04.1.1-04-PLAN.md — Migrate tasks and process into skill directories
+
+### Phase 4.1.2: Adapter Skill Install Paths (INSERTED)
+
+**Goal**: Installer code copies the shared skill templates into the correct Claude and non-Claude skill trees without changing hook or agent behavior
+**Depends on**: Phase 4.1.1
+**Requirements**: SM-02, SM-03
+**Success Criteria** (what must be TRUE):
+  1. `npx codewiki init --tool claude-code` installs `.claude/skills/codewiki-<name>/SKILL.md` for all eight skills
+  2. Tool selections including Codex, Copilot, or OpenCode install the same eight skills into `.agents/skills/codewiki-<name>/SKILL.md`
+  3. Claude-only installs do not create a redundant `.agents/skills/` tree
+  4. Hook wiring, agent installation, and instruction-file merging remain unchanged by the skill-path migration
+**Plans:** 0 plans
+Plans:
+- [ ] TBD (run /gsd-plan-phase 4.1.2)
+
+### Phase 4.1.3: Skills Regression Coverage (INSERTED)
+
+**Goal**: Regression tests and packaging verification prove the new skill install paths and bundled template assets
+**Depends on**: Phase 4.1.2
+**Requirements**: SM-04
+**Success Criteria** (what must be TRUE):
+  1. Init regression coverage asserts skill directories instead of command directories
+  2. Pack coverage asserts `dist/templates/skills/codewiki-ingest/SKILL.md` appears in the tarball file list
+  3. The migration does not weaken existing idempotency or hook-coverage guarantees
+**Plans:** 0 plans
+Plans:
+- [ ] TBD (run /gsd-plan-phase 4.1.3)
+
+### Phase 4.1.4: Planning Docs Canon Refresh (INSERTED)
+
+**Goal**: Planning artifacts describe the skills canon and the parser-safe atomic sub-phase split accurately
+**Depends on**: Phase 4.1.3
+**Requirements**: SM-05
+**Success Criteria** (what must be TRUE):
+  1. `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md`, and `.planning/STATE.md` describe the split phase structure and skill canon consistently
+  2. Traceability exists for SM-01 through SM-06
+  3. Active phase contexts/plans no longer instruct future work to use unsupported `4.1a` numbering or slash-command canon language
+**Plans:** 0 plans
+Plans:
+- [ ] TBD (run /gsd-plan-phase 4.1.4)
+
+### Phase 4.1.5: Product Docs Canon Refresh (INSERTED)
+
+**Goal**: User-facing and implementation docs describe skill-based installs and the dual-tree adapter rules consistently
+**Depends on**: Phase 4.1.3
+**Requirements**: SM-06
+**Success Criteria** (what must be TRUE):
+  1. README and implementation docs describe skills rather than slash commands as the install surface
+  2. Handoff and reference docs describe the dual-tree install rules for `.claude/skills/` and `.agents/skills/`
+  3. Project docs do not describe obsolete command directories as the source of truth
+**Plans:** 0 plans
+Plans:
+- [ ] TBD (run /gsd-plan-phase 4.1.5)
 
 ### Phase 5: Test Suite
 **Goal**: vitest suite covers merge correctness, idempotency, and npm pack asset inclusion; tests are the living spec for merge behavior
@@ -173,7 +252,8 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 4.1 -> 5 -> 6 -> 7 -> 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 4.1.1 -> 4.1.2 -> 4.1.3 -> 4.1.4 -> 4.1.5 -> 5 -> 6 -> 7 -> 8
+Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1.5.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -182,7 +262,12 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 4.1 -> 5 -> 6 -> 7 -
 | 3. Prompt Templates and Hook Scripts | 3/3 | Complete | 2026-04-08 |
 | 3.1 Auto-Improvement Engine (INSERTED) | 3/3 | Complete | 2026-04-08 |
 | 4. Claude Code Adapter + init Command | 3/3 | Complete | 2026-04-08 |
-| 4.1 Skills Migration (INSERTED) | 0/0 | Not started | - |
+| 4.1 Skills Migration (INSERTED) | 0/5 child phases | Split | - |
+| 4.1.1 Skill Template Source (INSERTED) | 0/4 | Planned | - |
+| 4.1.2 Adapter Skill Install Paths (INSERTED) | 0/0 | Not started | - |
+| 4.1.3 Skills Regression Coverage (INSERTED) | 0/0 | Not started | - |
+| 4.1.4 Planning Docs Canon Refresh (INSERTED) | 0/0 | Not started | - |
+| 4.1.5 Product Docs Canon Refresh (INSERTED) | 0/0 | Not started | - |
 | 5. Test Suite | 1/1 | Complete | 2026-04-10 |
 | 6. OpenCode Adapter | 0/2 | Not started | - |
 | 7. Codex and Copilot Adapters | 0/TBD | Not started | - |

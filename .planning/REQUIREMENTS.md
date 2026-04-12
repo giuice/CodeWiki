@@ -35,6 +35,15 @@
 - [x] **CMD-06**: `codewiki-process` skill — adapted from `docs/prompts/process-task-list.md`, one-sub-task-at-a-time preserved
 - [x] **CMD-07**: All SKILL.md files have `name` + `description` frontmatter so each skill surfaces independently in the tool's skill index (richer description than command frontmatter because the description is how the agent auto-matches natural-language requests to the right skill)
 
+### Skills Migration
+
+- [ ] **SM-01**: Source templates live under `src/templates/skills/codewiki-<name>/SKILL.md`; each migrated skill preserves the existing prompt behavior and exposes `name`, `description`, and `argument-hint` frontmatter
+- [ ] **SM-02**: Claude installs 8 skills to `.claude/skills/codewiki-<name>/SKILL.md`
+- [ ] **SM-03**: When non-Claude tools are selected, the installer also writes the same 8 skills to `.agents/skills/codewiki-<name>/SKILL.md`; Claude-only installs do not create the `.agents/skills/` tree
+- [ ] **SM-04**: Regression coverage asserts skill install paths in init tests and pack coverage for `dist/templates/skills/codewiki-ingest/SKILL.md`
+- [ ] **SM-05**: Planning artifacts (`ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, and active phase contexts/plans) reflect the skills canon and parser-safe split structure
+- [ ] **SM-06**: Project docs (README, implementation docs, handoff docs) reflect the skills canon and dual-tree install rules
+
 ### Hook Scripts
 
 - [x] **HOOK-01**: `pre-wiki-context.sh` — reads wiki/index.md, greps for relevant pages, outputs context to stdout
@@ -165,6 +174,12 @@
 | CC-03 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | CC-04 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | CC-05 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
+| SM-01 | Phase 4.1.1 (Skill Template Source) | Planned |
+| SM-02 | Phase 4.1.2 (Adapter Skill Install Paths) | Planned |
+| SM-03 | Phase 4.1.2 (Adapter Skill Install Paths) | Planned |
+| SM-04 | Phase 4.1.3 (Skills Regression Coverage) | Planned |
+| SM-05 | Phase 4.1.4 (Planning Docs Canon Refresh) | Planned |
+| SM-06 | Phase 4.1.5 (Product Docs Canon Refresh) | Planned |
 | BUILD-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | BUILD-02 | Phase 5 (Test Suite) | Complete (2026-04-10) |
 | OC-01 | Phase 6 (OpenCode Adapter) | Pending |
@@ -181,8 +196,8 @@
 | BUILD-04 | Phase 8 (npm Publish Hardening) | Pending |
 
 **Coverage:**
-- v1 requirements: 54 total
-- Mapped to phases: 54
+- v1 requirements: 60 total
+- Mapped to phases: 60
 - Unmapped: 0 ✓
 
 **Note:** Phase 1 (Clean Slate) has no v1 requirements assigned — it is a prerequisite cleanup that removes v1 runtime code to create a clean foundation. All v1 requirements map to Phases 2-8.
