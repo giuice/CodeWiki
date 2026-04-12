@@ -45,14 +45,14 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
     ".codewiki/templates/source-summary.md",
     ".claude/agents/codewiki-verifier.md",
     ".claude/agents/codewiki-wiki-updater.md",
-    ".claude/commands/codewiki/absorb.md",
-    ".claude/commands/codewiki/breakdown.md",
-    ".claude/commands/codewiki/ingest.md",
-    ".claude/commands/codewiki/lint.md",
-    ".claude/commands/codewiki/prd.md",
-    ".claude/commands/codewiki/process.md",
-    ".claude/commands/codewiki/query.md",
-    ".claude/commands/codewiki/tasks.md",
+    ".claude/skills/codewiki-absorb/SKILL.md",
+    ".claude/skills/codewiki-breakdown/SKILL.md",
+    ".claude/skills/codewiki-ingest/SKILL.md",
+    ".claude/skills/codewiki-lint/SKILL.md",
+    ".claude/skills/codewiki-prd/SKILL.md",
+    ".claude/skills/codewiki-process/SKILL.md",
+    ".claude/skills/codewiki-query/SKILL.md",
+    ".claude/skills/codewiki-tasks/SKILL.md",
     ".claude/settings.json",
     "CLAUDE.md",
     "raw",
@@ -100,15 +100,18 @@ test("init auto-detects Claude when a .claude directory already exists", () => {
 
   const result = mustRun(cwd, ["init"]);
   assert.match(result.stdout, /claude-code adapter:/);
-  assert.equal(existsSync(path.join(cwd, ".claude/commands/codewiki/query.md")), true);
+  assert.equal(existsSync(path.join(cwd, ".claude/skills/codewiki-query/SKILL.md")), true);
 });
 
-test("init reports unsupported selected tools without failing the Claude install", () => {
+test("init reports pending non-Claude integrations without failing the Claude install", () => {
   const cwd = tempProject();
   const result = mustRun(cwd, ["init", "--tool", "claude-code,codex"]);
-  assert.match(result.stdout, /Unsupported \(not yet implemented\):/);
-  assert.match(result.stdout, /codex \(adapter not implemented\)/);
-  assert.equal(existsSync(path.join(cwd, ".claude/commands/codewiki/ingest.md")), true);
+  assert.match(result.stdout, /shared-skills adapter:/);
+  assert.match(result.stdout, /Tool-specific integrations pending:/);
+  assert.match(result.stdout, /codex \(shared skills installed; hooks and instructions remain pending\)/);
+  assert.doesNotMatch(result.stdout, /Unsupported \(not yet implemented\):/);
+  assert.equal(existsSync(path.join(cwd, ".claude/skills/codewiki-ingest/SKILL.md")), true);
+  assert.equal(existsSync(path.join(cwd, ".agents/skills/codewiki-ingest/SKILL.md")), true);
   assert.equal(existsSync(path.join(cwd, ".codewiki/adapters/codex")), false);
 
   const bad = runCli(tempProject(), ["init", "--tool", "unknown"]);
@@ -126,7 +129,8 @@ test("init reports unsupported selected tools without failing the Claude install
   const deduped = tempProject();
   const duplicateSelection = mustRun(deduped, ["init", "--tool", "claude-code,claude-code,codex"]);
   assert.match(duplicateSelection.stdout, /claude-code adapter:/);
-  assert.match(duplicateSelection.stdout, /codex \(adapter not implemented\)/);
+  assert.match(duplicateSelection.stdout, /shared-skills adapter:/);
+  assert.match(duplicateSelection.stdout, /codex \(shared skills installed; hooks and instructions remain pending\)/);
 });
 
 test("init preserves existing Claude settings and instructions without duplication on rerun", () => {
@@ -207,17 +211,17 @@ test("init installs hook scripts with executable permissions (mode 755)", () => 
   }
 });
 
-test("init --force replaces existing command and agent files", () => {
+test("init --force replaces existing skill and agent files", () => {
   const cwd = tempProject();
   mustRun(cwd, ["init", "--tool", "claude-code"]);
 
-  writeFileSync(path.join(cwd, ".claude/commands/codewiki/ingest.md"), "# Stale content\n");
+  writeFileSync(path.join(cwd, ".claude/skills/codewiki-ingest/SKILL.md"), "# Stale content\n");
   writeFileSync(path.join(cwd, ".claude/agents/codewiki-verifier.md"), "# Stale agent\n");
 
   const result = mustRun(cwd, ["init", "--tool", "claude-code", "--force"]);
 
   assert.match(result.stdout, /↻/);
-  assert.match(result.stdout, /ingest\.md/);
-  assert.ok(!/# Stale content/.test(readFileSync(path.join(cwd, ".claude/commands/codewiki/ingest.md"), "utf8")));
+  assert.match(result.stdout, /codewiki-ingest\/SKILL\.md/);
+  assert.ok(!/# Stale content/.test(readFileSync(path.join(cwd, ".claude/skills/codewiki-ingest/SKILL.md"), "utf8")));
   assert.ok(!/# Stale agent/.test(readFileSync(path.join(cwd, ".claude/agents/codewiki-verifier.md"), "utf8")));
 });

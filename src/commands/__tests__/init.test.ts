@@ -43,5 +43,6 @@ test("prompts for Claude when no tools are detected in a TTY session", async () 
   const output = await initCommand({ root, args: ["--name", "tty-demo"] });
 
   expect(output).toContain("claude-code adapter:");
-  expect(existsSync(path.join(root, ".claude/commands/codewiki/ingest.md"))).toBe(true);
+  expect(output).not.toContain("Tool-specific integrations pending:");
+  expect(existsSync(path.join(root, ".claude/skills/codewiki-ingest/SKILL.md"))).toBe(true);
 });
