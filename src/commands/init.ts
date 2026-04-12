@@ -111,6 +111,15 @@ export async function initCommand({ root = process.cwd(), args }: InitOptions): 
     sections.push({ title: `${adapter.tool} adapter`, entries: adapterEntries });
   }
 
+  const hasSharedSkillsAdapter = adapters.some((adapter) => adapter.tool === "shared-skills");
+  const pendingIntegrationEntries = hasSharedSkillsAdapter ? getPendingIntegrationEntries(tools) : [];
+  if (pendingIntegrationEntries.length > 0) {
+    sections.push({
+      title: "Tool-specific integrations pending",
+      entries: pendingIntegrationEntries
+    });
+  }
+
   if (unsupported.length > 0) {
     sections.push({
       title: "Unsupported (not yet implemented)",
@@ -119,14 +128,6 @@ export async function initCommand({ root = process.cwd(), args }: InitOptions): 
         path: tool,
         reason: "adapter not implemented"
       }))
-    });
-  }
-
-  const pendingIntegrationEntries = getPendingIntegrationEntries(tools);
-  if (pendingIntegrationEntries.length > 0) {
-    sections.push({
-      title: "Tool-specific integrations pending",
-      entries: pendingIntegrationEntries
     });
   }
 
