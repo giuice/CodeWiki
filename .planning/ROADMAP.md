@@ -156,7 +156,7 @@ Plans:
 **Plans:** 3 plans
 Plans:
 - [x] 04.1.2-01-PLAN.md — Repoint Claude adapter from command assets to `.claude/skills`
-- [ ] 04.1.2-02-PLAN.md — Add the shared `.agents/skills` installer for non-Claude selections
+- [x] 04.1.2-02-PLAN.md — Add the shared `.agents/skills` installer for non-Claude selections
 - [ ] 04.1.2-03-PLAN.md — Update init reporting for combined skill installs and pending non-Claude integrations
 
 ### Phase 4.1.3: Skills Regression Coverage (INSERTED)
