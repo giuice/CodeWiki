@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: verifying
 stopped_at: Completed 04.1.2-03-PLAN.md
-last_updated: "2026-04-12T11:08:36.236Z"
+last_updated: "2026-04-12T11:16:17.503Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 15
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 
 ## Current Position
 
-Phase: 04.1.2 (adapter-skill-install-paths-inserted) — EXECUTING
-Plan: 3 of 3
+Phase: 05
+Plan: Not started
 Status: Phase complete — ready for verification
 Last activity: 2026-04-12
 
@@ -36,7 +36,7 @@ Progress: [█████░░░░░] 47%
 
 **Velocity:**
 
-- Total plans completed: 18
+- Total plans completed: 21
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -51,6 +51,7 @@ Progress: [█████░░░░░] 47%
 | 04 | 3 | 7m | 2m |
 | 04.1.1 | 4 | - | - |
 | 05 | 1 | 8m | 8m |
+| 04.1.2 | 3 | - | - |
 
 **Recent Trend:**
 
