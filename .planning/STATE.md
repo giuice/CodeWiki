@@ -3,40 +3,40 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 04.1 split into 04.1.1-04.1.5; 04.1.1 plans created
-last_updated: "2026-04-11T22:41:22-03:00"
-last_activity: 2026-04-11 -- Split umbrella Phase 04.1 into atomic parser-safe sub-phases 04.1.1-04.1.5 and created plans for 04.1.1
+stopped_at: Phase 04.1.1 complete; Phase 04.1.2 ready to plan
+last_updated: "2026-04-12T02:18:27.971Z"
+last_activity: 2026-04-12 -- Completed Phase 04.1.1 Skill Template Source and advanced to Phase 04.1.2 planning
 progress:
   total_phases: 15
-  completed_phases: 6
-  total_plans: 16
-  completed_plans: 14
-  percent: 40
+  completed_phases: 7
+  total_plans: 18
+  completed_plans: 18
+  percent: 47
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-10)
+See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 04.1.1 — Skill Template Source
+**Current focus:** Phase 04.1.2 — Adapter Skill Install Paths
 
 ## Current Position
 
-Phase: 04.1.1 of 15 (skill template source)
-Plan: 4 plans created
-Status: Ready to execute Phase 04.1.1
-Last activity: 2026-04-11 -- Split umbrella Phase 04.1 into parser-safe atomic sub-phases 04.1.1-04.1.5 and created plans for 04.1.1
+Phase: 04.1.2 of 15 (adapter skill install paths)
+Plan: Not planned yet
+Status: Ready to plan Phase 04.1.2
+Last activity: 2026-04-12 -- Completed Phase 04.1.1 Skill Template Source and advanced to Phase 04.1.2 planning
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 47%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 14
+- Total plans completed: 18
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -49,11 +49,12 @@ Progress: [████░░░░░░] 40%
 | 03 | 3 | - | - |
 | 03.1 | 3 | - | - |
 | 04 | 3 | 7m | 2m |
+| 04.1.1 | 4 | - | - |
 | 05 | 1 | 8m | 8m |
 
 **Recent Trend:**
 
-- Last 4 plans: 04-01, 04-02, 04-03, 05-01
+- Last 4 plans: 04.1.1-01, 04.1.1-02, 04.1.1-03, 04.1.1-04
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -76,6 +77,7 @@ Recent decisions affecting current work:
 - Phase 04.1: skills migration remains the active corrective umbrella phase; execution is split into 04.1.1-04.1.5 to preserve atomicity
 - Phase 04.1 planning uses parser-safe chained decimals (4.1.1-4.1.5) because local GSD tooling does not accept 4.1a-style suffixes
 - Phase 04.1 template migration uses `/create-skill` as a structure/metadata reference only; skill files are migrated by hand from the existing commands
+- Phase 04.1.1: canonical skill sources now live under `src/templates/skills/codewiki-<name>/SKILL.md`; legacy command files stay in place until adapter and regression-path rewiring lands in Phases 04.1.2 and 04.1.3
 - Phase 05: pack coverage reads `npm pack --dry-run --json` for file assertions because plain dry-run stdout on the current npm version omits the tarball file list
 - Phase 05: compiled node:test integration files now run with `--test-concurrency=1` so pack verification cannot delete `dist/` while other integration files are executing
 
@@ -105,5 +107,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-10T18:41:04.025Z
-Stopped at: Phase 04.1 inserted; planning not started
+Stopped at: Phase 04.1.2 ready to plan
 Resume file: .planning/ROADMAP.md

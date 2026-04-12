@@ -37,7 +37,7 @@
 
 ### Skills Migration
 
-- [ ] **SM-01**: Source templates live under `src/templates/skills/codewiki-<name>/SKILL.md`; each migrated skill preserves the existing prompt behavior and exposes `name`, `description`, and `argument-hint` frontmatter
+- [x] **SM-01**: Source templates live under `src/templates/skills/codewiki-<name>/SKILL.md`; each migrated skill preserves the existing prompt behavior and exposes `name`, `description`, and `argument-hint` frontmatter
 - [ ] **SM-02**: Claude installs 8 skills to `.claude/skills/codewiki-<name>/SKILL.md`
 - [ ] **SM-03**: When non-Claude tools are selected, the installer also writes the same 8 skills to `.agents/skills/codewiki-<name>/SKILL.md`; Claude-only installs do not create the `.agents/skills/` tree
 - [ ] **SM-04**: Regression coverage asserts skill install paths in init tests and pack coverage for `dist/templates/skills/codewiki-ingest/SKILL.md`
@@ -174,7 +174,7 @@
 | CC-03 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | CC-04 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
 | CC-05 | Phase 4 (Claude Code Adapter + init Command) | Complete (2026-04-08) |
-| SM-01 | Phase 4.1.1 (Skill Template Source) | Planned |
+| SM-01 | Phase 4.1.1 (Skill Template Source) | Complete (2026-04-12) |
 | SM-02 | Phase 4.1.2 (Adapter Skill Install Paths) | Planned |
 | SM-03 | Phase 4.1.2 (Adapter Skill Install Paths) | Planned |
 | SM-04 | Phase 4.1.3 (Skills Regression Coverage) | Planned |
@@ -204,4 +204,4 @@
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-10 — Phase 5 plan 01 executed, BUILD-02 validated, and traceability refreshed*
+*Last updated: 2026-04-12 — Phase 4.1.1 executed, SM-01 validated, and traceability refreshed*

@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
 - [x] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
 - [ ] **Phase 4.1: Skills Migration** - Umbrella corrective phase split into atomic skill/template, adapter, test, and doc sub-phases (INSERTED)
-- [ ] **Phase 4.1.1: Skill Template Source** - Move the eight source templates into per-skill SKILL.md directories and preserve prompt behavior (INSERTED)
+- [x] **Phase 4.1.1: Skill Template Source** - Move the eight source templates into per-skill SKILL.md directories and preserve prompt behavior (INSERTED)
 - [ ] **Phase 4.1.2: Adapter Skill Install Paths** - Install skills into .claude/skills and conditional .agents/skills trees (INSERTED)
 - [ ] **Phase 4.1.3: Skills Regression Coverage** - Update init and pack verification to assert skill-based install surfaces (INSERTED)
 - [ ] **Phase 4.1.4: Planning Docs Canon Refresh** - Align roadmap, requirements, state, and active planning artifacts to the skills canon (INSERTED)
@@ -120,7 +120,7 @@ Plans:
 **Plans:** 0 direct plans / 5 child phases
 
 Plans:
-- [ ] 4.1.1 — Skill Template Source
+- [x] 4.1.1 — Skill Template Source
 - [ ] 4.1.2 — Adapter Skill Install Paths
 - [ ] 4.1.3 — Skills Regression Coverage
 - [ ] 4.1.4 — Planning Docs Canon Refresh
@@ -138,10 +138,10 @@ Plans:
   4. The legacy files in `src/templates/claude/commands/codewiki/` are no longer the source of truth for the migrated skills
 **Plans:** 4 plans
 Plans:
-- [ ] 04.1.1-01-PLAN.md — Migrate ingest and query into skill directories
-- [ ] 04.1.1-02-PLAN.md — Migrate lint and absorb into skill directories
-- [ ] 04.1.1-03-PLAN.md — Migrate breakdown and prd into skill directories
-- [ ] 04.1.1-04-PLAN.md — Migrate tasks and process into skill directories
+- [x] 04.1.1-01-PLAN.md — Migrate ingest and query into skill directories
+- [x] 04.1.1-02-PLAN.md — Migrate lint and absorb into skill directories
+- [x] 04.1.1-03-PLAN.md — Migrate breakdown and prd into skill directories
+- [x] 04.1.1-04-PLAN.md — Migrate tasks and process into skill directories
 
 ### Phase 4.1.2: Adapter Skill Install Paths (INSERTED)
 
@@ -262,8 +262,8 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 3. Prompt Templates and Hook Scripts | 3/3 | Complete | 2026-04-08 |
 | 3.1 Auto-Improvement Engine (INSERTED) | 3/3 | Complete | 2026-04-08 |
 | 4. Claude Code Adapter + init Command | 3/3 | Complete | 2026-04-08 |
-| 4.1 Skills Migration (INSERTED) | 0/5 child phases | Split | - |
-| 4.1.1 Skill Template Source (INSERTED) | 0/4 | Planned | - |
+| 4.1 Skills Migration (INSERTED) | 1/5 child phases | In progress | 2026-04-12 |
+| 4.1.1 Skill Template Source (INSERTED) | 4/4 | Complete | 2026-04-12 |
 | 4.1.2 Adapter Skill Install Paths (INSERTED) | 0/0 | Not started | - |
 | 4.1.3 Skills Regression Coverage (INSERTED) | 0/0 | Not started | - |
 | 4.1.4 Planning Docs Canon Refresh (INSERTED) | 0/0 | Not started | - |
