@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 04.1.2-03-PLAN.md
+status: ready
+stopped_at: Phase 04.1.2 complete; Phase 04.1.3 ready to plan
 last_updated: "2026-04-12T11:16:17.503Z"
-last_activity: 2026-04-12
+last_activity: 2026-04-12 -- Completed Phase 04.1.2 Adapter Skill Install Paths and advanced to Phase 04.1.3 planning
 progress:
   total_phases: 15
   completed_phases: 8
   total_plans: 21
   completed_plans: 21
-  percent: 100
+  percent: 53
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 04.1.2 — adapter-skill-install-paths-inserted
+**Current focus:** Phase 04.1.3 — Skills Regression Coverage
 
 ## Current Position
 
-Phase: 05
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-12
+Phase: 04.1.3 of 15 (skills regression coverage)
+Plan: Not planned yet
+Status: Ready to plan Phase 04.1.3
+Last activity: 2026-04-12 -- Completed Phase 04.1.2 Adapter Skill Install Paths and advanced to Phase 04.1.3 planning
 
-Progress: [█████░░░░░] 47%
+Progress: [█████░░░░░] 53%
 
 ## Performance Metrics
 
@@ -111,5 +111,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-12T11:08:36.233Z
-Stopped at: Completed 04.1.2-03-PLAN.md
-Resume file: None
+Stopped at: Phase 04.1.2 complete; Phase 04.1.3 ready to plan
+Resume file: .planning/ROADMAP.md
