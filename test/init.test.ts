@@ -8,6 +8,15 @@ function countOccurrences(value: string, pattern: string): number {
   return value.split(pattern).length - 1;
 }
 
+const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "prd", "process", "query", "tasks"] as const;
+
+function assertInstalledSkillTree(cwd: string, baseDir: string): void {
+  for (const skill of CANONICAL_SKILLS) {
+    const rel = path.join(baseDir, `codewiki-${skill}`, "SKILL.md");
+    assert.equal(existsSync(path.join(cwd, rel)), true, `missing ${rel}`);
+  }
+}
+
 test("package baseline and compiled help expose all commands", () => {
   const pkg = JSON.parse(readFileSync(path.join(process.cwd(), "package.json"), "utf8")) as Record<string, unknown>;
   assert.equal(pkg.type, "module");
@@ -45,14 +54,6 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
     ".codewiki/templates/source-summary.md",
     ".claude/agents/codewiki-verifier.md",
     ".claude/agents/codewiki-wiki-updater.md",
-    ".claude/skills/codewiki-absorb/SKILL.md",
-    ".claude/skills/codewiki-breakdown/SKILL.md",
-    ".claude/skills/codewiki-ingest/SKILL.md",
-    ".claude/skills/codewiki-lint/SKILL.md",
-    ".claude/skills/codewiki-prd/SKILL.md",
-    ".claude/skills/codewiki-process/SKILL.md",
-    ".claude/skills/codewiki-query/SKILL.md",
-    ".claude/skills/codewiki-tasks/SKILL.md",
     ".claude/settings.json",
     "CLAUDE.md",
     "raw",
@@ -66,6 +67,8 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   ]) {
     assert.equal(files.has(rel), true, `missing ${rel}`);
   }
+  assertInstalledSkillTree(cwd, ".claude/skills");
+  assert.equal(existsSync(path.join(cwd, ".agents/skills")), false, "Claude-only install must not create .agents/skills");
   assert.equal(files.has(".codewiki/adapters/claude-code"), false);
 
   const config = readFileSync(path.join(cwd, ".codewiki/config.yml"), "utf8");
@@ -100,7 +103,8 @@ test("init auto-detects Claude when a .claude directory already exists", () => {
 
   const result = mustRun(cwd, ["init"]);
   assert.match(result.stdout, /claude-code adapter:/);
-  assert.equal(existsSync(path.join(cwd, ".claude/skills/codewiki-query/SKILL.md")), true);
+  assertInstalledSkillTree(cwd, ".claude/skills");
+  assert.equal(existsSync(path.join(cwd, ".agents/skills")), false, "Auto-detected Claude install must not create .agents/skills");
 });
 
 test("init reports pending non-Claude integrations without failing the Claude install", () => {
@@ -110,8 +114,8 @@ test("init reports pending non-Claude integrations without failing the Claude in
   assert.match(result.stdout, /Tool-specific integrations pending:/);
   assert.match(result.stdout, /codex \(shared skills installed; hooks and instructions remain pending\)/);
   assert.doesNotMatch(result.stdout, /Unsupported \(not yet implemented\):/);
-  assert.equal(existsSync(path.join(cwd, ".claude/skills/codewiki-ingest/SKILL.md")), true);
-  assert.equal(existsSync(path.join(cwd, ".agents/skills/codewiki-ingest/SKILL.md")), true);
+  assertInstalledSkillTree(cwd, ".claude/skills");
+  assertInstalledSkillTree(cwd, ".agents/skills");
   assert.equal(existsSync(path.join(cwd, ".codewiki/adapters/codex")), false);
 
   const bad = runCli(tempProject(), ["init", "--tool", "unknown"]);
@@ -131,6 +135,8 @@ test("init reports pending non-Claude integrations without failing the Claude in
   assert.match(duplicateSelection.stdout, /claude-code adapter:/);
   assert.match(duplicateSelection.stdout, /shared-skills adapter:/);
   assert.match(duplicateSelection.stdout, /codex \(shared skills installed; hooks and instructions remain pending\)/);
+  assertInstalledSkillTree(deduped, ".claude/skills");
+  assertInstalledSkillTree(deduped, ".agents/skills");
 });
 
 test("init preserves existing Claude settings and instructions without duplication on rerun", () => {
@@ -167,6 +173,8 @@ test("init preserves existing Claude settings and instructions without duplicati
   assert.equal(firstSettings.hooks.PreToolUse.length, 2);
   assert.equal(firstSettings.hooks.PostToolUse.length, 1);
   assert.equal(firstSettings.hooks.PreToolUse[0]?.hooks[0]?.command, "echo user");
+  assertInstalledSkillTree(cwd, ".claude/skills");
+  assert.equal(existsSync(path.join(cwd, ".agents/skills")), false, "Claude reruns must not create .agents/skills");
 
   const firstClaude = readFileSync(path.join(cwd, "CLAUDE.md"), "utf8");
   assert.match(firstClaude, /^# Existing Instructions/m);
@@ -181,6 +189,8 @@ test("init preserves existing Claude settings and instructions without duplicati
   };
   assert.equal(secondSettings.hooks.PreToolUse.length, 2);
   assert.equal(secondSettings.hooks.PostToolUse.length, 1);
+  assertInstalledSkillTree(cwd, ".claude/skills");
+  assert.equal(existsSync(path.join(cwd, ".agents/skills")), false, "Claude reruns must keep .agents/skills absent");
 
   const secondClaude = readFileSync(path.join(cwd, "CLAUDE.md"), "utf8");
   assert.equal(countOccurrences(secondClaude, "<!-- codewiki:start -->"), 1);
@@ -224,4 +234,6 @@ test("init --force replaces existing skill and agent files", () => {
   assert.match(result.stdout, /codewiki-ingest\/SKILL\.md/);
   assert.ok(!/# Stale content/.test(readFileSync(path.join(cwd, ".claude/skills/codewiki-ingest/SKILL.md"), "utf8")));
   assert.ok(!/# Stale agent/.test(readFileSync(path.join(cwd, ".claude/agents/codewiki-verifier.md"), "utf8")));
+  assertInstalledSkillTree(cwd, ".claude/skills");
+  assert.equal(existsSync(path.join(cwd, ".agents/skills")), false, "Force reruns must keep .agents/skills absent for Claude-only installs");
 });
