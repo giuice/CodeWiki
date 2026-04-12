@@ -41,6 +41,12 @@ const CLAUDE_SETTINGS_PATCH: ClaudeSettings = {
 };
 
 const HOOK_EVENT_NAMES = ["PreToolUse", "PostToolUse"] as const;
+const CLAUDE_SKILLS_DIR = ".claude/skills";
+const CLAUDE_AGENTS_DIR = ".claude/agents";
+const CODEWIKI_HOOKS_DIR = ".codewiki/hooks";
+const CLAUDE_SETTINGS_FILE = ".claude/settings.json";
+const CLAUDE_INSTRUCTIONS_FILE = "CLAUDE.md";
+const SESSION_END_HOOK_PATH = `${CODEWIKI_HOOKS_DIR}/session-end.sh`;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -73,15 +79,15 @@ export class ClaudeCodeAdapter implements ToolAdapter {
     const report: ReportEntry[] = [];
 
     await Promise.all([
-      ensureDir(options.root, ".claude/skills"),
-      ensureDir(options.root, ".claude/agents"),
-      ensureDir(options.root, ".codewiki/hooks")
+      ensureDir(options.root, CLAUDE_SKILLS_DIR),
+      ensureDir(options.root, CLAUDE_AGENTS_DIR),
+      ensureDir(options.root, CODEWIKI_HOOKS_DIR)
     ]);
 
     report.push(
       ...(await this.copyAssetDirectory(
         path.join(options.templateDir, "skills"),
-        ensureInsideRoot(options.root, ".claude/skills"),
+        ensureInsideRoot(options.root, CLAUDE_SKILLS_DIR),
         options
       ))
     );
@@ -89,14 +95,14 @@ export class ClaudeCodeAdapter implements ToolAdapter {
     report.push(
       ...(await this.copyAssetDirectory(
         path.join(options.templateDir, "claude", "agents"),
-        ensureInsideRoot(options.root, ".claude/agents"),
+        ensureInsideRoot(options.root, CLAUDE_AGENTS_DIR),
         options
       ))
     );
 
     const hookEntries = await this.copyAssetDirectory(
       path.join(options.templateDir, "hooks"),
-      ensureInsideRoot(options.root, ".codewiki/hooks"),
+      ensureInsideRoot(options.root, CODEWIKI_HOOKS_DIR),
       options
     );
     report.push(...(await this.applyHookPermissions(options, hookEntries)));
@@ -135,7 +141,7 @@ export class ClaudeCodeAdapter implements ToolAdapter {
         }
       }
 
-      if (entry.path === ".codewiki/hooks/session-end.sh") {
+      if (entry.path === SESSION_END_HOOK_PATH) {
         updatedEntries[index] = withReason(entry, "not wired to Claude lifecycle");
       }
     }
@@ -144,7 +150,7 @@ export class ClaudeCodeAdapter implements ToolAdapter {
   }
 
   private async mergeSettings(options: AdapterInstallOptions): Promise<ReportEntry> {
-    const settingsPath = ensureInsideRoot(options.root, ".claude/settings.json");
+    const settingsPath = ensureInsideRoot(options.root, CLAUDE_SETTINGS_FILE);
     const displayPath = relativePath(options.root, settingsPath);
 
     try {
@@ -176,7 +182,7 @@ export class ClaudeCodeAdapter implements ToolAdapter {
   }
 
   private async mergeInstructions(options: AdapterInstallOptions): Promise<ReportEntry> {
-    const claudePath = ensureInsideRoot(options.root, "CLAUDE.md");
+    const claudePath = ensureInsideRoot(options.root, CLAUDE_INSTRUCTIONS_FILE);
     const displayPath = relativePath(options.root, claudePath);
     const instructionPath = path.join(options.templateDir, "claude", "instructions.md");
 
