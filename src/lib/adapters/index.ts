@@ -1,6 +1,8 @@
 import type { SupportedTool } from "../../core/types.js";
 import type { ToolAdapter } from "./types.js";
 
+const SHARED_SKILLS_TOOLS = new Set<SupportedTool>(["codex", "copilot", "opencode"]);
+
 const adapterFactories: Partial<Record<SupportedTool, () => Promise<ToolAdapter>>> = {
   "claude-code": async () => {
     const modulePath = "./claude.js";
@@ -9,20 +11,35 @@ const adapterFactories: Partial<Record<SupportedTool, () => Promise<ToolAdapter>
   }
 };
 
+async function createSharedSkillsAdapter(): Promise<ToolAdapter> {
+  const modulePath = "./shared-skills.js";
+  const { SharedSkillsAdapter } = await import(modulePath);
+  return new SharedSkillsAdapter();
+}
+
 export async function resolveAdapters(
   tools: SupportedTool[]
 ): Promise<{ adapters: ToolAdapter[]; unsupported: SupportedTool[] }> {
   const adapters: ToolAdapter[] = [];
   const unsupported: SupportedTool[] = [];
+  let sharedSkillsAdded = false;
 
   for (const tool of tools) {
     const factory = adapterFactories[tool];
-    if (!factory) {
-      unsupported.push(tool);
+    if (factory) {
+      adapters.push(await factory());
       continue;
     }
 
-    adapters.push(await factory());
+    if (SHARED_SKILLS_TOOLS.has(tool)) {
+      if (!sharedSkillsAdded) {
+        adapters.push(await createSharedSkillsAdapter());
+        sharedSkillsAdded = true;
+      }
+      continue;
+    }
+
+    unsupported.push(tool);
   }
 
   return { adapters, unsupported };
