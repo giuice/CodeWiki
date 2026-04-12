@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 04.1.3 complete; Phase 04.1.4 ready to plan
-last_updated: "2026-04-12T13:17:12.053Z"
-last_activity: 2026-04-12 -- Phase 4.1.4 planning complete
+stopped_at: Phase 04.1.4 complete; Phase 04.1.5 ready to plan
+last_updated: "2026-04-12T13:21:51.518Z"
+last_activity: 2026-04-12 -- Phase 04.1.4 — planning docs canon refresh
 progress:
   total_phases: 15
   completed_phases: 9
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 04.1.4 — Planning Docs Canon Refresh
+**Current focus:** Phase 04.1.4 — planning-docs-canon-refresh-inserted
 
 ## Current Position
 
-Phase: 04.1.4 of 15 (planning docs canon refresh)
-Plan: Not planned yet
-Status: Ready to execute
-Last activity: 2026-04-12 -- Phase 4.1.4 planning complete
+Phase: 04.1.4 (planning-docs-canon-refresh-inserted) — EXECUTING
+Plan: 1 of 1
+Status: Executing Phase 04.1.4
+Last activity: 2026-04-12 -- Phase 04.1.4 execution started
 
 Progress: [██████░░░░] 60%
 
@@ -85,6 +85,8 @@ Recent decisions affecting current work:
 - Phase 04.1.1: canonical skill sources now live under `src/templates/skills/codewiki-<name>/SKILL.md`; legacy command files stay in place until adapter and regression-path rewiring lands in Phases 04.1.2 and 04.1.3
 - Phase 05: pack coverage reads `npm pack --dry-run --json` for file assertions because plain dry-run stdout on the current npm version omits the tarball file list
 - Phase 05: compiled node:test integration files now run with `--test-concurrency=1` so pack verification cannot delete `dist/` while other integration files are executing
+- Phase 04.1.4: Planning artifacts refreshed to reflect the skills canon — ROADMAP.md, REQUIREMENTS.md, STATE.md, and CONVENTIONS.md now describe the eight-skill install surface and parser-safe decimal sub-phases consistently
+- Phase 04.1.2: skills canon install surface is `.claude/skills/codewiki-<name>/SKILL.md` for Claude and `.agents/skills/codewiki-<name>/SKILL.md` for non-Claude tools, replacing the legacy `.claude/commands/codewiki/` directory
 
 ### Pending Todos
 

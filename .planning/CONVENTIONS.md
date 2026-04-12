@@ -10,7 +10,7 @@ Every GSD phase, sub-phase, and plan MUST fit within a single agent context wind
 - **≤1 concern** per plan — code changes OR doc updates, never both together
 
 **Phase decomposition rules:**
-- If a phase has more than 2 plans, consider splitting into decimal sub-phases (e.g., 4.1a, 4.1b)
+- If a phase has more than 2 plans, consider splitting into decimal sub-phases (e.g., 4.1.1, 4.1.2)
 - Code migration and doc cascade are ALWAYS separate sub-phases
 - Test updates are their own sub-phase if they touch more than 3 test files
 - Each sub-phase must have a single verifiable deliverable
