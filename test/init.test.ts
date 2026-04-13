@@ -89,7 +89,7 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
 
   const claudeInstructions = readFileSync(path.join(cwd, "CLAUDE.md"), "utf8");
   assert.match(claudeInstructions, /<!-- codewiki:start -->/);
-  assert.match(claudeInstructions, /\/codewiki-breakdown/);
+  assert.match(claudeInstructions, /codewiki-breakdown/);
 
   const quoted = tempProject();
   mustRun(quoted, ["init", "--name", 'demo "quoted"', "--tool", "claude-code"]);

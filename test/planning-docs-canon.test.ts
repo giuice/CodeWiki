@@ -24,8 +24,18 @@ test("planning docs canon keeps roadmap and requirements aligned to SM-05", () =
   assert.match(requirements, /\| SM-05 \| Phase 4\.1\.4 \(Planning Docs Canon Refresh\) \| Complete \(2026-04-12\) \|/);
   assert.match(requirements, /\| SM-06 \| Phase 4\.1\.5 \(Product Docs Canon Refresh\) \| Complete \(2026-04-13\) \|/);
   assert.match(requirements, /\*\*CC-01\*\*: Installs 8 skills to `\.claude\/skills\/codewiki-<name>\/SKILL\.md`/);
-  assert.match(requirements, /\*\*OC-01\*\*: Installs 8 skills to `\.opencode\/skills\/codewiki-<name>\/SKILL\.md`/);
-  assert.match(requirements, /\*\*CODEX-01\*\*: Installs 8 skills to correct Codex skill directory/);
+  assert.match(
+    requirements,
+    /\*\*OC-01\*\*: Reuses the shared `\.agents\/skills\/codewiki-<name>\/SKILL\.md` tree for OpenCode selections; no separate OpenCode-only skill tree is introduced in v1/
+  );
+  assert.match(
+    requirements,
+    /\*\*OC-03\*\*: Installs `\.opencode\/plugins\/codewiki\.ts` that dispatches `tool\.execute\.before`, `file\.edited`, and `session\.idle` to the shared shell hooks/
+  );
+  assert.match(
+    requirements,
+    /\*\*CODEX-01\*\*: Codex selections reuse `\.agents\/skills\/codewiki-<name>\/SKILL\.md` as the canonical skill tree/
+  );
 });
 
 test("planning docs canon keeps state, conventions, and active context parser-safe", () => {
@@ -38,6 +48,8 @@ test("planning docs canon keeps state, conventions, and active context parser-sa
     state,
     /Phase 04\.1\.2: skills canon install surface is `\.claude\/skills\/codewiki-<name>\/SKILL\.md` for Claude and `\.agents\/skills\/codewiki-<name>\/SKILL\.md` for non-Claude tools/
   );
+  assert.match(state, /Codex uses `UserPromptSubmit` and `Stop` because `PreToolUse` and `PostToolUse` are Bash-only/);
+  assert.match(state, /OpenCode uses plugin events `tool\.execute\.before`, `file\.edited`, and `session\.idle`/);
 
   assert.match(conventions, /\(e\.g\., 4\.1\.1, 4\.1\.2\)/);
   assert.doesNotMatch(conventions, /\(e\.g\., 4\.1a, 4\.1b\)/);

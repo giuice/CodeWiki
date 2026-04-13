@@ -1,171 +1,139 @@
 # Feature Research
 
 **Domain:** npm CLI installer for AI coding tool integrations (Claude Code, Codex, Copilot, OpenCode)
-**Researched:** 2026-04-07
-**Confidence:** HIGH for Claude Code/GSD patterns; MEDIUM for Codex/Copilot hook formats; OpenCode has no PreToolUse equivalent — post-hook uses `session_completed` (confirmed)
+**Originally researched:** 2026-04-07
+**Canonicalized:** 2026-04-13
+**Confidence:** HIGH for the current install surface and Claude Code; MEDIUM for non-Claude runtime payload details that still need live-tool validation
 
-## Feature Landscape
+## Current Feature Canon
 
-### Table Stakes (Users Expect These)
+CodeWiki v2 is an installer-only CLI. `npx codewiki init` scaffolds the wiki and installs tool-facing integration assets. The canonical product surface is:
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Auto-detect AI tools present | Users don't want to specify which tools they have | LOW | Check for `.claude/`, `.codex/`, `.github/copilot-instructions.md`, `opencode.json` |
-| `--tool` flag override | Power users need explicit control | LOW | Comma-separated: `--tool claude-code,codex` |
-| Idempotent re-runs | Safe to run twice without breaking things | MEDIUM | No-clobber merge for JSON; marker-comment sections for markdown |
-| `--force` flag for overwrite | Users need to update installed prompts | LOW | Overwrite command files; replace marker sections |
-| Structured install report | Users need to know what happened | LOW | `✓ Created`, `⚠ Skipped`, `✗ Failed` per file |
-| Zero runtime npm dependencies | Expected from a dev tool | LOW | Commander.js + picocolors are the only additions |
-| Works via `npx codewiki init` | Standard for scaffolding tools | LOW | `bin` field in package.json, correct `dist/` structure |
-| Bundled prompt files in dist/ | Self-contained package | LOW | `postbuild` script copies `src/templates/**` → `dist/templates/**` |
+- eight standalone Skills, one per workflow
+- shared shell hooks in `.codewiki/hooks/`
+- tool-specific instruction blocks
+- tool-specific agents or plugins where the host supports them
 
-### Differentiators (Competitive Advantage)
+The installer does not run runtime wiki logic itself. The host AI tool reads the markdown prompt assets and executes the workflow natively.
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Multi-tool install in one command | 4 different file formats abstracted | HIGH | Each tool has different hook config, command path, instruction file |
-| Shared hook scripts in `.codewiki/hooks/` | One update propagates to all tools | LOW | All tool configs point to same `.codewiki/hooks/pre-wiki-context.sh` |
-| Marker-comment merge | Safe instruction file updates without destroying user content | MEDIUM | `<!-- codewiki:start -->` / `<!-- codewiki:end -->` |
-| Pre-hook wiki context injection | Wiki knowledge arrives automatically before file edits | MEDIUM | Most differentiating feature — passive context delivery |
-| 8 slash commands with tool-native frontmatter | Correct format per tool, not just file copies | MEDIUM | Claude Code and OpenCode have different frontmatter requirements |
-| System instructions explain verification loop | Agent understands the wiki pattern without user prompting | LOW | Appended to CLAUDE.md / AGENTS.md / copilot-instructions.md |
+## Table Stakes
 
-### Anti-Features (Deliberately NOT Building)
+| Feature | Why expected | Complexity | Current canon |
+|---------|--------------|------------|---------------|
+| Auto-detect AI tools present | Users do not want to specify which tools they have | LOW | Detect `.claude/`, `.codex/`, `.github/copilot-instructions.md`, `opencode.json`, or `.opencode/` |
+| `--tool` flag override | Explicit control for CI and mixed installs | LOW | Comma-separated selections such as `--tool claude-code,codex` |
+| Idempotent re-runs | Safe to run twice without corrupting config | MEDIUM | JSON deep-merge, marker-comment merges, hook deduplication |
+| `--force` flag | Intentional refresh of managed content | LOW | Replace managed marker sections and managed copied assets |
+| Structured install report | Users need to know what actually shipped | LOW | Report installed surfaces separately from pending adapter work |
+| Bundled prompt assets in `dist/` | `npx` must work without source checkout | LOW | `postbuild` copies `src/templates/**` to `dist/templates/**` |
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Runtime CLI commands (`codewiki ingest`, `codewiki query`) | Feels like a complete product | Reimplements what AI tools do natively; loses conversation loop; can't do interactive approval | Slash commands installed by `init` |
-| LLM API calls from CLI | "Smart" installer that knows your codebase | Forces API key management, fails offline, adds vendor lock-in | AI tool executes the prompts natively |
-| Interactive wizard prompts | Friendlier UX | Breaks CI/automation; flags cover all config needs | `--tool`, `--force`, `--name` flags |
-| Template auto-update system | Keep prompts up to date automatically | Creates version conflicts with user customizations | `init --force` for intentional updates |
-| Web dashboard / database | Visual wiki browser | Wiki is already browsable as markdown in any editor | Plain markdown + git |
-| Team sync / multi-user | Teams use the same wiki | Wiki is in git — teams sync via git naturally | Git workflow |
+## Differentiators
 
-## Hook Config Formats Per Tool
+| Feature | Value | Complexity | Notes |
+|---------|-------|------------|-------|
+| Shared dual-tree skill strategy | One skill corpus covers all four tools | MEDIUM | Claude requires `.claude/skills/`; Codex, Copilot, and OpenCode use `.agents/skills/` |
+| Shared hook scripts | One update propagates across adapters | LOW | `.codewiki/hooks/*.sh` stays portable; adapter code only dispatches |
+| Per-tool event mapping | Aligns to real host semantics instead of pretending hooks are uniform | HIGH | Most important non-Claude correctness constraint |
+| Marker-comment instruction merges | Safe re-runs without clobbering user docs | MEDIUM | `<!-- codewiki:start -->` / `<!-- codewiki:end -->` |
+| Portable skill corpus | Same workflow text works across tools | LOW | File format is uniform `SKILL.md`; only install directory changes |
 
-### Claude Code — `.claude/settings.json`
+## Anti-Features
 
-```json
-{
-  "hooks": {
-    "PreToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "bash .codewiki/hooks/pre-wiki-context.sh", "timeout": 5 }] }],
-    "PostToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "bash .codewiki/hooks/post-verify.sh", "timeout": 5 }] }]
-  }
-}
-```
-- Hook stdin: `{ session_id, tool_name, tool_input, cwd }`. Stdout injected as `additionalContext`. Exit 2 blocks tool use.
-- Merge into existing arrays — never replace the file.
+| Feature | Why not | Alternative |
+|---------|---------|------------|
+| Runtime CLI commands (`codewiki ingest`, `codewiki query`) | Reimplements what the AI tool already does natively and loses the conversation loop | Install Skills and let the host run them |
+| Custom LLM API calls from the CLI | Adds API keys, vendor lock-in, and offline failure modes | Keep all AI work inside the host tool |
+| Separate per-tool skill trees for Copilot/OpenCode | Adds duplication without solving a discovery gap | Use `.agents/skills/` as the shared non-Claude tree |
+| Treating session-end hooks as interchangeable across hosts | Different tools expose materially different lifecycle events | Follow each host's documented event model |
 
-### Codex — `~/.codex/hooks.json` (same three-level structure as Claude Code)
+## Hook Surface By Tool
 
-```json
-{
-  "hooks": {
-    "PreToolUse": [{ "matcher": "write_file|edit_file", "hooks": [{ "type": "command", "command": "bash .codewiki/hooks/pre-wiki-context.sh", "statusMessage": "Loading CodeWiki context" }] }]
-  }
-}
-```
-- Exit 2 + stderr = block. Stdout JSON with `systemMessage` = inject context.
-- Multiple `hooks.json` files across config layers are all loaded (don't replace each other).
-- **RESEARCH GAP:** Per-project `.codex/` command path unconfirmed. Official docs reference `~/.codex/prompts/<name>.md` (global only).
+| Tool | Canonical config surface | Pre-edit or pre-turn surface | Post-edit or post-turn surface | Lifecycle note |
+|------|--------------------------|------------------------------|-------------------------------|----------------|
+| Claude Code | `.claude/settings.json` | `PreToolUse` on `Write|Edit` | `PostToolUse` on `Write|Edit` | `PreCompact` is only a future candidate; `SessionEnd` remains dormant for true end-of-session semantics |
+| Codex | `.codex/hooks.json` | `UserPromptSubmit` fallback | `Stop` fallback | `PreToolUse` and `PostToolUse` are Bash-only, so they are not the canonical file-edit interception path for CodeWiki |
+| Copilot | `.github/hooks/*.json` | `preToolUse` | `postToolUse` | `agentStop` is the meaningful post-turn hook; `sessionEnd` is cleanup-only |
+| OpenCode | `.opencode/plugins/codewiki.ts` | `tool.execute.before` | `file.edited` | `session.idle` is the best turn-end or idle signal; do not treat it as teardown |
 
-### Copilot — `.github/hooks/<name>.json`
+## Skill Install Surface
 
-```json
-{
-  "version": 1,
-  "hooks": [
-    { "event": "preToolUse", "command": { "bash": "bash .codewiki/hooks/pre-wiki-context.sh", "timeoutSec": 5 } },
-    { "event": "postToolUse", "command": { "bash": "bash .codewiki/hooks/post-verify.sh", "timeoutSec": 5 } }
-  ]
-}
-```
-- Must include `"version": 1`. File must be on the default branch. Multiple JSON files in `.github/hooks/` are all loaded.
-- **Preview feature** as of 2025.
-- **RESEARCH GAP:** No file-based custom slash command directory confirmed (no `.github/commands/` equivalent). Must rely on instruction file descriptions.
+CodeWiki ships eight skill directories:
 
-### OpenCode — `opencode.json`
+- `codewiki-ingest`
+- `codewiki-query`
+- `codewiki-lint`
+- `codewiki-absorb`
+- `codewiki-breakdown`
+- `codewiki-prd`
+- `codewiki-tasks`
+- `codewiki-process`
 
-```json
-{
-  "experimental": {
-    "hooks": {
-      "session_completed": { "command": "bash .codewiki/hooks/post-verify.sh" }
-    }
-  }
-}
-```
-- **No pre-tool hook available.** OpenCode has no PreToolUse equivalent. CodeWiki uses `session_completed` (fires once at end-of-session) to trigger `post-verify.sh` for batch wiki absorb. Pre-edit wiki context must come from `AGENTS.md` instructions, not hooks.
-- Commands go in `.opencode/commands/<name>.md`; agents in `.opencode/agents/<name>.md`.
+The canonical source and install paths are:
 
-## Command/Skill Installation Paths
+| Surface | Path | Notes |
+|---------|------|-------|
+| Source of truth in this repo | `src/templates/skills/codewiki-<name>/SKILL.md` | One directory per skill |
+| Claude install tree | `.claude/skills/codewiki-<name>/SKILL.md` | Claude reads `.claude/skills/` |
+| Shared non-Claude install tree | `.agents/skills/codewiki-<name>/SKILL.md` | Codex reads `.agents/skills/`; Copilot and OpenCode also discover it |
 
-| Tool | Slash Command Path | Instruction File | Subagents |
-|------|--------------------|-----------------|-----------|
-| Claude Code | `.claude/commands/codewiki/<name>.md` | `CLAUDE.md` (append) | `.claude/agents/<name>.md` |
-| Codex | `~/.codex/prompts/<name>.md` (global; per-project unconfirmed) | `AGENTS.md` (append) | None native |
-| Copilot | No file-based directory confirmed | `.github/copilot-instructions.md` (append) | `.github/copilot-agents/` (unconfirmed) |
-| OpenCode | `.opencode/commands/<name>.md` | `AGENTS.md` (append) | `.opencode/agents/<name>.md` |
+OpenCode and Copilot also support tool-specific skill directories, but CodeWiki does not use them as the canonical v1 repo layout because they do not solve the Claude versus Codex discovery split.
 
 ## Feature Dependencies
 
+```text
+wiki scaffold
+  -> required by every adapter
+
+src/templates/skills/*
+  -> required by Claude adapter
+  -> required by shared non-Claude skills adapter
+
+.codewiki/hooks/*
+  -> required by Claude adapter
+  -> required by future Codex adapter
+  -> required by future Copilot adapter
+  -> required by future OpenCode plugin adapter
+
+Claude adapter
+  -> validates the end-to-end installer pattern first
+
+shared .agents/skills adapter
+  -> unblocks Codex, Copilot, and OpenCode skill availability before their full adapters land
 ```
-wiki scaffold (wiki/, raw/, tasks/, .codewiki/)
-    └──required by──> all tool adapters
 
-hook scripts (.codewiki/hooks/*.sh)
-    └──required by──> Claude Code adapter
-    └──required by──> Codex adapter
-    └──required by──> Copilot adapter
-    └──required by──> OpenCode adapter (post-only)
+## MVP And Remaining Work
 
-Claude Code adapter
-    └──validates──> overall installer pattern (do this first)
+### Shipped today
 
-slash command prompts (ingest.md, query.md, etc.)
-    └──required by──> Claude Code adapter
-    └──required by──> Codex adapter (if per-project path confirmed)
-    └──required by──> OpenCode adapter
-```
+- Wiki scaffold
+- Claude Code adapter
+- Shared non-Claude `.agents/skills/` installer
+- Shared hook scripts
+- Marker-comment instruction merges
+- Regression and pack coverage for the canonical skill assets
 
-## MVP Definition
+### Remaining adapter work
 
-### Launch With (v1)
+- OpenCode plugin adapter: `.opencode/plugins/codewiki.ts`, `.opencode/agents/`, `AGENTS.md`
+- Codex hook and instruction adapter: `.codex/hooks.json`, `AGENTS.md`
+- Copilot hook and instruction adapter: `.github/hooks/*.json`, `.github/copilot-instructions.md`
 
-- [ ] Wiki scaffold (`wiki/`, `raw/`, `tasks/`, `.codewiki/`) — core value without any tool adapter
-- [ ] Claude Code adapter (hooks + 8 commands + 2 agents + instruction section) — first tool, most mature
-- [ ] Shared hook scripts in `.codewiki/hooks/` — context injection pattern
-- [ ] No-clobber merge for `.claude/settings.json` and `CLAUDE.md` — idempotency
-- [ ] `--force` flag for overwrite — upgrade path
-- [ ] Structured install report — user confidence
+## Open Questions
 
-### Add After Validation (v1.x)
-
-- [ ] Codex adapter — after Claude Code pattern is validated; needs per-project command path spike
-- [ ] OpenCode adapter — after Claude Code; similar structure, no pre-hook limitation
-- [ ] Copilot adapter — last; Preview feature, custom command path unconfirmed
-
-### Future Consideration (v2+)
-
-- [ ] `codewiki update` command — re-install/update prompts in place
-- [ ] Plugin system for custom page types — defer until page templates are battle-tested
-- [ ] Config migration for breaking changes — not needed until v2 is a real upgrade
-
-## Open Research Questions
-
-1. **Codex per-project command path:** Is `.codex/prompts/` a valid per-project location, or global only (`~/.codex/prompts/`)? Verify before implementing Codex adapter.
-2. **Copilot custom command files:** Does Copilot agent mode support a file-based custom slash command directory? If not, Copilot adapter ships without slash commands (instruction file only).
-3. **OpenCode pre-tool hook:** Any way to inject context before file edits? Check OpenCode GitHub issues/Discord.
-4. **JS vs. shell hooks:** GSD uses Node.js scripts for hooks (better JSON parsing). Should CodeWiki follow? Tradeoff: JS is more reliable but adds a conceptual dependency on Node.js being available during hook execution.
+1. What exact stdin payloads do Codex `UserPromptSubmit` and `Stop` deliver in realistic file-edit sessions?
+2. Which Copilot payload fields are available at `agentStop` versus `postToolUse` for any future automatic absorb or continuation flow?
+3. What runtime payload shape does OpenCode deliver to the plugin hooks when `tool.execute.before`, `file.edited`, and `session.idle` fire in practice?
+4. Should any future OpenCode adapter ship a small helper library for the plugin, or keep the plugin as a thin Bun `$` dispatcher only?
 
 ## Sources
 
-- GSD local install at `/home/giuice/.claude/settings.json` — Claude Code hook format confirmed
-- Claude Code hooks documentation (official)
-- Codex hooks documentation (official)
-- Copilot hooks documentation — `.github/hooks/*.json` format with `"version": 1`
-- OpenCode config documentation — `experimental.hooks` with `file_edited` event
+- `docs/codewiki-project-v2.md`
+- `docs/skills-migration-handoff.md`
+- `docs/research-reference.md`
+- Claude Code hooks and skills docs
+- OpenAI Codex hooks and skills docs
+- GitHub Copilot hooks docs
+- OpenCode plugin and skills docs
 
 ---
-*Feature research for: npm CLI installer for AI coding tool integrations*
-*Researched: 2026-04-07*
+*Feature research refreshed to the skills + hook-event canon on 2026-04-13*

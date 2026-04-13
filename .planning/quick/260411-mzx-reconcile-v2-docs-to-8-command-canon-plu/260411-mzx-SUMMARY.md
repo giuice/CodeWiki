@@ -1,5 +1,7 @@
 # Quick Task 260411-mzx — Summary
 
+> Historical note: This completed quick-task artifact preserves the assumptions of its original session. It may mention superseded command-era paths or older hook-event choices. For current canon, use `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`, `docs/research-reference.md`, and the live `.planning/*.md` docs.
+
 **Task:** Reconcile v2 docs to 8-command canon — unblocked fixes + apply Q1 resolution (OpenCode post-hook = `session_completed → post-verify.sh` only)
 **Date:** 2026-04-11
 **Status:** Complete

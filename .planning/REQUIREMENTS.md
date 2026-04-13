@@ -9,7 +9,7 @@
 
 - [x] **CLI-01**: `npx codewiki init` works without a global install
 - [x] **CLI-02**: `--tool claude-code,codex` flag installs only specified adapters
-- [x] **CLI-03**: `--force` flag overwrites existing prompt/command files
+- [x] **CLI-03**: `--force` flag overwrites existing prompt and integration files
 - [x] **CLI-04**: `--name <name>` flag sets project name in config
 - [x] **CLI-05**: Auto-detect AI tools present (check for `.claude/`, `.codex/`, `opencode.json`, `.github/copilot-instructions.md`)
 - [x] **CLI-06**: Structured install report shows ✓ Created / ⚠ Skipped / ✗ Failed per file
@@ -75,21 +75,21 @@
 
 ### Codex Adapter
 
-- [ ] **CODEX-01**: Installs 8 skills to correct Codex skill directory (per-project or global, confirmed by research spike)
-- [ ] **CODEX-02**: Merges hook config into Codex hooks.json without clobbering existing hooks
+- [ ] **CODEX-01**: Codex selections reuse `.agents/skills/codewiki-<name>/SKILL.md` as the canonical skill tree; no separate Codex-only skill directory is introduced in v1
+- [ ] **CODEX-02**: Merges hook config into `.codex/hooks.json` without clobbering existing hooks, using `UserPromptSubmit` and `Stop` because Codex `PreToolUse` and `PostToolUse` are Bash-only
 - [ ] **CODEX-03**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
 
 ### Copilot Adapter
 
-- [ ] **COP-01**: Creates `.github/hooks/codewiki-hooks.json` with `"version": 1` and preToolUse/postToolUse entries
+- [ ] **COP-01**: Creates `.github/hooks/codewiki-hooks.json` with `"version": 1` and preToolUse/postToolUse entries; any future automatic absorb follow-up uses `agentStop`, not `sessionEnd`
 - [ ] **COP-02**: Appends CodeWiki instructions to `.github/copilot-instructions.md` using marker comments
-- [ ] **COP-03**: Documents skill directory limitation (no file-based skill directory confirmed)
+- [ ] **COP-03**: Reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree; does not require a separate `.github/skills/` tree in v1
 
 ### OpenCode Adapter
 
-- [ ] **OC-01**: Installs 8 skills to `.opencode/skills/codewiki-<name>/SKILL.md`
+- [ ] **OC-01**: Reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree for OpenCode selections; no separate OpenCode-only skill tree is introduced in v1
 - [ ] **OC-02**: Installs 2 subagents to `.opencode/agents/`
-- [ ] **OC-03**: Merges `session_completed` hook into `opencode.json` experimental.hooks (no PreToolUse — not available)
+- [ ] **OC-03**: Installs `.opencode/plugins/codewiki.ts` that dispatches `tool.execute.before`, `file.edited`, and `session.idle` to the shared shell hooks; `session.idle` is treated as turn-end or idle, not teardown
 - [ ] **OC-04**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
 
 ### Config Merge Safety
@@ -204,4 +204,4 @@
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-12 — Phase 4.1.4 — planning docs canon refresh and SM traceability update*
+*Last updated: 2026-04-13 — canonical hook and skill surface reconciliation*

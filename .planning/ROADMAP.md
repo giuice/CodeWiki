@@ -2,7 +2,7 @@
 
 ## Overview
 
-CodeWiki v2 rewrites the v1 runtime CLI as a pure installer/scaffolder. The journey starts with deleting all v1 runtime code, builds shared infrastructure that every adapter depends on, writes all template files (the riskiest deliverable), wires up the Claude Code adapter to validate the full install pattern end-to-end, hardens the implementation with tests, then adds OpenCode, Codex, and Copilot adapters incrementally. The final phase hardens the npm publish so `npx codewiki init` works reliably with all template assets bundled.
+CodeWiki v2 rewrites the v1 runtime CLI as a pure installer/scaffolder. The journey starts with deleting all v1 runtime code, builds shared infrastructure that every adapter depends on, writes the canonical skill and hook assets, wires up the Claude Code adapter to validate the full install pattern end-to-end, hardens the implementation with tests, then adds the remaining OpenCode, Codex, and Copilot adapter surfaces incrementally. The shared non-Claude skill tree already ships today; the remaining work is the tool-specific hook, instruction, plugin, and agent integration. The final phase hardens the npm publish so `npx codewiki init` works reliably with all template assets bundled.
 
 ## Phases
 
@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4.1.4: Planning Docs Canon Refresh** - Align roadmap, requirements, state, and active planning artifacts to the skills canon (INSERTED)
 - [x] **Phase 4.1.5: Product Docs Canon Refresh** - Align README, implementation docs, and handoff docs to the skills canon (INSERTED) (completed 2026-04-13)
 - [x] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
-- [ ] **Phase 6: OpenCode Adapter** - session_completed-only hook strategy; skills and agents
+- [ ] **Phase 6: OpenCode Adapter** - plugin-based hook strategy with shared `.agents/skills`, OpenCode agents, and AGENTS wiring
 - [ ] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps
 - [ ] **Phase 8: npm Publish Hardening** - Build script, pack verification, engines field, README
 
@@ -107,7 +107,7 @@ Plans:
 **Plans:** 3/3 plans complete
 Plans:
 - [x] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
-- [x] 04-02-PLAN.md — Claude Code adapter (8 commands, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [x] 04-02-PLAN.md — Claude Code adapter (8 skills, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
 - [x] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ### Phase 4.1: Skills Migration (INSERTED)
@@ -213,28 +213,29 @@ Plans:
 - [x] 05-01-PLAN.md — Add pack tarball test (BUILD-02) and session-end empty-JSON-payload edge case
 
 ### Phase 6: OpenCode Adapter
-**Goal**: `npx codewiki init` on a project with `opencode.json` installs skills, agents, and a session_completed hook (no PreToolUse)
+**Goal**: `npx codewiki init` on a project with OpenCode present reuses the shared `.agents/skills` tree, installs OpenCode agents, appends `AGENTS.md`, and wires a `.opencode/plugins/codewiki.ts` dispatcher to the documented OpenCode plugin events
 **Depends on**: Phase 5
 **Requirements**: OC-01, OC-02, OC-03, OC-04
 **Success Criteria** (what must be TRUE):
-  1. Running `npx codewiki init` on a project with `opencode.json` installs 8 skills to `.opencode/skills/codewiki-<name>/` and 2 agents to `.opencode/agents/`
-  2. The resulting `opencode.json` contains a `session_completed` hook entry pointing to `.codewiki/hooks/post-verify.sh` and no PreToolUse entry
-  3. Re-running `npx codewiki init` twice does not create duplicate hook entries in `opencode.json` or duplicate marker sections in `AGENTS.md`
-  4. Running `npx codewiki init --tool opencode` on a project without `opencode.json` still installs the OpenCode adapter (explicit flag overrides detection)
+  1. Running `npx codewiki init` on a project with OpenCode selected installs 8 skills to `.agents/skills/codewiki-<name>/SKILL.md` and 2 agents to `.opencode/agents/`
+  2. The resulting `.opencode/plugins/codewiki.ts` dispatches `tool.execute.before` to `pre-wiki-context.sh`, `file.edited` to `post-verify.sh`, and `session.idle` to `session-end.sh`
+  3. OpenCode documentation and adapter code treat `session.idle` as a turn-end or assistant-idle signal, not literal session teardown semantics
+  4. Re-running `npx codewiki init` twice does not create duplicate plugin wiring, duplicate OpenCode agent files, or duplicate marker sections in `AGENTS.md`
+  5. Running `npx codewiki init --tool opencode` on a project without an existing OpenCode config still installs the OpenCode adapter (explicit flag overrides detection)
 **Plans:** 2 plans
 Plans:
-- [ ] 06-01-PLAN.md — Create OpenCode command, agent, and AGENTS.md template assets
-- [ ] 06-02-PLAN.md — Implement the OpenCode adapter, init wiring, and idempotent regression coverage
+- [ ] 06-01-PLAN.md — Create OpenCode plugin, agent, and AGENTS.md template assets
+- [ ] 06-02-PLAN.md — Implement the OpenCode adapter, plugin wiring, and idempotent regression coverage
 
 ### Phase 7: Codex and Copilot Adapters
-**Goal**: Codex and Copilot adapters are implemented after per-tool command path and hook format are confirmed via spikes
+**Goal**: Codex and Copilot adapters layer their tool-specific hooks and instruction integration on top of the already-shipped shared `.agents/skills` tree
 **Depends on**: Phase 6
 **Requirements**: CODEX-01, CODEX-02, CODEX-03, COP-01, COP-02, COP-03
 **Success Criteria** (what must be TRUE):
-  1. Running `npx codewiki init` on a project with `.codex/` present merges CodeWiki hooks into Codex hook config without clobbering existing hooks, and appends instructions to `AGENTS.md` using marker comments
-  2. Running `npx codewiki init` on a project with `.github/copilot-instructions.md` creates `.github/hooks/codewiki-hooks.json` with `"version": 1` and appends to `.github/copilot-instructions.md` using marker comments
-  3. If Codex per-project command path is confirmed, 8 skills are installed to that directory; if global-only, the install report notes the limitation
-  4. If Copilot has no confirmed skill directory, the install report documents the limitation rather than silently skipping
+  1. Running `npx codewiki init` on a project with `.codex/` present preserves the shared `.agents/skills` tree, merges CodeWiki hooks into `.codex/hooks.json` without clobbering existing hooks, and appends instructions to `AGENTS.md` using marker comments
+  2. Codex hook wiring uses `UserPromptSubmit` for wiki-context injection and `Stop` for post-turn follow-up because Codex `PreToolUse` and `PostToolUse` are Bash-only
+  3. Running `npx codewiki init` on a project with `.github/copilot-instructions.md` creates `.github/hooks/codewiki-hooks.json` with `"version": 1`, appends to `.github/copilot-instructions.md`, and documents `agentStop` as the meaningful post-turn lifecycle hook while `sessionEnd` remains cleanup-only
+  4. Mixed selections such as `claude-code,codex` or `claude-code,copilot` still write both `.claude/skills/` and `.agents/skills/` exactly once
 **Plans:** TBD
 Plans:
 - [ ] TBD

@@ -6,6 +6,8 @@ score: 5/5
 overrides_applied: 0
 ---
 
+> Historical note: This completed phase artifact preserves the assumptions of its original session. It may mention superseded command-era paths or older hook-event choices. For current canon, use `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`, `docs/research-reference.md`, and the live `.planning/*.md` docs.
+
 # Phase 03: Prompt Templates and Hook Scripts Verification Report
 
 **Phase Goal:** All markdown prompt files, agent definitions, and hook scripts exist in `src/templates/` and are individually verifiable.

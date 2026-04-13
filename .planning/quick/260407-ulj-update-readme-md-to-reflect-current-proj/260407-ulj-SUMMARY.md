@@ -1,5 +1,7 @@
 # Quick Task 260407-ulj: Update README.md — Summary
 
+> Historical note: This completed quick-task artifact preserves the assumptions of its original session. It may mention superseded command-era paths or older hook-event choices. For current canon, use `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`, `docs/research-reference.md`, and the live `.planning/*.md` docs.
+
 **Completed:** 2026-04-08
 **Status:** ✅ Done
 

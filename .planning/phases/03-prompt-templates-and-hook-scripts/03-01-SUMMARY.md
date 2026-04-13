@@ -34,6 +34,8 @@ duration: 1m
 completed: 2026-04-08
 ---
 
+> Historical note: This completed phase artifact preserves the assumptions of its original session. It may mention superseded command-era paths or older hook-event choices. For current canon, use `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`, `docs/research-reference.md`, and the live `.planning/*.md` docs.
+
 # Phase 03 Plan 01: Command Templates Summary
 
 **Six Claude slash command templates covering wiki ingest/query/lint plus PRD, task generation, and guided task processing workflows**

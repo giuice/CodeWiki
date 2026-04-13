@@ -6,6 +6,8 @@ score: 7/7
 overrides_applied: 0
 ---
 
+> Historical note: This completed phase artifact preserves the assumptions of its original session. It may mention superseded command-era paths or older hook-event choices. For current canon, use `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`, `docs/research-reference.md`, and the live `.planning/*.md` docs.
+
 # Phase 04: Claude Code Adapter + init Command Verification Report
 
 **Phase Goal:** `npx codewiki init` installs the wiki scaffold and Claude Code integration into a real project, and re-running the command produces the same state without duplicated hooks or marker blocks.

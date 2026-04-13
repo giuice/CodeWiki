@@ -3,7 +3,7 @@
 
 **CodeWiki v2**
 
-CodeWiki is a framework that installs into any AI coding tool (Claude Code, Codex, Copilot, OpenCode) and maintains a persistent, LLM-written wiki of verified project knowledge. Developers run `npx codewiki init` once — the CLI scaffolds a wiki structure and installs hooks, slash commands, and agents into their AI tool. All intelligence (reading wiki, proposing updates, human approval loops) lives in markdown prompt files the AI tool executes natively.
+CodeWiki is a framework that installs into any AI coding tool (Claude Code, Codex, Copilot, OpenCode) and maintains a persistent, LLM-written wiki of verified project knowledge. Developers run `npx codewiki init` once — the CLI scaffolds a wiki structure and installs hooks, Skills, agents, and instruction blocks into the host tool. All intelligence (reading wiki, proposing updates, human approval loops) lives in markdown prompt files and shared scripts that the AI tool executes natively.
 
 Target users: solo developers using AI coding agents who have experienced agents confidently producing broken code and want accumulated, cross-referenced, human-verified context that reduces hallucination over time.
 
