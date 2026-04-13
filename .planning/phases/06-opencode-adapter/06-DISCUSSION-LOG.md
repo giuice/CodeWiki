@@ -41,13 +41,13 @@
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Adaptacao leve dos agentes atuais | Reuse the existing CodeWiki agent roles with only light OpenCode-specific adjustments. | ✓ |
+| Adaptacao leve dos agentes atuais | Reuse the existing CodeWiki agent roles with only light OpenCode-specific adjustments. | |
 | Copia quase literal | Install versions that are nearly identical to the Claude agent templates. | |
 | Agentes realmente especificos do OpenCode | Rewrite the agent prompts around OpenCode-specific runtime behavior. | |
 | Voce decide | Let the planner choose the approach later. | |
 
-**User's choice:** Adaptacao leve dos agentes atuais
-**Notes:** During clarification, the existing agent pair was confirmed as `codewiki-wiki-updater` and `codewiki-verifier`, and the user preferred preserving those responsibilities.
+**User's choice:** Custom — preserve `codewiki-wiki-updater` and `codewiki-verifier` as the role pair, but adapt each tool's agent prompts as much as needed so they work in the best way for that host runtime.
+**Notes:** During clarification, the existing agent pair was confirmed as `codewiki-wiki-updater` and `codewiki-verifier`. After reconsideration, the user revised the earlier "light adaptation" preference and asked for tool-optimized prompts rather than near-identical copies across OpenCode, Codex, Copilot, and Claude.
 
 ---
 

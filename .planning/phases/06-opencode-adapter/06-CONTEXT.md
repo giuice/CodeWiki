@@ -24,13 +24,14 @@
 
 ### OpenCode agents
 - **D-06:** Phase 6 installs the existing two CodeWiki agent roles for OpenCode: `codewiki-wiki-updater` and `codewiki-verifier`.
-- **D-07:** OpenCode agent templates should be light adaptations of the current shipped agent bodies rather than entirely new OpenCode-specific roles.
-- **D-08:** The responsibilities stay unchanged: the updater proposes wiki changes from code changes with per-change approval, and the verifier remains read-only and checks for contradictions, broken references, and missing index updates.
+- **D-07:** OpenCode agent templates should be adapted as much as needed to work best in OpenCode rather than being forced into near-literal copies of another tool's prompt shape.
+- **D-08:** The responsibilities stay unchanged even when the prompt wording or workflow is tool-tuned: the updater proposes wiki changes from code changes with per-change approval, and the verifier remains read-only and checks for contradictions, broken references, and missing index updates.
+- **D-09:** The same product preference should inform future tool-agent work as later phases arrive: preserve the shared role pair where possible, but optimize each tool's agent prompts for that host's best runtime fit.
 
 ### Detection and bootstrap
-- **D-09:** Auto-detection for OpenCode remains conservative in this phase. Existing marker-based detection can stay narrow rather than broadening immediately.
-- **D-10:** Explicit `--tool opencode` must be authoritative: if the user asks for OpenCode, the installer should create the required OpenCode surface even when no prior OpenCode config exists.
-- **D-11:** That bootstrap path should create whatever Phase 6 owns and needs to function: `.opencode/`, `.opencode/plugins/codewiki.ts`, `.opencode/agents/`, and the CodeWiki-managed `AGENTS.md` marker section.
+- **D-10:** Auto-detection for OpenCode remains conservative in this phase. Existing marker-based detection can stay narrow rather than broadening immediately.
+- **D-11:** Explicit `--tool opencode` must be authoritative: if the user asks for OpenCode, the installer should create the required OpenCode surface even when no prior OpenCode config exists.
+- **D-12:** That bootstrap path should create whatever Phase 6 owns and needs to function: `.opencode/`, `.opencode/plugins/codewiki.ts`, `.opencode/agents/`, and the CodeWiki-managed `AGENTS.md` marker section.
 
 ### the agent's Discretion
 - Exact TypeScript structure inside the thin plugin dispatcher, as long as it remains a minimal event-to-hook bridge
@@ -45,7 +46,8 @@
 
 - The user explicitly called out that plugin architecture had already been decided; preserve the thin-dispatch model rather than reopening it during planning.
 - The OpenCode `AGENTS.md` block should stay compact and practical instead of copying the full Claude instruction body.
-- Reuse the existing `codewiki-wiki-updater` and `codewiki-verifier` responsibilities rather than inventing new OpenCode-only agent roles.
+- Reuse the existing `codewiki-wiki-updater` and `codewiki-verifier` responsibilities rather than inventing a different role catalog for OpenCode.
+- The user revised the earlier "light adaptation" wording: prompts should be adapted to work as well as possible for each tool, even if that means more than small wording tweaks, as long as the shared updater/verifier role model still holds.
 
 </specifics>
 
