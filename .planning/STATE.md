@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 04.1 shipped via PR #2; Phase 06 ready to plan
-last_updated: "2026-04-13T17:54:04Z"
+stopped_at: Phase 6 context gathered
+last_updated: "2026-04-13T18:39:14.818Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 15
@@ -118,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T11:08:36.233Z
-Stopped at: Phase 04.1.3 complete; Phase 04.1.4 ready to plan
-Resume file: .planning/ROADMAP.md
+Last session: 2026-04-13T18:39:14.814Z
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-opencode-adapter/06-CONTEXT.md
