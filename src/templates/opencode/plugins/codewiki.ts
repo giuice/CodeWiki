@@ -1,40 +1,51 @@
-import { join } from "node:path";
-import type { Plugin } from "@opencode-ai/plugin";
+import path from "node:path";
 
-export const CodeWikiPlugin: Plugin = async ({ $, directory, worktree }) => {
-  const hookRoot = join(worktree || directory, ".codewiki", "hooks");
+function toJson(value: unknown): string {
+  try {
+    return `${JSON.stringify(value ?? {}, null, 2)}\n`;
+  } catch {
+    return "{}\n";
+  }
+}
 
-  const runHook = async (hookFile: string, payload?: unknown) => {
-    const hookPath = join(hookRoot, hookFile);
+async function runHook(root: string, hookName: string, payload?: unknown): Promise<void> {
+  const hookPath = path.join(root, ".codewiki", "hooks", hookName);
 
-    if (!(await Bun.file(hookPath).exists())) {
-      return;
-    }
+  try {
+    const process = Bun.spawn({
+      cmd: ["bash", hookPath],
+      cwd: root,
+      stdin: payload === undefined ? undefined : toJson(payload),
+      stdout: "ignore",
+      stderr: "ignore"
+    });
+    await process.exited;
+  } catch {
+    // CodeWiki hooks are advisory and must never block the host agent.
+  }
+}
 
-    const payloadText = payload == null ? "" : JSON.stringify(payload);
-
-    try {
-      if (payloadText) {
-        await $`printf '%s' ${payloadText} | sh ${hookPath}`;
-        return;
-      }
-
-      await $`sh ${hookPath}`;
-    } catch {
-      // CodeWiki hooks are advisory only and should never block OpenCode.
-    }
-  };
+export const CodeWikiPlugin = async ({
+  directory,
+  worktree
+}: {
+  directory?: string;
+  worktree?: string;
+}) => {
+  const root = worktree ?? directory ?? process.cwd();
 
   return {
-    "tool.execute.before": async (input: unknown) => {
-      await runHook("pre-wiki-context.sh", input);
+    "tool.execute.before": async (input: unknown, output: unknown) => {
+      await runHook(root, "pre-wiki-context.sh", { input, output });
     },
-    "file.edited": async (event: unknown) => {
-      await runHook("post-verify.sh", event);
+
+    "file.edited": async (input: unknown, output: unknown) => {
+      await runHook(root, "post-verify.sh", { input, output });
     },
-    "session.idle": async (event: unknown) => {
-      // Treat assistant idle as turn-end, not literal session teardown.
-      await runHook("session-end.sh", event);
-    },
+
+    // `session.idle` is treated as assistant-idle / turn-end, not teardown.
+    "session.idle": async (input: unknown) => {
+      await runHook(root, "session-end.sh", input);
+    }
   };
 };
