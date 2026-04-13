@@ -8,6 +8,11 @@ const adapterFactories: Partial<Record<SupportedTool, () => Promise<ToolAdapter>
     const modulePath = "./claude.js";
     const { ClaudeCodeAdapter } = await import(modulePath);
     return new ClaudeCodeAdapter();
+  },
+  opencode: async () => {
+    const modulePath = "./opencode.js";
+    const { OpenCodeAdapter } = await import(modulePath);
+    return new OpenCodeAdapter();
   }
 };
 
@@ -25,21 +30,20 @@ export async function resolveAdapters(
   let sharedSkillsAdded = false;
 
   for (const tool of tools) {
+    if (SHARED_SKILLS_TOOLS.has(tool) && !sharedSkillsAdded) {
+      adapters.push(await createSharedSkillsAdapter());
+      sharedSkillsAdded = true;
+    }
+
     const factory = adapterFactories[tool];
     if (factory) {
       adapters.push(await factory());
       continue;
     }
 
-    if (SHARED_SKILLS_TOOLS.has(tool)) {
-      if (!sharedSkillsAdded) {
-        adapters.push(await createSharedSkillsAdapter());
-        sharedSkillsAdded = true;
-      }
-      continue;
+    if (!SHARED_SKILLS_TOOLS.has(tool)) {
+      unsupported.push(tool);
     }
-
-    unsupported.push(tool);
   }
 
   return { adapters, unsupported };
