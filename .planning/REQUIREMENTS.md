@@ -87,10 +87,10 @@
 
 ### OpenCode Adapter
 
-- [ ] **OC-01**: Reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree for OpenCode selections; no separate OpenCode-only skill tree is introduced in v1
-- [ ] **OC-02**: Installs 2 subagents to `.opencode/agents/`
-- [ ] **OC-03**: Installs `.opencode/plugins/codewiki.ts` that dispatches `tool.execute.before`, `file.edited`, and `session.idle` to the shared shell hooks; `session.idle` is treated as turn-end or idle, not teardown
-- [ ] **OC-04**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
+- [x] **OC-01**: Reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree for OpenCode selections; no separate OpenCode-only skill tree is introduced in v1
+- [x] **OC-02**: Installs 2 subagents to `.opencode/agents/`
+- [x] **OC-03**: Installs `.opencode/plugins/codewiki.ts` that dispatches `tool.execute.before`, `file.edited`, and `session.idle` to the shared shell hooks; `session.idle` is treated as turn-end or idle, not teardown
+- [x] **OC-04**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
 
 ### Config Merge Safety
 
@@ -182,10 +182,10 @@
 | SM-06 | Phase 4.1.5 (Product Docs Canon Refresh) | Complete (2026-04-13) |
 | BUILD-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | BUILD-02 | Phase 5 (Test Suite) | Complete (2026-04-10) |
-| OC-01 | Phase 6 (OpenCode Adapter) | Pending |
-| OC-02 | Phase 6 (OpenCode Adapter) | Pending |
-| OC-03 | Phase 6 (OpenCode Adapter) | Pending |
-| OC-04 | Phase 6 (OpenCode Adapter) | Pending |
+| OC-01 | Phase 6 (OpenCode Adapter) | Complete |
+| OC-02 | Phase 6 (OpenCode Adapter) | Complete |
+| OC-03 | Phase 6 (OpenCode Adapter) | Complete |
+| OC-04 | Phase 6 (OpenCode Adapter) | Complete |
 | CODEX-01 | Phase 7 (Codex and Copilot Adapters) | Pending |
 | CODEX-02 | Phase 7 (Codex and Copilot Adapters) | Pending |
 | CODEX-03 | Phase 7 (Codex and Copilot Adapters) | Pending |

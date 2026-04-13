@@ -107,6 +107,37 @@ test("init auto-detects Claude when a .claude directory already exists", () => {
   assert.equal(existsSync(path.join(cwd, ".agents/skills")), false, "Auto-detected Claude install must not create .agents/skills");
 });
 
+test("init --tool opencode installs the real OpenCode adapter and stays idempotent", () => {
+  const cwd = tempProject();
+
+  const first = mustRun(cwd, ["init", "--tool", "opencode"]);
+  assert.match(first.stdout, /shared-skills adapter:/);
+  assert.match(first.stdout, /opencode adapter:/);
+  assert.doesNotMatch(first.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(first.stdout, /opencode \(shared skills installed; hooks and instructions remain pending\)/);
+
+  assertInstalledSkillTree(cwd, ".agents/skills");
+  assert.equal(existsSync(path.join(cwd, ".claude/skills")), false, "OpenCode-only install must not create .claude/skills");
+  assert.equal(existsSync(path.join(cwd, ".opencode/plugins/codewiki.ts")), true);
+  assert.equal(existsSync(path.join(cwd, ".opencode/agents/codewiki-wiki-updater.md")), true);
+  assert.equal(existsSync(path.join(cwd, ".opencode/agents/codewiki-verifier.md")), true);
+  assert.equal(existsSync(path.join(cwd, "AGENTS.md")), true);
+
+  const firstAgents = readFileSync(path.join(cwd, "AGENTS.md"), "utf8");
+  assert.equal(countOccurrences(firstAgents, "<!-- codewiki:start -->"), 1);
+  assert.match(firstAgents, /wiki\/_backlinks\.json/);
+  assert.match(firstAgents, /tool\.execute\.before/);
+
+  const second = mustRun(cwd, ["init", "--tool", "opencode"]);
+  assert.match(second.stdout, /shared-skills adapter:/);
+  assert.match(second.stdout, /opencode adapter:/);
+  assert.doesNotMatch(second.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(second.stdout, /opencode \(shared skills installed; hooks and instructions remain pending\)/);
+
+  const secondAgents = readFileSync(path.join(cwd, "AGENTS.md"), "utf8");
+  assert.equal(countOccurrences(secondAgents, "<!-- codewiki:start -->"), 1);
+});
+
 test("init reports pending non-Claude integrations without failing the Claude install", () => {
   const cwd = tempProject();
   const result = mustRun(cwd, ["init", "--tool", "claude-code,codex"]);
