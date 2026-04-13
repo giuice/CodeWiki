@@ -22,7 +22,7 @@ test("planning docs canon keeps roadmap and requirements aligned to SM-05", () =
     /\*\*SM-05\*\*: Planning artifacts \(`ROADMAP\.md`, `REQUIREMENTS\.md`, `STATE\.md`, and active phase contexts\/plans\) reflect the skills canon and parser-safe split structure/
   );
   assert.match(requirements, /\| SM-05 \| Phase 4\.1\.4 \(Planning Docs Canon Refresh\) \| Complete \(2026-04-12\) \|/);
-  assert.match(requirements, /\| SM-06 \| Phase 4\.1\.5 \(Product Docs Canon Refresh\) \| Planned \|/);
+  assert.match(requirements, /\| SM-06 \| Phase 4\.1\.5 \(Product Docs Canon Refresh\) \| Complete \(2026-04-13\) \|/);
   assert.match(requirements, /\*\*CC-01\*\*: Installs 8 skills to `\.claude\/skills\/codewiki-<name>\/SKILL\.md`/);
   assert.match(requirements, /\*\*OC-01\*\*: Installs 8 skills to `\.opencode\/skills\/codewiki-<name>\/SKILL\.md`/);
   assert.match(requirements, /\*\*CODEX-01\*\*: Installs 8 skills to correct Codex skill directory/);
