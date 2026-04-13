@@ -4,7 +4,7 @@ import { createInterface } from "node:readline/promises";
 import { SUPPORTED_TOOLS, type SupportedTool } from "../core/types.js";
 import { resolveAdapters } from "../lib/adapters/index.js";
 import { detectTools } from "../lib/detect.js";
-import { formatSectionedReport, type ReportSection } from "../lib/reporter.js";
+import { formatSectionedReport, type ReportEntry, type ReportSection } from "../lib/reporter.js";
 import { scaffoldProject } from "../lib/scaffold.js";
 
 export interface InitOptions {
@@ -35,6 +35,18 @@ function parseTools(value: string): SupportedTool[] {
     throw new Error(`Unsupported tool value: ${unknown.join(", ")}. Supported values: ${SUPPORTED_TOOLS.join(", ")}`);
   }
   return [...new Set(requested)] as SupportedTool[];
+}
+
+const SHARED_SKILL_ONLY_TOOLS = new Set<SupportedTool>(["codex", "copilot", "opencode"]);
+
+function getPendingIntegrationEntries(tools: SupportedTool[]): ReportEntry[] {
+  return tools
+    .filter((tool) => SHARED_SKILL_ONLY_TOOLS.has(tool))
+    .map((tool) => ({
+      action: "skipped" as const,
+      path: tool,
+      reason: "shared skills installed; hooks and instructions remain pending"
+    }));
 }
 
 async function promptForTool(): Promise<SupportedTool[]> {
@@ -97,6 +109,15 @@ export async function initCommand({ root = process.cwd(), args }: InitOptions): 
   for (const adapter of adapters) {
     const adapterEntries = await adapter.install({ root, projectName, force, templateDir });
     sections.push({ title: `${adapter.tool} adapter`, entries: adapterEntries });
+  }
+
+  const hasSharedSkillsAdapter = adapters.some((adapter) => adapter.tool === "shared-skills");
+  const pendingIntegrationEntries = hasSharedSkillsAdapter ? getPendingIntegrationEntries(tools) : [];
+  if (pendingIntegrationEntries.length > 0) {
+    sections.push({
+      title: "Tool-specific integrations pending",
+      entries: pendingIntegrationEntries
+    });
   }
 
   if (unsupported.length > 0) {

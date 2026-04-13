@@ -3,10 +3,12 @@ import path from "node:path";
 
 import { describe, expect, test } from "vitest";
 
-const COMMANDS_DIR = path.resolve("src/templates/claude/commands/codewiki");
+const SKILLS_DIR = path.resolve("src/templates/skills");
+const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "prd", "process", "query", "tasks"];
+const ARGUMENT_HINT_SKILLS = new Set(["ingest", "query", "prd", "process", "tasks"]);
 
-async function readCommand(name: string): Promise<string> {
-  return readFile(path.join(COMMANDS_DIR, name), "utf8");
+async function readSkill(name: string): Promise<string> {
+  return readFile(path.join(SKILLS_DIR, `codewiki-${name}`, "SKILL.md"), "utf8");
 }
 
 function extractFrontmatter(content: string): string | null {
@@ -14,119 +16,151 @@ function extractFrontmatter(content: string): string | null {
   return match ? match[1] ?? null : null;
 }
 
-describe("CMD-01: ingest.md has description frontmatter and purpose/process tags", () => {
-  test("ingest.md exists with description, purpose, and process", async () => {
-    const content = await readCommand("ingest.md");
+describe("SM-04: canonical skill files expose the eight-skill frontmatter contract", () => {
+  for (const skill of CANONICAL_SKILLS) {
+    test(`codewiki-${skill}/SKILL.md has name, description, purpose, and process`, async () => {
+      const content = await readSkill(skill);
+      const fm = extractFrontmatter(content);
+
+      expect(fm).not.toBeNull();
+      expect(fm).toMatch(new RegExp(`^name: codewiki-${skill}$`, "m"));
+      expect(fm).toMatch(/^description:/m);
+      expect(content).toContain("<purpose>");
+      expect(content).toContain("<process>");
+    });
+
+    test(`codewiki-${skill}/SKILL.md preserves the current argument-hint contract`, async () => {
+      const fm = extractFrontmatter(await readSkill(skill));
+
+      expect(fm).not.toBeNull();
+
+      if (ARGUMENT_HINT_SKILLS.has(skill)) {
+        expect(fm).toMatch(/^argument-hint:/m);
+      } else {
+        expect(fm).not.toMatch(/^argument-hint:/m);
+      }
+    });
+  }
+});
+
+describe("CMD-01: codewiki-ingest preserves the ingest workflow checks", () => {
+  test("codewiki-ingest exists with description, purpose, and process", async () => {
+    const content = await readSkill("ingest");
     const fm = extractFrontmatter(content);
     expect(fm).not.toBeNull();
+    expect(fm).toMatch(/^name: codewiki-ingest$/m);
     expect(fm).toMatch(/^description:/m);
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
   });
 
-  test("ingest.md has approval gate and no automatic git commit", async () => {
-    const content = await readCommand("ingest.md");
+  test("codewiki-ingest has approval gate and no automatic git commit", async () => {
+    const content = await readSkill("ingest");
     expect(content.toLowerCase()).toContain("approval");
   });
 });
 
-describe("CMD-02: query.md has description frontmatter and purpose/process tags", () => {
-  test("query.md exists with description, purpose, and process", async () => {
-    const content = await readCommand("query.md");
+describe("CMD-02: codewiki-query preserves the grounded search workflow", () => {
+  test("codewiki-query exists with description, purpose, and process", async () => {
+    const content = await readSkill("query");
     const fm = extractFrontmatter(content);
     expect(fm).not.toBeNull();
+    expect(fm).toMatch(/^name: codewiki-query$/m);
     expect(fm).toMatch(/^description:/m);
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
   });
 
-  test("query.md references wiki/index.md for grounded search", async () => {
-    const content = await readCommand("query.md");
+  test("codewiki-query references wiki/index.md for grounded search", async () => {
+    const content = await readSkill("query");
     expect(content).toContain("wiki/index.md");
   });
 });
 
-describe("CMD-03: lint.md has description frontmatter and purpose/process tags", () => {
-  test("lint.md exists with description, purpose, and process", async () => {
-    const content = await readCommand("lint.md");
+describe("CMD-03: codewiki-lint preserves lint workflow checks", () => {
+  test("codewiki-lint exists with description, purpose, and process", async () => {
+    const content = await readSkill("lint");
     const fm = extractFrontmatter(content);
     expect(fm).not.toBeNull();
+    expect(fm).toMatch(/^name: codewiki-lint$/m);
     expect(fm).toMatch(/^description:/m);
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
   });
 
-  test("lint.md includes orphan detection capability", async () => {
-    const content = await readCommand("lint.md");
+  test("codewiki-lint includes orphan detection capability", async () => {
+    const content = await readSkill("lint");
     expect(content.toLowerCase()).toContain("orphan");
   });
 });
 
-describe("CMD-04: prd.md has description, purpose/process, and --fast toggle", () => {
-  test("prd.md exists with description, purpose, process, and --fast", async () => {
-    const content = await readCommand("prd.md");
+describe("CMD-04: codewiki-prd preserves task-driven PRD workflow checks", () => {
+  test("codewiki-prd exists with description, purpose, process, and --fast", async () => {
+    const content = await readSkill("prd");
     const fm = extractFrontmatter(content);
     expect(fm).not.toBeNull();
+    expect(fm).toMatch(/^name: codewiki-prd$/m);
     expect(fm).toMatch(/^description:/m);
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
     expect(content).toContain("--fast");
   });
 
-  test("prd.md preserves clarifying questions and uses Task for multi-agent", async () => {
-    const content = await readCommand("prd.md");
+  test("codewiki-prd preserves clarifying questions and uses Task for multi-agent", async () => {
+    const content = await readSkill("prd");
     expect(content.toLowerCase()).toContain("clarifying questions");
     const fm = extractFrontmatter(content)!;
     expect(fm).toContain("Task");
   });
 });
 
-describe("CMD-05: tasks.md has description, purpose/process, and --fast toggle", () => {
-  test("tasks.md exists with description, purpose, process, and --fast", async () => {
-    const content = await readCommand("tasks.md");
+describe("CMD-05: codewiki-tasks preserves task generation workflow checks", () => {
+  test("codewiki-tasks exists with description, purpose, process, and --fast", async () => {
+    const content = await readSkill("tasks");
     const fm = extractFrontmatter(content);
     expect(fm).not.toBeNull();
+    expect(fm).toMatch(/^name: codewiki-tasks$/m);
     expect(fm).toMatch(/^description:/m);
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
     expect(content).toContain("--fast");
   });
 
-  test("tasks.md preserves Go gate and uses Task for multi-agent", async () => {
-    const content = await readCommand("tasks.md");
-    expect(content).toMatch(/['"]?Go['"]?/);
+  test("codewiki-tasks preserves Go gate and uses Task for multi-agent", async () => {
+    const content = await readSkill("tasks");
+    expect(content).toMatch(/["']?Go["']?/);
     const fm = extractFrontmatter(content)!;
     expect(fm).toContain("Task");
   });
 });
 
-describe("CMD-06: process.md has description, purpose/process, and --fast toggle", () => {
-  test("process.md exists with description, purpose, process, and --fast", async () => {
-    const content = await readCommand("process.md");
+describe("CMD-06: codewiki-process preserves process workflow checks", () => {
+  test("codewiki-process exists with description, purpose, process, and --fast", async () => {
+    const content = await readSkill("process");
     const fm = extractFrontmatter(content);
     expect(fm).not.toBeNull();
+    expect(fm).toMatch(/^name: codewiki-process$/m);
     expect(fm).toMatch(/^description:/m);
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
     expect(content).toContain("--fast");
   });
 
-  test("process.md preserves one sub-task pattern and uses Task", async () => {
-    const content = await readCommand("process.md");
+  test("codewiki-process preserves one sub-task pattern and uses Task", async () => {
+    const content = await readSkill("process");
     expect(content.toLowerCase()).toMatch(/one sub[- ]?task/);
     const fm = extractFrontmatter(content)!;
     expect(fm).toContain("Task");
   });
 });
 
-describe("CMD-07: All 6 command files have description field in YAML frontmatter", () => {
-  const commands = ["ingest.md", "query.md", "lint.md", "prd.md", "tasks.md", "process.md"];
-
-  for (const cmd of commands) {
-    test(`${cmd} has description field in YAML frontmatter`, async () => {
-      const content = await readCommand(cmd);
+describe("CMD-07: All 8 canonical skill files have name and description in YAML frontmatter", () => {
+  for (const skill of CANONICAL_SKILLS) {
+    test(`codewiki-${skill}/SKILL.md has name and description in YAML frontmatter`, async () => {
+      const content = await readSkill(skill);
       const fm = extractFrontmatter(content);
       expect(fm).not.toBeNull();
+      expect(fm).toMatch(new RegExp(`^name: codewiki-${skill}$`, "m"));
       expect(fm).toMatch(/^description:/m);
     });
   }

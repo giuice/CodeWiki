@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { describe, expect, test } from "vitest";
 
-const INGEST_PATH = path.resolve("src/templates/claude/commands/codewiki/ingest.md");
+const INGEST_PATH = path.resolve("src/templates/skills/codewiki-ingest/SKILL.md");
 
 describe("ABS-03A: ingest.md reads and updates backlinks", () => {
   test("ingest.md references wiki/_backlinks.json in load and write steps", async () => {

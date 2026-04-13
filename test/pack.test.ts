@@ -26,13 +26,12 @@ test("npm pack --dry-run includes required template files in tarball (BUILD-01, 
 
   const packOutput = packDetails.stdout;
 
-  // IMPORTANT: REQUIREMENTS.md says `dist/templates/claude/commands/ingest.md` but that path
-  // does NOT exist in the tarball. The actual path includes the codewiki/ subdirectory.
-  // Using the real path verified against actual npm pack --dry-run output.
+  // IMPORTANT: older planning prose still references the retired command asset.
+  // The actual packaged source of truth after the skills migration is the canonical SKILL.md path below.
   assert.match(
     packOutput,
-    /dist\/templates\/claude\/commands\/codewiki\/ingest\.md/,
-    "tarball must include dist/templates/claude/commands/codewiki/ingest.md (BUILD-02)"
+    /dist\/templates\/skills\/codewiki-ingest\/SKILL\.md/,
+    "tarball must include dist/templates/skills/codewiki-ingest/SKILL.md (BUILD-02)"
   );
   assert.match(
     packOutput,

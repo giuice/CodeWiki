@@ -8,7 +8,9 @@ export interface AdapterInstallOptions {
   templateDir: string;
 }
 
+export type AdapterSection = SupportedTool | "shared-skills";
+
 export interface ToolAdapter {
-  tool: SupportedTool;
+  tool: AdapterSection;
   install(options: AdapterInstallOptions): Promise<ReportEntry[]>;
 }

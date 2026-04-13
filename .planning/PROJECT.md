@@ -17,14 +17,17 @@ Target users: solo developers using AI coding agents who have experienced agents
 - WIKI-01..WIKI-05 validated in Phase 2 — scaffold and init create the expected wiki tree, config, and template files.
 - MERGE-01..MERGE-04 validated in Phase 2 — merge utilities are covered by focused Vitest tests and regression-safe edge-case checks.
 - BUILD-01 validated early in Phase 2 — `npm run build` now copies template assets into `dist/templates/`.
-- BUILD-02 validated in Phase 5 — compiled pack coverage now proves `npm pack --dry-run` includes the bundled Claude command and shared hook assets in the tarball.
+- BUILD-02 validated across Phases 5 and 4.1.3 — compiled pack coverage now proves `npm pack --dry-run` includes the canonical packaged skill asset and shared hook assets in the tarball.
 - ABS-01..ABS-05 validated in Phase 3.1 — auto-improvement prompts, backlinks scaffold state, and structured hook outputs are now implemented and test-covered.
 - CLI-01..CLI-07 and CC-01..CC-05 validated in Phase 4 — the adapter pipeline, Claude installer, detection flow, rerun idempotency, and sectioned install reporting are covered by unit plus built CLI integration tests.
+- SM-01 validated in Phase 4.1.1 — the eight canonical CodeWiki skill sources now live under `src/templates/skills/codewiki-<name>/SKILL.md` with preserved prompt bodies and skill discovery frontmatter.
+- SM-02..SM-04 validated in Phases 4.1.2-4.1.3 — installer output, regression coverage, and tarball verification now follow the canonical skill install surface for Claude and mixed-tool runs.
+- SM-05 validated in Phase 4.1.4 — planning artifacts (ROADMAP, REQUIREMENTS, STATE, CONVENTIONS) refreshed to reflect the skills canon and parser-safe sub-phase numbering consistently
 
 ### Active
 
 - [ ] `codewiki init` installs wiki scaffold + tool-specific configs for Claude Code, Codex, Copilot, OpenCode
-- [ ] Slash commands installed as native markdown prompts: `/codewiki-ingest`, `/codewiki-query`, `/codewiki-lint`, `/codewiki-absorb`, `/codewiki-breakdown`, `/codewiki-prd`, `/codewiki-tasks`, `/codewiki-process`
+- [ ] Installer output migration completes so tools install eight native skills (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`) instead of legacy slash-command paths
 - [ ] Pre/post/session-end hooks inject wiki context and trigger wiki updates automatically
 - [ ] Wiki structure: `wiki/entities/`, `decisions/`, `lessons/`, `issues/`, `sources/`, `index.md`, `log.md`
 - [ ] Agents installed: `codewiki-wiki-updater`, `codewiki-verifier`
@@ -44,7 +47,7 @@ Target users: solo developers using AI coding agents who have experienced agents
 
 ## Context
 
-- **Existing codebase:** `src/` now has an init-only CLI, shared infrastructure in `src/lib/`, a generic adapter pipeline in `src/lib/adapters/`, a working Claude installer, the full Phase 3/3.1 prompt and hook asset set in `src/templates/`, and a Phase 5 test suite that covers merge/scaffold behavior, rerun idempotency, hook exit-0 guarantees, and npm-pack tarball inclusion for shipped templates.
+- **Existing codebase:** `src/` now has an init-only CLI, shared infrastructure in `src/lib/`, a generic adapter pipeline in `src/lib/adapters/`, a working Claude installer, canonical skill source templates under `src/templates/skills/`, adapters and regression coverage wired to the canonical skill paths, and a Phase 5 test suite that covers merge/scaffold behavior, rerun idempotency, hook exit-0 guarantees, and npm-pack tarball inclusion for shipped templates.
 - **Architecture model:** GSD (`get-shit-done`) — the CLI is a scaffolder/installer only, like how GSD installs prompts and configs. Study GSD's hook scripts and install pattern before implementing.
 - **Hook formats:** Each tool uses different hook config formats (`.claude/settings.json` for Claude Code, `.codex/hooks.json` for Codex, `.github/hooks/*.json` for Copilot, `opencode.json` for OpenCode). Research required before implementation.
 - **Original prompts:** `docs/prompts/create-prd.md`, `generate-tasks.md`, `process-task-list.md` are the source of truth for the `/codewiki-prd`, `/codewiki-tasks`, `/codewiki-process` slash command content.
@@ -90,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-10 after Phase 5 completion*
+*Last updated: 2026-04-12 after Phase 4.1.4 completion*
