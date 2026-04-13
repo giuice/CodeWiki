@@ -13,7 +13,7 @@
 
 ## Implementation Status Note
 
-This document describes the **target v2 architecture**. As of 2026-04-11, the repository implementation is still mid-migration: the current installer code only supports Claude Code and still copies prompt files into `.claude/commands/codewiki/*.md`. The skills migration tracked in `docs/skills-migration-handoff.md` is required to bring the codebase in line with this PRD.
+This document remains the canonical **v2 architecture**. As of 2026-04-13, the repository has completed the skills-canon migration this PRD originally called for: source templates live under `src/templates/skills/codewiki-<name>/SKILL.md`, Claude installs `.claude/skills/codewiki-<name>/SKILL.md`, mixed or non-Claude selections install `.agents/skills/codewiki-<name>/SKILL.md`, and regression coverage verifies both the init surface and packaged skill assets. The remaining roadmap gap is the later-phase work to add full non-Claude hook, instruction, and agent adapters.
 
 ## 1. Problem Statement
 
@@ -332,7 +332,7 @@ Agent proposes fixes. Human approves. Rebuilds `wiki/_backlinks.json` after chan
 
 ### 6.1 What `init` Installs Per Tool
 
-All four tools accept CodeWiki's two install surfaces: **Skills** (8 SKILL.md files, one per command) and **hook handlers** (shell scripts dispatched by the tool's event config — for Claude Code, Codex, and Copilot via JSON config pointing at scripts directly; for OpenCode via a TypeScript plugin file that shells out to the same scripts via Bun `$` API). Instruction files and agents are supplementary where supported.
+CodeWiki's canonical adapter design uses two install surfaces: **Skills** (8 `SKILL.md` files, one per command) and **hook handlers** (shared shell scripts dispatched by each tool's native event surface). In the repository today, Claude Code is the fully shipped adapter. The shared-skills installer also writes `.agents/skills/codewiki-<name>/SKILL.md` for Codex, Copilot, and OpenCode selections, while their tool-specific hooks, instruction-file integration, and agent packaging remain planned work in Phases 6 and 7. The table below shows the canonical per-tool layout the current code already follows for skill paths.
 
 | Tool | Hooks | Skills (8 total, one per command) | Instructions | Agents |
 |------|-------|-----------------------------------|--------------|--------|
@@ -362,7 +362,7 @@ All four tools accept CodeWiki's two install surfaces: **Skills** (8 SKILL.md fi
 
 ### 6.2 Adapter Contents
 
-Each adapter installs:
+A full adapter in the v2 design installs:
 
 - **Hook scripts** — Shell scripts in `.codewiki/hooks/` (`pre-wiki-context.sh`, `post-verify.sh`, `session-end.sh`). Shared across tools. For Claude Code, Codex, and Copilot the tool's JSON hook config points at these scripts directly. For OpenCode, a TypeScript plugin file at `.opencode/plugins/codewiki.ts` subscribes to events and shells out to the scripts via Bun `$` API. `session-end.sh` ships on every tool but is only wired where the tool exposes a viable session-lifecycle event (see §5.2.4).
 - **Skills** — Eight SKILL.md files (one per command) installed to the **dual-tree canonical layout**: `.claude/skills/codewiki-<name>/SKILL.md` when Claude Code is selected, `.agents/skills/codewiki-<name>/SKILL.md` when Codex, Copilot, or OpenCode are selected. When both conditions apply, both trees get the same 8 files (plain copy, no symlinks). Single source of truth: `src/templates/skills/codewiki-<name>/SKILL.md`. Same prompt content everywhere; the adapter just decides where to copy.
