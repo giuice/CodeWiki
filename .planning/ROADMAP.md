@@ -224,8 +224,8 @@ Plans:
   5. Running `npx codewiki init --tool opencode` on a project without an existing OpenCode config still installs the OpenCode adapter (explicit flag overrides detection)
 **Plans:** 2 plans
 Plans:
-- [ ] 06-01-PLAN.md — Create OpenCode plugin, agent, and AGENTS.md template assets
-- [ ] 06-02-PLAN.md — Implement the OpenCode adapter, plugin wiring, and idempotent regression coverage
+- [x] 06-01-PLAN.md — Create OpenCode plugin, agent, and AGENTS.md template assets
+- [x] 06-02-PLAN.md — Implement the OpenCode adapter, plugin wiring, and idempotent regression coverage
 
 ### Phase 7: Codex and Copilot Adapters
 **Goal**: Codex and Copilot adapters layer their tool-specific hooks and instruction integration on top of the already-shipped shared `.agents/skills` tree
