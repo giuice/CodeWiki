@@ -195,9 +195,9 @@ Plans:
   1. README and implementation docs describe skills rather than slash commands as the install surface
   2. Handoff and reference docs describe the dual-tree install rules for `.claude/skills/` and `.agents/skills/`
   3. Project docs do not describe obsolete command directories as the source of truth
-**Plans:** 0 plans
+**Plans:** 1 plan
 Plans:
-- [ ] TBD (run /gsd-plan-phase 4.1.5)
+- [ ] 04.1.5-01-PLAN.md — Refresh README, v2 PRD, implementation plan, and migration handoff to the skills canon
 
 ### Phase 5: Test Suite
 **Goal**: vitest suite covers merge correctness, idempotency, and npm pack asset inclusion; tests are the living spec for merge behavior
@@ -270,7 +270,7 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 4.1.2 Adapter Skill Install Paths (INSERTED) | 3/3 | Complete | 2026-04-12 |
 | 4.1.3 Skills Regression Coverage (INSERTED) | 2/2 | Complete | 2026-04-12 |
 | 4.1.4 Planning Docs Canon Refresh (INSERTED) | 1/1 | Complete | 2026-04-12 |
-| 4.1.5 Product Docs Canon Refresh (INSERTED) | 0/0 | Not started | - |
+| 4.1.5 Product Docs Canon Refresh (INSERTED) | 0/1 | Not started | - |
 | 5. Test Suite | 1/1 | Complete | 2026-04-10 |
 | 6. OpenCode Adapter | 0/2 | Not started | - |
 | 7. Codex and Copilot Adapters | 0/TBD | Not started | - |
