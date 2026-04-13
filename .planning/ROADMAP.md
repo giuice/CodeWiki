@@ -17,12 +17,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Prompt Templates and Hook Scripts** - All markdown prompts, agent definitions, hook scripts
 - [x] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
 - [x] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
-- [ ] **Phase 4.1: Skills Migration** - Umbrella corrective phase split into atomic skill/template, adapter, test, and doc sub-phases (INSERTED)
+- [x] **Phase 4.1: Skills Migration** - Umbrella corrective phase split into atomic skill/template, adapter, test, and doc sub-phases (INSERTED) (completed 2026-04-13)
 - [x] **Phase 4.1.1: Skill Template Source** - Move the eight source templates into per-skill SKILL.md directories and preserve prompt behavior (INSERTED)
 - [x] **Phase 4.1.2: Adapter Skill Install Paths** - Install skills into .claude/skills and conditional .agents/skills trees (INSERTED)
 - [x] **Phase 4.1.3: Skills Regression Coverage** - Update init and pack verification to assert skill-based install surfaces (INSERTED)
 - [x] **Phase 4.1.4: Planning Docs Canon Refresh** - Align roadmap, requirements, state, and active planning artifacts to the skills canon (INSERTED)
-- [ ] **Phase 4.1.5: Product Docs Canon Refresh** - Align README, implementation docs, and handoff docs to the skills canon (INSERTED)
+- [x] **Phase 4.1.5: Product Docs Canon Refresh** - Align README, implementation docs, and handoff docs to the skills canon (INSERTED) (completed 2026-04-13)
 - [x] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
 - [ ] **Phase 6: OpenCode Adapter** - session_completed-only hook strategy; skills and agents
 - [ ] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps
@@ -117,14 +117,14 @@ Plans:
 **Depends on:** Phase 4
 **Planning Note**: This umbrella phase is executed through child phases 4.1.1-4.1.5 because the local GSD parser supports chained decimals like 4.1.1 but not suffixes like 4.1a. Use `/create-skill` as a reference for metadata quality and structure, not as a generator.
 **Canonical Refs**: `docs/codewiki-project-v2.md`, `docs/skills-migration-handoff.md`, `docs/skills/wiki.md`
-**Plans:** 0 direct plans / 5 child phases
+**Plans:** 0 direct plans / 5 child phases complete
 
 Plans:
 - [x] 4.1.1 — Skill Template Source
 - [x] 4.1.2 — Adapter Skill Install Paths
 - [x] 4.1.3 — Skills Regression Coverage
 - [x] 4.1.4 — Planning Docs Canon Refresh
-- [ ] 4.1.5 — Product Docs Canon Refresh
+- [x] 4.1.5 — Product Docs Canon Refresh
 
 ### Phase 4.1.1: Skill Template Source (INSERTED)
 
@@ -195,9 +195,9 @@ Plans:
   1. README and implementation docs describe skills rather than slash commands as the install surface
   2. Handoff and reference docs describe the dual-tree install rules for `.claude/skills/` and `.agents/skills/`
   3. Project docs do not describe obsolete command directories as the source of truth
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 04.1.5-01-PLAN.md — Refresh README, v2 PRD, implementation plan, and migration handoff to the skills canon
+- [x] 04.1.5-01-PLAN.md — Refresh README, v2 PRD, implementation plan, and migration handoff to the skills canon
 
 ### Phase 5: Test Suite
 **Goal**: vitest suite covers merge correctness, idempotency, and npm pack asset inclusion; tests are the living spec for merge behavior
@@ -265,12 +265,12 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 3. Prompt Templates and Hook Scripts | 3/3 | Complete | 2026-04-08 |
 | 3.1 Auto-Improvement Engine (INSERTED) | 3/3 | Complete | 2026-04-08 |
 | 4. Claude Code Adapter + init Command | 3/3 | Complete | 2026-04-08 |
-| 4.1 Skills Migration (INSERTED) | 3/5 child phases | In progress | 2026-04-12 |
+| 4.1 Skills Migration (INSERTED) | 5/5 child phases | Complete | 2026-04-13 |
 | 4.1.1 Skill Template Source (INSERTED) | 4/4 | Complete | 2026-04-12 |
 | 4.1.2 Adapter Skill Install Paths (INSERTED) | 3/3 | Complete | 2026-04-12 |
 | 4.1.3 Skills Regression Coverage (INSERTED) | 2/2 | Complete | 2026-04-12 |
 | 4.1.4 Planning Docs Canon Refresh (INSERTED) | 1/1 | Complete | 2026-04-12 |
-| 4.1.5 Product Docs Canon Refresh (INSERTED) | 0/1 | Not started | - |
+| 4.1.5 Product Docs Canon Refresh (INSERTED) | 1/1 | Complete    | 2026-04-13 |
 | 5. Test Suite | 1/1 | Complete | 2026-04-10 |
 | 6. OpenCode Adapter | 0/2 | Not started | - |
 | 7. Codex and Copilot Adapters | 0/TBD | Not started | - |

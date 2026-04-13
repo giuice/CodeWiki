@@ -42,7 +42,7 @@
 - [x] **SM-03**: When non-Claude tools are selected, the installer also writes the same 8 skills to `.agents/skills/codewiki-<name>/SKILL.md`; Claude-only installs do not create the `.agents/skills/` tree
 - [x] **SM-04**: Regression coverage asserts skill install paths in init tests and pack coverage for `dist/templates/skills/codewiki-ingest/SKILL.md`
 - [x] **SM-05**: Planning artifacts (`ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, and active phase contexts/plans) reflect the skills canon and parser-safe split structure
-- [ ] **SM-06**: Project docs (README, implementation docs, handoff docs) reflect the skills canon and dual-tree install rules
+- [x] **SM-06**: Project docs (README, implementation docs, handoff docs) reflect the skills canon and dual-tree install rules
 
 ### Hook Scripts
 
@@ -179,7 +179,7 @@
 | SM-03 | Phase 4.1.2 (Adapter Skill Install Paths) | Complete (2026-04-12) |
 | SM-04 | Phase 4.1.3 (Skills Regression Coverage) | Complete (2026-04-12) |
 | SM-05 | Phase 4.1.4 (Planning Docs Canon Refresh) | Complete (2026-04-12) |
-| SM-06 | Phase 4.1.5 (Product Docs Canon Refresh) | Planned |
+| SM-06 | Phase 4.1.5 (Product Docs Canon Refresh) | Complete (2026-04-13) |
 | BUILD-01 | Phase 2 (Shared Infrastructure) | Complete (2026-04-07) |
 | BUILD-02 | Phase 5 (Test Suite) | Complete (2026-04-10) |
 | OC-01 | Phase 6 (OpenCode Adapter) | Pending |

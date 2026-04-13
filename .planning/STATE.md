@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 04.1.3 complete; Phase 04.1.4 ready to plan
-last_updated: "2026-04-12T14:17:41.862Z"
-last_activity: 2026-04-12
+status: planning
+stopped_at: Phase 04.1.5 complete; Phase 06 ready to plan
+last_updated: "2026-04-13T14:23:57Z"
+last_activity: 2026-04-13
 progress:
   total_phases: 15
-  completed_phases: 10
-  total_plans: 24
-  completed_plans: 24
+  completed_phases: 11
+  total_plans: 25
+  completed_plans: 25
   percent: 100
 ---
 
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 04.1.4 — planning-docs-canon-refresh-inserted
+**Current focus:** Phase 06 — opencode-adapter
 
 ## Current Position
 
-Phase: 05
+Phase: 06
 Plan: Not started
-Status: Executing Phase 04.1.4
-Last activity: 2026-04-12
+Status: Ready to plan Phase 06
+Last activity: 2026-04-13
 
-Progress: [██████░░░░] 60%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -54,6 +54,7 @@ Progress: [██████░░░░] 60%
 | 04.1.2 | 3 | - | - |
 | 04.1.3 | 2 | - | - |
 | 04.1.4 | 1 | - | - |
+| 04.1.5 | 1 | 25m | 25m |
 
 **Recent Trend:**
 
@@ -64,6 +65,7 @@ Progress: [██████░░░░] 60%
 | Phase 04.1.2 P01 | 1 min | 2 tasks | 1 files |
 | Phase 04.1.2 P02 | 3 min | 2 tasks | 3 files |
 | Phase 04.1.2 P03 | 2 min | 2 tasks | 1 files |
+| Phase 04.1.5 P01 | 25 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -88,6 +90,7 @@ Recent decisions affecting current work:
 - Phase 05: compiled node:test integration files now run with `--test-concurrency=1` so pack verification cannot delete `dist/` while other integration files are executing
 - Phase 04.1.4: Planning artifacts refreshed to reflect the skills canon — ROADMAP.md, REQUIREMENTS.md, STATE.md, and CONVENTIONS.md now describe the eight-skill install surface and parser-safe decimal sub-phases consistently
 - Phase 04.1.2: skills canon install surface is `.claude/skills/codewiki-<name>/SKILL.md` for Claude and `.agents/skills/codewiki-<name>/SKILL.md` for non-Claude tools, replacing the legacy `.claude/commands/codewiki/` directory
+- Phase 04.1.5: product docs now describe the shipped eight-skill surface and the `.claude/skills/` / `.agents/skills/` split consistently across README, PRD, implementation docs, and migration reference
 
 ### Pending Todos
 
