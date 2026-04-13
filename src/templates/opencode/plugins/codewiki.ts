@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import path from "node:path";
 
 function toJson(value: unknown): string {
@@ -12,14 +13,22 @@ async function runHook(root: string, hookName: string, payload?: unknown): Promi
   const hookPath = path.join(root, ".codewiki", "hooks", hookName);
 
   try {
-    const process = Bun.spawn({
-      cmd: ["bash", hookPath],
-      cwd: root,
-      stdin: payload === undefined ? undefined : toJson(payload),
-      stdout: "ignore",
-      stderr: "ignore"
+    await new Promise<void>((resolve) => {
+      const child = spawn("bash", [hookPath], {
+        cwd: root,
+        stdio: ["pipe", "ignore", "ignore"]
+      });
+
+      child.on("error", () => resolve());
+      child.on("close", () => resolve());
+
+      if (payload === undefined) {
+        child.stdin.end();
+        return;
+      }
+
+      child.stdin.end(toJson(payload));
     });
-    await process.exited;
   } catch {
     // CodeWiki hooks are advisory and must never block the host agent.
   }
