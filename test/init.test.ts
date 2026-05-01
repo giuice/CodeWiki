@@ -250,6 +250,57 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
   assert.equal(countHookCommands(secondHooks, ".codex/hooks/stop.sh"), 1);
 });
 
+test("init --tool copilot installs hooks, shared skills, and preserves instructions on rerun", () => {
+  const cwd = tempProject();
+  mkdirSync(path.join(cwd, ".github/hooks"), { recursive: true });
+  writeFileSync(path.join(cwd, ".github/copilot-instructions.md"), "# Existing Copilot Instructions\n");
+  writeFileSync(path.join(cwd, ".github/hooks/existing.json"), "{\"hooks\":{}}\n");
+
+  const first = mustRun(cwd, ["init", "--tool", "copilot"]);
+  assert.match(first.stdout, /shared-skills adapter:/);
+  assert.match(first.stdout, /copilot adapter:/);
+  assert.doesNotMatch(first.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(first.stdout, /copilot \(shared skills installed; hooks and instructions remain pending\)/);
+
+  assertInstalledSkillTree(cwd, ".agents/skills");
+  assert.equal(existsSync(path.join(cwd, ".claude/skills")), false, "Copilot-only install must not create .claude/skills");
+
+  for (const rel of [
+    ".github/hooks/codewiki-hooks.json",
+    ".github/hooks/codewiki/pre-tool-use.sh",
+    ".github/hooks/codewiki/post-tool-use.sh",
+    ".github/hooks/codewiki/agent-stop.sh",
+    ".github/copilot-instructions.md",
+    ".github/hooks/existing.json"
+  ]) {
+    assert.equal(existsSync(path.join(cwd, rel)), true, `missing ${rel}`);
+  }
+
+  const hooks = JSON.parse(readFileSync(path.join(cwd, ".github/hooks/codewiki-hooks.json"), "utf8")) as {
+    version: number;
+    hooks: Record<string, unknown>;
+  };
+  assert.equal(hooks.version, 1);
+  assert.equal("preToolUse" in hooks.hooks, true);
+  assert.equal("postToolUse" in hooks.hooks, true);
+  assert.equal("agentStop" in hooks.hooks, true);
+  assert.equal("sessionEnd" in hooks.hooks, true);
+
+  const firstInstructions = readFileSync(path.join(cwd, ".github/copilot-instructions.md"), "utf8");
+  assert.match(firstInstructions, /^# Existing Copilot Instructions/m);
+  assert.equal(countOccurrences(firstInstructions, "<!-- codewiki:start -->"), 1);
+
+  const second = mustRun(cwd, ["init", "--tool", "copilot"]);
+  assert.match(second.stdout, /shared-skills adapter:/);
+  assert.match(second.stdout, /copilot adapter:/);
+  assert.doesNotMatch(second.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(second.stdout, /copilot \(shared skills installed; hooks and instructions remain pending\)/);
+
+  const secondInstructions = readFileSync(path.join(cwd, ".github/copilot-instructions.md"), "utf8");
+  assert.equal(countOccurrences(secondInstructions, "<!-- codewiki:start -->"), 1);
+  assert.equal(existsSync(path.join(cwd, ".github/hooks/existing.json")), true);
+});
+
 test("init --tool claude-code,codex installs both skill trees and the real Codex adapter", () => {
   const cwd = tempProject();
   const result = mustRun(cwd, ["init", "--tool", "claude-code,codex"]);
