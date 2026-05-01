@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-05-01T16:06:50.610Z"
+stopped_at: Completed 07-05-PLAN.md
+last_updated: "2026-05-01T16:12:32.000Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 15
   completed_phases: 12
   total_plans: 33
-  completed_plans: 30
-  percent: 91
+  completed_plans: 31
+  percent: 94
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-13)
 ## Current Position
 
 Phase: 7 (codex-and-copilot-adapters) — EXECUTING
-Plan: 2 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-05-01
 
@@ -68,6 +68,7 @@ Progress: [██████████] 100%
 | Phase 04.1.2 P03 | 2 min | 2 tasks | 1 files |
 | Phase 04.1.5 P01 | 25 | 3 tasks | 4 files |
 | Phase 07 P02 | 4 | 3 tasks | 4 files |
+| Phase 07 P05 | 4 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - 2026-05-01 Codex hook canon refresh: current Codex docs supersede the 2026-04-13 hook model. Codex uses `UserPromptSubmit` for prompt-level context, can match `apply_patch` through `PreToolUse`/`PostToolUse` aliases `Edit|Write`, and needs event-specific JSON wrappers for `PostToolUse`/`Stop`; Copilot uses `agentStop` for meaningful post-turn follow-up and treats `sessionEnd` as cleanup-only; OpenCode uses plugin events `tool.execute.before`, `file.edited`, and `session.idle`
 - [Phase 07]: Codex config merging uses a narrow text helper for codex_hooks — Preserves unrelated .codex/config.toml user settings and comments while enabling hooks.
 - [Phase 07]: Codex remains in SHARED_SKILLS_TOOLS while also resolving a real CodexAdapter — Preserves canonical shared .agents/skills installation for Codex selections.
+- [Phase 07]: Copilot remains in SHARED_SKILLS_TOOLS while also resolving a real CopilotAdapter — Preserves canonical shared .agents/skills installation for Copilot selections.
+- [Phase 07]: Copilot hook config is a CodeWiki-owned `.github/hooks/codewiki-hooks.json` file — The adapter writes that deterministic file and leaves unrelated `.github/hooks/*.json` files alone.
+- [Phase 07]: Copilot pending integration reporting was removed — Codex and Copilot both have real adapters after 07-05.
 
 ### Pending Todos
 
@@ -110,7 +114,7 @@ None yet.
 ### Blockers/Concerns
 
 - Future Codex adapter work: the shared `.agents/skills` tree is already resolved; remaining work is `.codex/hooks.json`, `.codex/config.toml`, Codex-specific hook wrappers, and `AGENTS.md` integration around current Codex hook semantics
-- Future Copilot adapter work: the shared `.agents/skills` tree is already resolved; remaining work is `.github/hooks/*.json`, `.github/copilot-instructions.md`, and the `agentStop` versus `sessionEnd` lifecycle handling
+- Future Copilot adapter work: installer wiring is complete; remaining Phase 7 Copilot work is regression coverage and any live hook payload smoke verification
 - Phase 3 and future adapter work: actual payload shapes for Codex, Copilot, and OpenCode hook or plugin events should still be verified with live tool invocations before finalizing parser assumptions
 
 ### Quick Tasks Completed
@@ -122,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T16:06:41.263Z
-Stopped at: Completed 07-02-PLAN.md
+Last session: 2026-05-01T16:12:32.000Z
+Stopped at: Completed 07-05-PLAN.md
 Resume file: None

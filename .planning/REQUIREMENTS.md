@@ -81,9 +81,9 @@
 
 ### Copilot Adapter
 
-- [ ] **COP-01**: Creates `.github/hooks/codewiki-hooks.json` with `"version": 1` and preToolUse/postToolUse entries; any future automatic absorb follow-up uses `agentStop`, not `sessionEnd`
-- [ ] **COP-02**: Appends CodeWiki instructions to `.github/copilot-instructions.md` using marker comments
-- [ ] **COP-03**: Reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree; does not require a separate `.github/skills/` tree in v1
+- [x] **COP-01**: Creates `.github/hooks/codewiki-hooks.json` with `"version": 1` and preToolUse/postToolUse entries; any future automatic absorb follow-up uses `agentStop`, not `sessionEnd`
+- [x] **COP-02**: Appends CodeWiki instructions to `.github/copilot-instructions.md` using marker comments
+- [x] **COP-03**: Reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree; does not require a separate `.github/skills/` tree in v1
 
 ### OpenCode Adapter
 
@@ -189,9 +189,9 @@
 | CODEX-01 | Phase 7 (Codex and Copilot Adapters) | Complete |
 | CODEX-02 | Phase 7 (Codex and Copilot Adapters) | Complete |
 | CODEX-03 | Phase 7 (Codex and Copilot Adapters) | Complete |
-| COP-01 | Phase 7 (Codex and Copilot Adapters) | Pending |
-| COP-02 | Phase 7 (Codex and Copilot Adapters) | Pending |
-| COP-03 | Phase 7 (Codex and Copilot Adapters) | Pending |
+| COP-01 | Phase 7 (Codex and Copilot Adapters) | Complete |
+| COP-02 | Phase 7 (Codex and Copilot Adapters) | Complete |
+| COP-03 | Phase 7 (Codex and Copilot Adapters) | Complete |
 | BUILD-03 | Phase 8 (npm Publish Hardening) | Pending |
 | BUILD-04 | Phase 8 (npm Publish Hardening) | Pending |
 
