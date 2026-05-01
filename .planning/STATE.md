@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 07-05-PLAN.md
-last_updated: "2026-05-01T16:12:32.000Z"
+status: verifying
+stopped_at: Completed 07-06-PLAN.md
+last_updated: "2026-05-01T16:53:32.085Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 15
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 33
-  completed_plans: 31
-  percent: 94
+  completed_plans: 33
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-13)
 
 Phase: 7 (codex-and-copilot-adapters) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-01
 
 Progress: [██████████] 100%
@@ -69,6 +69,7 @@ Progress: [██████████] 100%
 | Phase 04.1.5 P01 | 25 | 3 tasks | 4 files |
 | Phase 07 P02 | 4 | 3 tasks | 4 files |
 | Phase 07 P05 | 4 | 3 tasks | 3 files |
+| Phase 07 P06 | 12min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,8 @@ Recent decisions affecting current work:
 - [Phase 07]: Copilot remains in SHARED_SKILLS_TOOLS while also resolving a real CopilotAdapter — Preserves canonical shared .agents/skills installation for Copilot selections.
 - [Phase 07]: Copilot hook config is a CodeWiki-owned `.github/hooks/codewiki-hooks.json` file — The adapter writes that deterministic file and leaves unrelated `.github/hooks/*.json` files alone.
 - [Phase 07]: Copilot pending integration reporting was removed — Codex and Copilot both have real adapters after 07-05.
+- [Phase 07]: Plan 07-06 Copilot regression coverage verifies shared .agents/skills usage and rejects .github/skills.
+- [Phase 07]: Plan 07-06 mixed-selection regressions assert both .claude/skills and .agents/skills contain exactly one copy of each CodeWiki skill.
 
 ### Pending Todos
 
@@ -126,6 +129,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T16:12:32.000Z
-Stopped at: Completed 07-05-PLAN.md
+Last session: 2026-05-01T16:53:31.991Z
+Stopped at: Completed 07-06-PLAN.md
 Resume file: None

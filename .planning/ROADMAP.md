@@ -247,8 +247,8 @@ Plans:
 - [x] 07-05-PLAN.md — Copilot adapter wiring and pending-report cleanup
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 07-03-PLAN.md — Codex regression coverage and mixed Claude+Codex skill-tree assertions
-- [ ] 07-06-PLAN.md — Copilot/final regression coverage and all-tool smoke assertions
+- [x] 07-03-PLAN.md — Codex regression coverage and mixed Claude+Codex skill-tree assertions
+- [x] 07-06-PLAN.md — Copilot/final regression coverage and all-tool smoke assertions
 
 ### Phase 8: npm Publish Hardening
 **Goal**: The package publishes to npm correctly and `npx codewiki init` works in a fresh project with all prompt files present in the tarball
