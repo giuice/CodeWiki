@@ -236,9 +236,19 @@ Plans:
   2. Codex hook wiring enables `codex_hooks`, uses `UserPromptSubmit` for prompt-level wiki-context injection, uses `PreToolUse`/`PostToolUse` matchers for `apply_patch` via `Edit|Write`, and routes `PostToolUse`/`Stop` through Codex-specific JSON wrappers
   3. Running `npx codewiki init` on a project with `.github/copilot-instructions.md` creates `.github/hooks/codewiki-hooks.json` with `"version": 1`, appends to `.github/copilot-instructions.md`, and documents `agentStop` as the meaningful post-turn lifecycle hook while `sessionEnd` remains cleanup-only
   4. Mixed selections such as `claude-code,codex` or `claude-code,copilot` still write both `.claude/skills/` and `.agents/skills/` exactly once
-**Plans:** TBD
+**Plans:** 6 plans
 Plans:
-- [ ] TBD
+**Wave 1**
+- [ ] 07-01-PLAN.md — Codex hook/config/wrapper/agent/instruction templates
+- [ ] 07-04-PLAN.md — Copilot hook/wrapper/instruction templates
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 07-02-PLAN.md — Codex adapter wiring and pending-report cleanup
+- [ ] 07-05-PLAN.md — Copilot adapter wiring and pending-report cleanup
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 07-03-PLAN.md — Codex regression coverage and mixed Claude+Codex skill-tree assertions
+- [ ] 07-06-PLAN.md — Copilot/final regression coverage and all-tool smoke assertions
 
 ### Phase 8: npm Publish Hardening
 **Goal**: The package publishes to npm correctly and `npx codewiki init` works in a fresh project with all prompt files present in the tarball
