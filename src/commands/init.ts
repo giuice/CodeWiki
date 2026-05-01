@@ -37,7 +37,7 @@ function parseTools(value: string): SupportedTool[] {
   return [...new Set(requested)] as SupportedTool[];
 }
 
-const SHARED_SKILL_ONLY_TOOLS = new Set<SupportedTool>(["codex", "copilot"]);
+const SHARED_SKILL_ONLY_TOOLS = new Set<SupportedTool>(["copilot"]);
 
 function getPendingIntegrationEntries(tools: SupportedTool[]): ReportEntry[] {
   return tools
