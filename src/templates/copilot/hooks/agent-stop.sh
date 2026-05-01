@@ -52,7 +52,7 @@ if [ -f "$ROOT/.codewiki/hooks/session-end.sh" ]; then
 fi
 
 if [ -n "$OUTPUT" ]; then
-    ESCAPED=$(printf '%s' "$OUTPUT" | json_escape)
+    ESCAPED=$(printf 'CODEWIKI_TRIGGERED_FOLLOWUP\n%s' "$OUTPUT" | json_escape)
     printf '{"decision":"block","reason":%s}\n' "$ESCAPED"
 else
     printf '{"decision":"allow"}\n'

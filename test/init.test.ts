@@ -307,6 +307,12 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   const secondInstructions = readFileSync(path.join(cwd, ".github/copilot-instructions.md"), "utf8");
   assert.equal(countOccurrences(secondInstructions, "<!-- codewiki:start -->"), 1);
   assert.equal(existsSync(path.join(cwd, ".github/hooks/existing.json")), true);
+
+  const userEditedHooks = '{"version":1,"hooks":{"agentStop":[{"type":"command","bash":"echo user"}]}}\n';
+  writeFileSync(path.join(cwd, ".github/hooks/codewiki-hooks.json"), userEditedHooks);
+  const third = mustRun(cwd, ["init", "--tool", "copilot"]);
+  assert.match(third.stdout, /\.github\/hooks\/codewiki-hooks\.json \(exists; use --force to replace\)/);
+  assert.equal(readFileSync(path.join(cwd, ".github/hooks/codewiki-hooks.json"), "utf8"), userEditedHooks);
 });
 
 test("init --tool claude-code,codex installs both skill trees and the real Codex adapter", () => {

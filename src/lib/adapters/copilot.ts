@@ -110,13 +110,12 @@ export class CopilotAdapter implements ToolAdapter {
       const existingText = (await readTextIfExists(hooksPath)) ?? "";
       const templateText = await readFile(templatePath, "utf8");
 
-      if (!options.force && existingText === templateText) {
-        return { action: "skipped", path: displayPath, reason: "exists" };
-      }
-
-      if (!options.force && existed && existingText !== templateText) {
-        await writeFile(hooksPath, templateText, "utf8");
-        return { action: "replaced", path: displayPath };
+      if (!options.force && existed) {
+        return {
+          action: "skipped",
+          path: displayPath,
+          reason: existingText === templateText ? "exists" : "exists; use --force to replace"
+        };
       }
 
       await writeFile(hooksPath, templateText, "utf8");
