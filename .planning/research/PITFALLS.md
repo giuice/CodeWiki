@@ -38,14 +38,16 @@ Future work invents a dedicated OpenCode-only skill tree, tries to rediscover a 
 - Keep `.agents/skills/` as the shared non-Claude tree
 - Only add another skill tree if a future adapter phase proves it solves a real discovery gap
 
-### Pitfall 4: Codex adapter assumes file-edit interception works like Claude
+### Pitfall 4: Codex adapter assumes file-edit interception behaves exactly like Claude
 
 **What goes wrong:**
-An adapter is written around Codex `PreToolUse` or `PostToolUse` as if they could reliably intercept file edits.
+An adapter is written around Codex `PreToolUse` or `PostToolUse` as if their stdout and control semantics matched Claude Code, or as if every edit path were a complete enforcement boundary.
 
 **How to avoid:**
-- Treat Codex `PreToolUse` and `PostToolUse` as Bash-only
-- Design around `UserPromptSubmit` and `Stop`
+- Enable `codex_hooks` explicitly
+- Use `UserPromptSubmit` for prompt-level context injection
+- Use `PreToolUse`/`PostToolUse` matchers for `apply_patch` via `Edit|Write`, but respect their Codex-specific stdout contracts
+- Route `PostToolUse` and `Stop` through JSON-emitting wrappers
 - Validate real Codex payloads before finalizing parser logic
 
 ### Pitfall 5: Copilot `sessionEnd` is used as a post-turn control surface
@@ -81,7 +83,7 @@ The OpenCode adapter assumes `session.idle` means the session is ending permanen
 ### Pitfall 8: Hook scripts block the host or fail on POSIX shells
 
 **What goes wrong:**
-Shared shell hooks exit non-zero, depend on Bash-only syntax, or assume one JSON payload shape.
+Shared shell hooks exit non-zero, depend on non-POSIX shell syntax, or assume one JSON payload shape.
 
 **How to avoid:**
 - Keep hooks POSIX `sh`

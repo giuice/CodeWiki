@@ -76,7 +76,7 @@
 ### Codex Adapter
 
 - [ ] **CODEX-01**: Codex selections reuse `.agents/skills/codewiki-<name>/SKILL.md` as the canonical skill tree; no separate Codex-only skill directory is introduced in v1
-- [ ] **CODEX-02**: Merges hook config into `.codex/hooks.json` without clobbering existing hooks, using `UserPromptSubmit` and `Stop` because Codex `PreToolUse` and `PostToolUse` are Bash-only
+- [ ] **CODEX-02**: Merges hook config into `.codex/hooks.json` and enables hooks in `.codex/config.toml` without clobbering existing config; uses `UserPromptSubmit` for prompt-level context, `PreToolUse`/`PostToolUse` matchers for `apply_patch` via `Edit|Write`, and Codex-specific JSON wrappers where event stdout contracts require them
 - [ ] **CODEX-03**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
 
 ### Copilot Adapter

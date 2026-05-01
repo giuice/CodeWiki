@@ -233,7 +233,7 @@ Plans:
 **Requirements**: CODEX-01, CODEX-02, CODEX-03, COP-01, COP-02, COP-03
 **Success Criteria** (what must be TRUE):
   1. Running `npx codewiki init` on a project with `.codex/` present preserves the shared `.agents/skills` tree, merges CodeWiki hooks into `.codex/hooks.json` without clobbering existing hooks, and appends instructions to `AGENTS.md` using marker comments
-  2. Codex hook wiring uses `UserPromptSubmit` for wiki-context injection and `Stop` for post-turn follow-up because Codex `PreToolUse` and `PostToolUse` are Bash-only
+  2. Codex hook wiring enables `codex_hooks`, uses `UserPromptSubmit` for prompt-level wiki-context injection, uses `PreToolUse`/`PostToolUse` matchers for `apply_patch` via `Edit|Write`, and routes `PostToolUse`/`Stop` through Codex-specific JSON wrappers
   3. Running `npx codewiki init` on a project with `.github/copilot-instructions.md` creates `.github/hooks/codewiki-hooks.json` with `"version": 1`, appends to `.github/copilot-instructions.md`, and documents `agentStop` as the meaningful post-turn lifecycle hook while `sessionEnd` remains cleanup-only
   4. Mixed selections such as `claude-code,codex` or `claude-code,copilot` still write both `.claude/skills/` and `.agents/skills/` exactly once
 **Plans:** TBD

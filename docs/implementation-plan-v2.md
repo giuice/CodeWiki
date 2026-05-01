@@ -152,7 +152,8 @@ The skills canon is in place. The remaining implementation work is now about the
 
 ### Phase 7: Codex and Copilot adapters
 
-- Add Codex-specific hook configuration and instruction-file integration
+- Add Codex-specific hook configuration, `.codex/config.toml` feature enablement, wrapper scripts, and instruction-file integration
+- For Codex, use the current official hook model: `UserPromptSubmit` for prompt-level context, `PreToolUse` on `Edit|Write|apply_patch` for guardrails only, `PostToolUse` on `Edit|Write|apply_patch` through a JSON-emitting wrapper, and `Stop` through a loop-safe JSON-emitting wrapper
 - Add Copilot-specific hook configuration and instruction-file integration
 - Package any tool-specific agent surfaces that remain worth shipping
 

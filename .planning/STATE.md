@@ -92,7 +92,7 @@ Recent decisions affecting current work:
 - Phase 04.1.4: Planning artifacts refreshed to reflect the skills canon — ROADMAP.md, REQUIREMENTS.md, STATE.md, and CONVENTIONS.md now describe the eight-skill install surface and parser-safe decimal sub-phases consistently
 - Phase 04.1.2: skills canon install surface is `.claude/skills/codewiki-<name>/SKILL.md` for Claude and `.agents/skills/codewiki-<name>/SKILL.md` for non-Claude tools, replacing the legacy Claude command directory
 - Phase 04.1.5: product docs now describe the shipped eight-skill surface and the `.claude/skills/` / `.agents/skills/` split consistently across README, PRD, implementation docs, and migration reference
-- 2026-04-13 hook/event canon refresh: Codex uses `UserPromptSubmit` and `Stop` because `PreToolUse` and `PostToolUse` are Bash-only; Copilot uses `agentStop` for meaningful post-turn follow-up and treats `sessionEnd` as cleanup-only; OpenCode uses plugin events `tool.execute.before`, `file.edited`, and `session.idle`
+- 2026-05-01 Codex hook canon refresh: current Codex docs supersede the 2026-04-13 hook model. Codex uses `UserPromptSubmit` for prompt-level context, can match `apply_patch` through `PreToolUse`/`PostToolUse` aliases `Edit|Write`, and needs event-specific JSON wrappers for `PostToolUse`/`Stop`; Copilot uses `agentStop` for meaningful post-turn follow-up and treats `sessionEnd` as cleanup-only; OpenCode uses plugin events `tool.execute.before`, `file.edited`, and `session.idle`
 
 ### Pending Todos
 
@@ -106,7 +106,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- Future Codex adapter work: the shared `.agents/skills` tree is already resolved; remaining work is `.codex/hooks.json` wiring and `AGENTS.md` integration around `UserPromptSubmit` and `Stop`
+- Future Codex adapter work: the shared `.agents/skills` tree is already resolved; remaining work is `.codex/hooks.json`, `.codex/config.toml`, Codex-specific hook wrappers, and `AGENTS.md` integration around current Codex hook semantics
 - Future Copilot adapter work: the shared `.agents/skills` tree is already resolved; remaining work is `.github/hooks/*.json`, `.github/copilot-instructions.md`, and the `agentStop` versus `sessionEnd` lifecycle handling
 - Phase 3 and future adapter work: actual payload shapes for Codex, Copilot, and OpenCode hook or plugin events should still be verified with live tool invocations before finalizing parser assumptions
 

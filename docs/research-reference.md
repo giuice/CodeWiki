@@ -7,6 +7,8 @@ skills: https://developers.openai.com/codex/skills
 plugins: https://developers.openai.com/codex/plugins
 subagents: https://developers.openai.com/codex/subagents
 
+Note: Codex hook semantics are treated as time-sensitive. Refresh these links before planning or implementing adapter behavior, especially event support, matcher aliases, stdout contracts, and feature flags.
+
 ## Opencode
 
 hooks & plugins : https://opencode.ai/docs/pt-br/plugins/

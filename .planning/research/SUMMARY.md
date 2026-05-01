@@ -36,7 +36,7 @@ This dual-tree layout is the minimum structure that satisfies the verified disco
 The per-tool hook model must follow the host's real event surface:
 
 - Claude Code uses `.claude/settings.json` with `PreToolUse` and `PostToolUse` on `Write|Edit`
-- Codex uses `.codex/hooks.json`, but CodeWiki's design must rely on `UserPromptSubmit` and `Stop` because `PreToolUse` and `PostToolUse` are Bash-only
+- Codex uses `.codex/hooks.json` plus `.codex/config.toml` hook feature enablement. Current Codex docs support `PreToolUse`/`PostToolUse` for `apply_patch` with `Edit|Write` aliases; CodeWiki must still use event-specific wrappers because Codex stdout contracts differ by event
 - Copilot uses `.github/hooks/*.json` with `preToolUse` and `postToolUse`; `agentStop` is the meaningful post-turn hook and `sessionEnd` is cleanup-only
 - OpenCode uses `.opencode/plugins/codewiki.ts`, not `opencode.json` hook wiring; the plugin should dispatch `tool.execute.before`, `file.edited`, and `session.idle`
 
@@ -74,7 +74,7 @@ The OpenCode phase should no longer plan around a dedicated OpenCode-only skill 
 
 The Codex and Copilot phases no longer need a skill-path spike. Their remaining work is:
 
-- Codex: `.codex/hooks.json` plus `AGENTS.md`
+- Codex: `.codex/hooks.json`, `.codex/config.toml`, Codex-specific hook wrappers, plus `AGENTS.md`
 - Copilot: `.github/hooks/*.json` plus `.github/copilot-instructions.md`
 - both: keep reusing the shared `.agents/skills/` tree
 
@@ -90,7 +90,7 @@ The Codex and Copilot phases no longer need a skill-path spike. Their remaining 
 
 ## Remaining Validation Work
 
-- Capture live Codex payloads for `UserPromptSubmit` and `Stop`
+- Capture live Codex payloads for `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, and `Stop`
 - Capture live Copilot payloads for `postToolUse` and `agentStop`
 - Capture live OpenCode plugin payloads for `tool.execute.before`, `file.edited`, and `session.idle`
 - Keep grep-based regression checks so live docs never drift back to superseded command-era paths

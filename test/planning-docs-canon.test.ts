@@ -48,7 +48,8 @@ test("planning docs canon keeps state, conventions, and active context parser-sa
     state,
     /Phase 04\.1\.2: skills canon install surface is `\.claude\/skills\/codewiki-<name>\/SKILL\.md` for Claude and `\.agents\/skills\/codewiki-<name>\/SKILL\.md` for non-Claude tools/
   );
-  assert.match(state, /Codex uses `UserPromptSubmit` and `Stop` because `PreToolUse` and `PostToolUse` are Bash-only/);
+  assert.match(state, /current Codex docs supersede the 2026-04-13 hook model/);
+  assert.match(state, /can match `apply_patch` through `PreToolUse`\/`PostToolUse` aliases `Edit\|Write`/);
   assert.match(state, /OpenCode uses plugin events `tool\.execute\.before`, `file\.edited`, and `session\.idle`/);
 
   assert.match(conventions, /\(e\.g\., 4\.1\.1, 4\.1\.2\)/);

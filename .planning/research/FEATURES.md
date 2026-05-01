@@ -51,7 +51,7 @@ The installer does not run runtime wiki logic itself. The host AI tool reads the
 | Tool | Canonical config surface | Pre-edit or pre-turn surface | Post-edit or post-turn surface | Lifecycle note |
 |------|--------------------------|------------------------------|-------------------------------|----------------|
 | Claude Code | `.claude/settings.json` | `PreToolUse` on `Write|Edit` | `PostToolUse` on `Write|Edit` | `PreCompact` is only a future candidate; `SessionEnd` remains dormant for true end-of-session semantics |
-| Codex | `.codex/hooks.json` | `UserPromptSubmit` fallback | `Stop` fallback | `PreToolUse` and `PostToolUse` are Bash-only, so they are not the canonical file-edit interception path for CodeWiki |
+| Codex | `.codex/hooks.json` plus `.codex/config.toml` | `UserPromptSubmit` for prompt-level context; `PreToolUse` on `Edit|Write|apply_patch` for guardrails | `PostToolUse` on `Edit|Write|apply_patch` via JSON wrapper; `Stop` via loop-safe JSON wrapper | Current Codex docs support `apply_patch` matching; wrappers are required because stdout contracts differ by event |
 | Copilot | `.github/hooks/*.json` | `preToolUse` | `postToolUse` | `agentStop` is the meaningful post-turn hook; `sessionEnd` is cleanup-only |
 | OpenCode | `.opencode/plugins/codewiki.ts` | `tool.execute.before` | `file.edited` | `session.idle` is the best turn-end or idle signal; do not treat it as teardown |
 
@@ -115,15 +115,15 @@ shared .agents/skills adapter
 ### Remaining adapter work
 
 - OpenCode plugin adapter: `.opencode/plugins/codewiki.ts`, `.opencode/agents/`, `AGENTS.md`
-- Codex hook and instruction adapter: `.codex/hooks.json`, `AGENTS.md`
+- Codex hook and instruction adapter: `.codex/hooks.json`, `.codex/config.toml`, Codex-specific wrappers, `AGENTS.md`
 - Copilot hook and instruction adapter: `.github/hooks/*.json`, `.github/copilot-instructions.md`
 
 ## Open Questions
 
-1. What exact stdin payloads do Codex `UserPromptSubmit` and `Stop` deliver in realistic file-edit sessions?
+1. What exact stdin payloads do Codex `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, and `Stop` deliver in realistic file-edit sessions?
 2. Which Copilot payload fields are available at `agentStop` versus `postToolUse` for any future automatic absorb or continuation flow?
 3. What runtime payload shape does OpenCode deliver to the plugin hooks when `tool.execute.before`, `file.edited`, and `session.idle` fire in practice?
-4. Should any future OpenCode adapter ship a small helper library for the plugin, or keep the plugin as a thin Bun `$` dispatcher only?
+4. Should any future OpenCode adapter ship a small helper library for the plugin, or keep the plugin as a thin Node `child_process` dispatcher only?
 
 ## Sources
 

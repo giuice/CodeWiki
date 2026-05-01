@@ -69,7 +69,7 @@
 | Tool | Trigger model | CodeWiki implication |
 |------|---------------|----------------------|
 | Claude Code | `PreToolUse` and `PostToolUse` on `Write|Edit` | Direct file-edit interception works |
-| Codex | `PreToolUse` and `PostToolUse` are Bash-only; `UserPromptSubmit` and `Stop` are broadly usable | CodeWiki falls back to prompt-level and turn-end hooks |
+| Codex | `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, and `Stop` are available when `codex_hooks` is enabled; `PreToolUse`/`PostToolUse` can match `apply_patch` via `Edit|Write` aliases | Use prompt-level context, file-edit post-processing through wrappers, and loop-safe turn-end follow-up |
 | Copilot | `preToolUse`, `postToolUse`, `agentStop`, `sessionEnd` | Use `preToolUse`/`postToolUse` for tool hooks and reserve `agentStop` for meaningful post-turn follow-up |
 | OpenCode | Plugin events `tool.execute.before`, `file.edited`, `session.idle` | Implement a thin plugin dispatcher rather than JSON hook config |
 
@@ -107,7 +107,8 @@ parse flags
 
 - Do not research skill paths again; `.agents/skills/` is already the canon.
 - Focus on `.codex/hooks.json` and `AGENTS.md`.
-- Design the adapter around `UserPromptSubmit` and `Stop`.
+- Design the adapter around `UserPromptSubmit`, `PreToolUse`/`PostToolUse` for `apply_patch` via `Edit|Write`, and loop-safe `Stop`.
+- Add Codex-specific wrappers where event stdout must be JSON or plain stdout is ignored.
 
 ### Copilot
 
