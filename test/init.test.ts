@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { cliPath, listRecursive, mustRun, runCli, tempProject } from "./helpers.js";
+import { cliPath, listRecursive, mustRun, mustRunPackedCli, runCli, tempProject } from "./helpers.js";
 
 function countOccurrences(value: string, pattern: string): number {
   return value.split(pattern).length - 1;
@@ -63,6 +64,55 @@ test("package baseline and compiled help expose all commands", () => {
   const unknown = runCli(process.cwd(), ["unknown-command"]);
   assert.notEqual(unknown.status, 0);
   assert.match(unknown.stderr, /Unknown command/);
+});
+
+test("local npm tarball works through npx in a fresh project", () => {
+  let tarballPath: string | null = null;
+
+  try {
+    const packed = spawnSync("npm", ["pack", "--json"], { cwd: process.cwd(), encoding: "utf8" });
+    assert.equal(packed.status, 0, `npm pack failed:\nSTDOUT:\n${packed.stdout}\nSTDERR:\n${packed.stderr}`);
+
+    const entries = JSON.parse(packed.stdout) as Array<{ filename?: string }>;
+    const filename = entries[0]?.filename;
+    if (typeof filename !== "string") {
+      assert.fail("npm pack JSON did not include a filename");
+    }
+
+    tarballPath = path.join(process.cwd(), filename);
+    const cwd = tempProject();
+    const result = mustRunPackedCli(cwd, tarballPath, [
+      "init",
+      "--name",
+      "packed-smoke",
+      "--tool",
+      "claude-code,codex,copilot,opencode"
+    ]);
+
+    assert.match(result.stdout, /CodeWiki initialized for packed-smoke\./);
+    assert.match(result.stdout, /claude-code adapter:/);
+    assert.match(result.stdout, /codex adapter:/);
+    assert.match(result.stdout, /copilot adapter:/);
+    assert.match(result.stdout, /opencode adapter:/);
+
+    const files = new Set(listRecursive(cwd));
+    for (const rel of [
+      ".codewiki/config.yml",
+      ".codewiki/hooks/pre-wiki-context.sh",
+      "wiki/index.md",
+      ".claude/skills/codewiki-ingest/SKILL.md",
+      ".agents/skills/codewiki-ingest/SKILL.md",
+      ".codex/hooks.json",
+      ".github/hooks/codewiki-hooks.json",
+      ".opencode/plugins/codewiki.ts"
+    ]) {
+      assert.equal(files.has(rel), true, `missing ${rel}`);
+    }
+  } finally {
+    if (tarballPath && existsSync(tarballPath)) {
+      unlinkSync(tarballPath);
+    }
+  }
 });
 
 test("init installs the wiki scaffold and Claude assets when the tool is selected explicitly", () => {
