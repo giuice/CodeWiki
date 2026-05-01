@@ -50,19 +50,21 @@ function mergeCodexHooksFeature(existingText: string, templateText: string): str
 
   let nextSectionIndex = lines.length;
   for (let index = featuresIndex + 1; index < lines.length; index += 1) {
-    if (/^\s*\[[^\]]+\]\s*$/.test(lines[index])) {
+    const line = lines[index] ?? "";
+    if (/^\s*\[[^\]]+\]\s*$/.test(line)) {
       nextSectionIndex = index;
       break;
     }
   }
 
   for (let index = featuresIndex + 1; index < nextSectionIndex; index += 1) {
-    if (/^\s*codex_hooks\s*=/.test(lines[index])) {
-      if (/^\s*codex_hooks\s*=\s*true\s*(?:#.*)?$/.test(lines[index])) {
+    const line = lines[index] ?? "";
+    if (/^\s*codex_hooks\s*=/.test(line)) {
+      if (/^\s*codex_hooks\s*=\s*true\s*(?:#.*)?$/.test(line)) {
         return existingText;
       }
 
-      const indent = lines[index].match(/^\s*/)?.[0] ?? "";
+      const indent = line.match(/^\s*/)?.[0] ?? "";
       lines[index] = `${indent}codex_hooks = true`;
       return lines.join("\n");
     }
