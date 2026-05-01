@@ -11,6 +11,9 @@
     "README.md",
     "package.json"
   ],
+  "engines": {
+    "node": ">=20.11.0"
+  },
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig.test.json",
