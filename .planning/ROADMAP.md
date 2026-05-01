@@ -259,9 +259,16 @@ Plans:
   2. `package.json` has `engines: { "node": ">=20.11.0" }` and zero runtime dependencies (Commander.js and optional picocolors only)
   3. Running `npx codewiki@latest init` in a clean temporary directory (no global install) completes successfully and creates the wiki scaffold
   4. README documents the four supported tools, their hook strategies, and the `--tool`, `--force`, `--name` flags
-**Plans:** TBD
+**Plans:** 3 plans
 Plans:
-- [ ] TBD
+**Wave 1**
+- [x] 08-01-PLAN.md — Package metadata contract and full pack manifest coverage
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 08-02-PLAN.md — Local npm tarball npx smoke test
+
+**Wave 3** *(blocked on Wave 1 and Wave 2 completion)*
+- [ ] 08-03-PLAN.md — README publish verification and troubleshooting docs
 
 ## Progress
 
@@ -285,4 +292,4 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 5. Test Suite | 1/1 | Complete | 2026-04-10 |
 | 6. OpenCode Adapter | 0/2 | Not started | - |
 | 7. Codex and Copilot Adapters | 6/6 | Complete    | 2026-05-01 |
-| 8. npm Publish Hardening | 0/TBD | Not started | - |
+| 8. npm Publish Hardening | 1/3 | In progress | - |

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 07-06-PLAN.md
-last_updated: "2026-05-01T16:54:42.371Z"
+status: executing
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-05-01T18:07:52.000Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 15
   completed_phases: 13
-  total_plans: 33
-  completed_plans: 33
+  total_plans: 36
+  completed_plans: 34
   percent: 100
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-13)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 7 — codex-and-copilot-adapters
+**Current focus:** Phase 8 — npm-publish-hardening
 
 ## Current Position
 
 Phase: 8
-Plan: Not started
-Status: Phase complete — ready for verification
+Plan: 08-02 next
+Status: Phase 8 in progress
 Last activity: 2026-05-01
 
 Progress: [██████████] 100%
@@ -71,6 +71,7 @@ Progress: [██████████] 100%
 | Phase 07 P02 | 4 | 3 tasks | 4 files |
 | Phase 07 P05 | 4 | 3 tasks | 3 files |
 | Phase 07 P06 | 12min | 3 tasks | 2 files |
+| Phase 08 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,10 @@ Recent decisions affecting current work:
 - [Phase 07]: Copilot pending integration reporting was removed — Codex and Copilot both have real adapters after 07-05.
 - [Phase 07]: Plan 07-06 Copilot regression coverage verifies shared .agents/skills usage and rejects .github/skills.
 - [Phase 07]: Plan 07-06 mixed-selection regressions assert both .claude/skills and .agents/skills contain exactly one copy of each CodeWiki skill.
+- Phase 08 planning: publish hardening is split into package/pack manifest coverage, local tarball npx smoke, and bounded README release verification docs.
+- Phase 08 planning: local tarball smoke is the blocking pre-publish gate; `npx codewiki@latest init` remains a post-publish/manual registry check.
+- Phase 08 planning: no runtime dependency is required for the phase; `picocolors` remains an allowed but unused narrow exception.
+- [Phase 08]: Pack verification parses `npm pack --dry-run --json` and asserts the full runtime template manifest required by `init`.
 
 ### Pending Todos
 
@@ -130,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T16:53:31.991Z
-Stopped at: Completed 07-06-PLAN.md
+Last session: 2026-05-01T18:07:52.000Z
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None

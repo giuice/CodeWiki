@@ -103,8 +103,8 @@
 
 - [x] **BUILD-01**: `npm run build` copies `src/templates/**` to `dist/templates/` (postbuild step)
 - [x] **BUILD-02**: `npm pack --dry-run` lists `dist/templates/skills/codewiki-ingest/SKILL.md` (prompt files in tarball)
-- [ ] **BUILD-03**: `engines.node >= "20.11.0"` set in package.json
-- [ ] **BUILD-04**: Zero npm runtime dependencies (Commander.js + optional picocolors only)
+- [x] **BUILD-03**: `engines.node >= "20.11.0"` set in package.json
+- [x] **BUILD-04**: Zero npm runtime dependencies (Commander.js + optional picocolors only)
 
 ## v2 Requirements
 
@@ -192,8 +192,8 @@
 | COP-01 | Phase 7 (Codex and Copilot Adapters) | Complete |
 | COP-02 | Phase 7 (Codex and Copilot Adapters) | Complete |
 | COP-03 | Phase 7 (Codex and Copilot Adapters) | Complete |
-| BUILD-03 | Phase 8 (npm Publish Hardening) | Pending |
-| BUILD-04 | Phase 8 (npm Publish Hardening) | Pending |
+| BUILD-03 | Phase 8 (npm Publish Hardening) | Complete |
+| BUILD-04 | Phase 8 (npm Publish Hardening) | Complete |
 
 **Coverage:**
 - v1 requirements: 60 total
