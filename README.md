@@ -320,7 +320,7 @@ The package compiles TypeScript from `src/` into `dist/` and copies template ass
 
 ### Publish verification
 
-The published package targets `node >=20.11.0` and contains compiled JavaScript plus bundled template assets.
+The published package targets `node >=20.11.0` and contains compiled JavaScript plus bundled template assets. Runtime dependencies are intentionally zero; TypeScript, Vitest, and `@types/node` are dev-only.
 
 Before publishing, verify the local release candidate:
 
@@ -339,6 +339,10 @@ npx codewiki@latest init --name latest-smoke
 ```
 
 This is a post-publish check because `codewiki@latest` targets the already-published registry package, not the local source tree or release candidate.
+
+### Publish troubleshooting
+
+If the local tarball smoke cannot find templates, check that `npm run build` copied `src/templates/**` to `dist/templates/**`, then confirm `npm pack --dry-run --json` lists the expected `dist/templates/...` files. If `npx codewiki@latest init` fails after publish while the local tarball passed, treat it as a registry or publish verification issue rather than a source-tree test failure.
 
 ## Current non-goals
 
