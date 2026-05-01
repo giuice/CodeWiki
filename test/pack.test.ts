@@ -2,6 +2,49 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 
+const REQUIRED_TEMPLATE_FILES = [
+  "dist/templates/skills/codewiki-absorb/SKILL.md",
+  "dist/templates/skills/codewiki-breakdown/SKILL.md",
+  "dist/templates/skills/codewiki-ingest/SKILL.md",
+  "dist/templates/skills/codewiki-lint/SKILL.md",
+  "dist/templates/skills/codewiki-prd/SKILL.md",
+  "dist/templates/skills/codewiki-process/SKILL.md",
+  "dist/templates/skills/codewiki-query/SKILL.md",
+  "dist/templates/skills/codewiki-tasks/SKILL.md",
+  "dist/templates/hooks/pre-wiki-context.sh",
+  "dist/templates/hooks/post-verify.sh",
+  "dist/templates/hooks/session-end.sh",
+  "dist/templates/claude/agents/codewiki-verifier.md",
+  "dist/templates/claude/agents/codewiki-wiki-updater.md",
+  "dist/templates/claude/instructions.md",
+  "dist/templates/codex/hooks.json",
+  "dist/templates/codex/config.toml",
+  "dist/templates/codex/hooks/user-prompt-submit.sh",
+  "dist/templates/codex/hooks/pre-tool-use.sh",
+  "dist/templates/codex/hooks/post-tool-use.sh",
+  "dist/templates/codex/hooks/stop.sh",
+  "dist/templates/codex/agents/codewiki-verifier.toml",
+  "dist/templates/codex/agents/codewiki-wiki-updater.toml",
+  "dist/templates/codex/instructions.md",
+  "dist/templates/copilot/hooks/codewiki-hooks.json",
+  "dist/templates/copilot/hooks/pre-tool-use.sh",
+  "dist/templates/copilot/hooks/post-tool-use.sh",
+  "dist/templates/copilot/hooks/agent-stop.sh",
+  "dist/templates/copilot/instructions.md",
+  "dist/templates/opencode/plugins/codewiki.ts",
+  "dist/templates/opencode/agents/codewiki-verifier.md",
+  "dist/templates/opencode/agents/codewiki-wiki-updater.md",
+  "dist/templates/opencode/instructions.md"
+] as const;
+
+type PackFile = {
+  path: string;
+};
+
+type PackPackage = {
+  files: PackFile[];
+};
+
 test("npm pack --dry-run includes required template files in tarball (BUILD-01, BUILD-02)", () => {
   // npm pack --dry-run triggers prepack → build → clean → recompile.
   // This test MUST run after vitest (unit tests) to avoid wiping dist/ mid-suite.
@@ -24,28 +67,10 @@ test("npm pack --dry-run includes required template files in tarball (BUILD-01, 
     `npm pack --dry-run --json failed:\nSTDOUT: ${packDetails.stdout}\nSTDERR: ${packDetails.stderr}`
   );
 
-  const packOutput = packDetails.stdout;
+  const packOutput = JSON.parse(packDetails.stdout) as PackPackage[];
+  const files = new Set(packOutput[0]?.files.map((file) => file.path) ?? []);
 
-  // IMPORTANT: older planning prose still references the retired command asset.
-  // The actual packaged source of truth after the skills migration is the canonical SKILL.md path below.
-  assert.match(
-    packOutput,
-    /dist\/templates\/skills\/codewiki-ingest\/SKILL\.md/,
-    "tarball must include dist/templates/skills/codewiki-ingest/SKILL.md (BUILD-02)"
-  );
-  assert.match(
-    packOutput,
-    /dist\/templates\/hooks\/pre-wiki-context\.sh/,
-    "tarball must include dist/templates/hooks/pre-wiki-context.sh"
-  );
-  assert.match(
-    packOutput,
-    /dist\/templates\/hooks\/post-verify\.sh/,
-    "tarball must include dist/templates/hooks/post-verify.sh"
-  );
-  assert.match(
-    packOutput,
-    /dist\/templates\/hooks\/session-end\.sh/,
-    "tarball must include dist/templates/hooks/session-end.sh"
-  );
+  for (const requiredPath of REQUIRED_TEMPLATE_FILES) {
+    assert.equal(files.has(requiredPath), true, `tarball must include ${requiredPath}`);
+  }
 });
