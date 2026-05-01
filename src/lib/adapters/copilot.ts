@@ -5,7 +5,7 @@ import { ensureDir, ensureInsideRoot, exists, readTextIfExists, relativePath } f
 import type { SupportedTool } from "../../core/types.js";
 import { mergeMarkerSection } from "../merge.js";
 import type { ReportEntry } from "../reporter.js";
-import { chmodExecutable, copyTemplateDir, copyTemplateFile } from "./base.js";
+import { chmodExecutable, copyTemplateFile } from "./base.js";
 import type { AdapterInstallOptions, ToolAdapter } from "./types.js";
 
 const GITHUB_HOOKS_DIR = ".github/hooks";
@@ -48,20 +48,10 @@ export class CopilotAdapter implements ToolAdapter {
     return report;
   }
 
-  private async copyAssetDirectory(
-    sourceDir: string,
-    targetDir: string,
-    options: AdapterInstallOptions
-  ): Promise<ReportEntry[]> {
-    return copyTemplateDir(sourceDir, targetDir, options.force, options.root);
-  }
-
   private async copyHookWrappers(options: AdapterInstallOptions): Promise<ReportEntry[]> {
     const entries: ReportEntry[] = [];
     const sourceDir = path.join(options.templateDir, "copilot", "hooks");
     const targetDir = ensureInsideRoot(options.root, COPILOT_CODEWIKI_HOOKS_DIR);
-
-    void this.copyAssetDirectory;
 
     for (const filename of await readTemplateScripts(sourceDir)) {
       const templatePath = path.join(sourceDir, filename);

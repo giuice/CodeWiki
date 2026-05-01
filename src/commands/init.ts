@@ -41,15 +41,24 @@ async function promptForTool(): Promise<SupportedTool[]> {
   const readline = createInterface({ input: process.stdin, output: process.stdout });
 
   try {
+    const choices = SUPPORTED_TOOLS.map((tool, index) => `  ${index + 1}) ${tool}`).join("\n");
     const answer = (await readline.question(
-      "No AI tools detected. Install for:\n  1) claude-code\n\nEnter number or tool name: "
+      `No AI tools detected. Install for:\n${choices}\n\nEnter number or tool name: `
     )).trim().toLowerCase();
+    const selectedByNumber = Number.parseInt(answer, 10);
 
-    if (answer === "1" || answer === "claude-code") {
-      return ["claude-code"];
+    if (Number.isInteger(selectedByNumber)) {
+      const selected = SUPPORTED_TOOLS[selectedByNumber - 1];
+      if (selected) {
+        return [selected];
+      }
     }
 
-    throw new Error("Invalid tool selection. Use --tool to specify: codewiki init --tool claude-code");
+    if (SUPPORTED_TOOLS.includes(answer as SupportedTool)) {
+      return [answer as SupportedTool];
+    }
+
+    throw new Error(`Invalid tool selection. Use --tool to specify: codewiki init --tool ${SUPPORTED_TOOLS.join(",")}`);
   } finally {
     readline.close();
   }
