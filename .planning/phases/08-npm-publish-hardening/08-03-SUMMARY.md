@@ -11,6 +11,7 @@ provides:
   - README guidance for local release-candidate verification
   - README guidance for post-publish registry smoke verification
   - README troubleshooting notes for missing template assets and registry-specific failures
+  - Isolated smoke commands that run in temporary directories instead of the release checkout
 affects: [npm-publish-hardening, maintainer-release-docs, user-install-docs]
 
 tech-stack:
@@ -31,6 +32,7 @@ key-decisions:
 
 patterns-established:
   - "README publish guidance distinguishes local release candidates from already-published registry packages."
+  - "README smoke commands use explicit temporary directories and `--tool` selections to stay non-TTY safe and avoid mutating the release repository."
 
 requirements-completed: [CLI-01, BUILD-03, BUILD-04]
 
@@ -52,7 +54,7 @@ completed: 2026-05-01
 
 ## Accomplishments
 
-- Added bounded Development-section publish verification commands for build, test, dry-run pack, real pack, local tarball smoke, and `codewiki@latest` registry smoke.
+- Added bounded Development-section publish verification commands for build, test, dry-run pack, real pack, isolated local tarball smoke, and isolated `codewiki@latest` registry smoke.
 - Refreshed README multi-tool status so Claude Code, Codex, Copilot, and OpenCode document their current skill, hook/integration, agent, and instruction surfaces.
 - Added concise runtime dependency and troubleshooting guidance for template asset and registry/publish verification failures.
 
@@ -67,7 +69,7 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `README.md` - Documents supported tools, hook strategies, release-candidate verification, post-publish smoke checks, dependency contract, and troubleshooting.
+- `README.md` - Documents supported tools, hook strategies, release-candidate verification, post-publish smoke checks, dependency contract, troubleshooting, and temp-directory smoke isolation.
 - `.planning/phases/08-npm-publish-hardening/08-03-SUMMARY.md` - Records execution outcome, verification, and tracking context.
 
 ## Decisions Made
@@ -77,7 +79,7 @@ Each task was committed atomically:
 
 ## Verification
 
-- `rg -n "node >=20\\.11\\.0|npm pack --dry-run --json|npx --yes ./codewiki-<version>\\.tgz init --name packed-smoke --tool claude-code,codex,copilot,opencode|npx codewiki@latest init --name latest-smoke|post-publish|claude-code|codex|copilot|opencode|--tool|--force|--name" README.md` - passed
+- `rg -n "node >=20\\.11\\.0|npm pack --dry-run --json|npx --yes --package|codewiki init --name packed-smoke --tool claude-code,codex,copilot,opencode|codewiki@latest init --name latest-smoke --tool claude-code,codex,copilot,opencode|post-publish|claude-code|codex|copilot|opencode|--tool|--force|--name" README.md` - passed
 - `rg -n "Runtime dependencies are intentionally zero|src/templates/\\*\\*|dist/templates/\\*\\*|registry|troubleshooting" README.md` - passed
 - `rg -n "node >=20\\.11\\.0|npm pack --dry-run --json|npx codewiki@latest init --name latest-smoke|Runtime dependencies are intentionally zero|troubleshooting" README.md` - passed
 - `npm test` - passed: 16 Vitest files / 105 tests and 17 compiled node tests
@@ -85,7 +87,7 @@ Each task was committed atomically:
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+Post-review hardening changed the documented tarball command from direct archive execution to `npx --yes --package "$TARBALL" codewiki ...` and wrapped both smoke checks in temporary directories. This preserves the plan intent while matching verified npm behavior and avoiding release-checkout mutations.
 
 ## Issues Encountered
 

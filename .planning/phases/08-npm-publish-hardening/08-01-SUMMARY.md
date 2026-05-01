@@ -10,6 +10,7 @@ requires:
 provides:
   - Node engine contract for the npm package
   - Full runtime template manifest coverage from npm pack JSON output
+  - Runtime-only package allowlist with negative pack assertions
 affects: [npm-publish-hardening, package-contract, pack-verification]
 
 tech-stack:
@@ -31,6 +32,7 @@ key-decisions:
 
 patterns-established:
   - "Pack manifest tests parse npm JSON into a Set before asserting required tarball paths."
+  - "Pack manifest tests reject non-runtime artifacts such as dist/test, __tests__, source maps, and helper template sources."
 
 requirements-completed: [BUILD-03, BUILD-04]
 
@@ -55,6 +57,8 @@ completed: 2026-05-01
 - Added `engines.node >=20.11.0` to `package.json`.
 - Preserved an absent `dependencies` field for zero runtime dependencies.
 - Replaced representative pack assertions with a complete `REQUIRED_TEMPLATE_FILES` manifest parsed from `npm pack --dry-run --json`.
+- Tightened `package.json` publish `files` from broad `dist/` inclusion to runtime CLI modules, declarations, required template assets, README, and package metadata.
+- Added negative pack assertions so tests, source maps, and helper template source files cannot enter the published tarball unnoticed.
 
 ## Task Commits
 
@@ -67,8 +71,8 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `package.json` - Declares the supported Node runtime through `engines.node`.
-- `test/pack.test.ts` - Parses npm pack JSON and asserts every runtime template asset required by `init`.
+- `package.json` - Declares the supported Node runtime through `engines.node` and scopes the npm publish allowlist to runtime artifacts.
+- `test/pack.test.ts` - Parses npm pack JSON, asserts every runtime template asset required by `init`, and rejects non-runtime artifacts.
 - `.planning/phases/08-npm-publish-hardening/08-01-SUMMARY.md` - Records execution outcome, verification, and tracking context.
 
 ## Decisions Made
@@ -84,7 +88,7 @@ Each task was committed atomically:
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+Post-review hardening tightened the package allowlist and added negative pack assertions. This stayed within the plan's publish-hardening scope and was verified by `npm pack --dry-run --json`, `node --test dist/test/pack.test.js`, and `npm test`.
 
 ## Issues Encountered
 

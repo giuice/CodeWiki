@@ -16,7 +16,7 @@ affects: [npm-publish-hardening, release-candidate-verification, init-regression
 tech-stack:
   added: []
   patterns:
-    - Run `npm pack --json` inside compiled node:test coverage and invoke the generated `.tgz` through `npx`
+    - Run `npm pack --json` inside compiled node:test coverage and invoke the generated `.tgz` with `npx --yes --package <tarball> codewiki`
     - Clean generated package tarballs in a `finally` block
     - Assert representative scaffold and adapter files from the fresh temp project
 
@@ -29,7 +29,7 @@ key-files:
 
 key-decisions:
   - "The blocking local smoke uses a generated `.tgz` release candidate rather than the published `codewiki@latest` package."
-  - "The packed CLI helper falls back to `npx --package <tarball> codewiki` when the local npm/npx version tries to execute the `.tgz` path directly."
+  - "The packed CLI helper uses npm's package form, `npx --yes --package <tarball> codewiki`, because direct `npx <tarball>` tries to execute the archive on current npm."
 
 patterns-established:
   - "Packed-package tests parse `npm pack --json`, derive an absolute tarball path, and remove that tarball in `finally`."
@@ -77,7 +77,7 @@ Each task was committed atomically:
 ## Decisions Made
 
 - Kept the smoke focused on package self-containment and representative adapter surfaces rather than duplicating every existing adapter assertion.
-- Preserved the planned direct `npx --yes <tarball>` helper invocation, with a fallback for npm/npx versions that treat the tarball path as a shell command instead of a package spec.
+- Replaced the planned direct `npx --yes <tarball>` helper invocation with npm's package form after local verification showed direct tarball execution is not reliable on current npm.
 
 ## Verification
 
@@ -90,10 +90,10 @@ Each task was committed atomically:
 
 ### Auto-fixed Issues
 
-**1. [Rule 3 - Blocking] Added npx package-form fallback for local tarballs**
+**1. [Rule 3 - Blocking] Switched local tarball execution to npx package form**
 - **Found during:** Task 2 (Add a local tarball npx smoke test)
 - **Issue:** The planned `npx --yes <tarball> ...` invocation failed locally with `Permission denied` because this npm/npx version tried to execute the `.tgz` path directly.
-- **Fix:** `runPackedCli` preserves the planned invocation, then falls back to `npx --yes --package <tarball> codewiki ...` when that direct tarball path execution fails.
+- **Fix:** `runPackedCli` invokes `npx --yes --package <tarball> codewiki ...`, which installs the local tarball package and resolves its `codewiki` bin without executing the archive path.
 - **Files modified:** `test/helpers.ts`
 - **Verification:** `npm run build && node --test dist/test/init.test.js`; `npm test`
 - **Committed in:** `f8589e6`
@@ -113,7 +113,7 @@ Each task was committed atomically:
 
 ## Issues Encountered
 
-The first smoke run proved the direct `npx --yes <tarball>` form was not portable in this environment. The helper now uses npm's package-install form as a fallback while still testing the generated local tarball.
+The first smoke run proved the direct `npx --yes <tarball>` form was not portable in this environment. The helper now uses npm's package-install form while still testing the generated local tarball.
 
 ## Known Stubs
 

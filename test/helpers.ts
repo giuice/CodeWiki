@@ -23,11 +23,7 @@ export function runCli(cwd: string, args: string[]): RunResult {
 }
 
 export function runPackedCli(cwd: string, tarballPath: string, args: string[]): RunResult {
-  const result = spawnSync("npx", ["--yes", tarballPath, ...args], { cwd, encoding: "utf8" });
-  if (result.status !== 0 && result.stderr.includes("Permission denied")) {
-    const fallback = spawnSync("npx", ["--yes", "--package", tarballPath, "codewiki", ...args], { cwd, encoding: "utf8" });
-    return { status: fallback.status, stdout: fallback.stdout, stderr: fallback.stderr };
-  }
+  const result = spawnSync("npx", ["--yes", "--package", tarballPath, "codewiki", ...args], { cwd, encoding: "utf8" });
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
 

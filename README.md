@@ -329,13 +329,16 @@ npm run build
 npm test
 npm pack --dry-run --json
 npm pack --json
-npx --yes ./codewiki-<version>.tgz init --name packed-smoke --tool claude-code,codex,copilot,opencode
+TARBALL="$(pwd)/codewiki-$(node -p "require('./package.json').version").tgz"
+SMOKE_DIR="$(mktemp -d)"
+(cd "$SMOKE_DIR" && npx --yes --package "$TARBALL" codewiki init --name packed-smoke --tool claude-code,codex,copilot,opencode)
 ```
 
 The local tarball smoke is the blocking pre-publish check because it runs the package candidate you are about to publish. After publishing, run the registry smoke separately:
 
 ```bash
-npx codewiki@latest init --name latest-smoke
+REGISTRY_SMOKE_DIR="$(mktemp -d)"
+(cd "$REGISTRY_SMOKE_DIR" && npx --yes codewiki@latest init --name latest-smoke --tool claude-code,codex,copilot,opencode)
 ```
 
 This is a post-publish check because `codewiki@latest` targets the already-published registry package, not the local source tree or release candidate.

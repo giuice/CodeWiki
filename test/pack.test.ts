@@ -37,6 +37,14 @@ const REQUIRED_TEMPLATE_FILES = [
   "dist/templates/opencode/instructions.md"
 ] as const;
 
+const FORBIDDEN_PACKAGE_PATTERNS = [
+  /^dist\/test\//,
+  /\/__tests__\//,
+  /^dist\/templates\/adapter-templates\.(?:d\.ts|js|js\.map|ts)$/,
+  /^dist\/templates\/(?:page-templates|scaffold)\.(?:js\.map|ts)$/,
+  /\.js\.map$/
+] as const;
+
 type PackFile = {
   path: string;
 };
@@ -72,5 +80,11 @@ test("npm pack --dry-run includes required template files in tarball (BUILD-01, 
 
   for (const requiredPath of REQUIRED_TEMPLATE_FILES) {
     assert.equal(files.has(requiredPath), true, `tarball must include ${requiredPath}`);
+  }
+
+  for (const packedPath of files) {
+    for (const forbiddenPattern of FORBIDDEN_PACKAGE_PATTERNS) {
+      assert.equal(forbiddenPattern.test(packedPath), false, `tarball must not include ${packedPath}`);
+    }
   }
 });
