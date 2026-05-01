@@ -265,7 +265,7 @@ Plans:
 - [x] 08-01-PLAN.md — Package metadata contract and full pack manifest coverage
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 08-02-PLAN.md — Local npm tarball npx smoke test
+- [x] 08-02-PLAN.md — Local npm tarball npx smoke test
 
 **Wave 3** *(blocked on Wave 1 and Wave 2 completion)*
 - [ ] 08-03-PLAN.md — README publish verification and troubleshooting docs
@@ -292,4 +292,4 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 5. Test Suite | 1/1 | Complete | 2026-04-10 |
 | 6. OpenCode Adapter | 0/2 | Not started | - |
 | 7. Codex and Copilot Adapters | 6/6 | Complete    | 2026-05-01 |
-| 8. npm Publish Hardening | 1/3 | In progress | - |
+| 8. npm Publish Hardening | 2/3 | In progress | - |

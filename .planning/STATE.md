@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-05-01T18:07:52.000Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-05-01T18:13:23.000Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 15
   completed_phases: 13
   total_plans: 36
-  completed_plans: 34
+  completed_plans: 35
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-13)
 ## Current Position
 
 Phase: 8
-Plan: 08-02 next
+Plan: 08-03 next
 Status: Phase 8 in progress
 Last activity: 2026-05-01
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 33
+- Total plans completed: 35
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -72,6 +72,7 @@ Progress: [██████████] 100%
 | Phase 07 P05 | 4 | 3 tasks | 3 files |
 | Phase 07 P06 | 12min | 3 tasks | 2 files |
 | Phase 08 P01 | 2min | 2 tasks | 3 files |
+| Phase 08 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,8 @@ Recent decisions affecting current work:
 - Phase 08 planning: local tarball smoke is the blocking pre-publish gate; `npx codewiki@latest init` remains a post-publish/manual registry check.
 - Phase 08 planning: no runtime dependency is required for the phase; `picocolors` remains an allowed but unused narrow exception.
 - [Phase 08]: Pack verification parses `npm pack --dry-run --json` and asserts the full runtime template manifest required by `init`.
+- [Phase 08]: The blocking local tarball smoke generates a `.tgz` with `npm pack --json`, invokes it through `npx`, verifies representative adapter assets, and removes the tarball in `finally`.
+- [Phase 08]: Local packed CLI tests preserve the direct `npx --yes <tarball>` form but fall back to `npx --yes --package <tarball> codewiki` when npm/npx treats the `.tgz` path as an executable.
 
 ### Pending Todos
 
@@ -135,6 +138,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T18:07:52.000Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-05-01T18:13:23.000Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None
