@@ -17,6 +17,31 @@ function assertInstalledSkillTree(cwd: string, baseDir: string): void {
   }
 }
 
+function countHookCommands(config: unknown, commandFragment: string): number {
+  let count = 0;
+
+  function visit(value: unknown): void {
+    if (Array.isArray(value)) {
+      for (const entry of value) visit(entry);
+      return;
+    }
+
+    if (!value || typeof value !== "object") {
+      return;
+    }
+
+    const record = value as Record<string, unknown>;
+    if (typeof record.command === "string" && record.command.includes(commandFragment)) {
+      count += 1;
+    }
+
+    for (const child of Object.values(record)) visit(child);
+  }
+
+  visit(config);
+  return count;
+}
+
 test("package baseline and compiled help expose all commands", () => {
   const pkg = JSON.parse(readFileSync(path.join(process.cwd(), "package.json"), "utf8")) as Record<string, unknown>;
   assert.equal(pkg.type, "module");
@@ -138,16 +163,107 @@ test("init --tool opencode installs the real OpenCode adapter and stays idempote
   assert.equal(countOccurrences(secondAgents, "<!-- codewiki:start -->"), 1);
 });
 
-test("init reports pending non-Claude integrations without failing the Claude install", () => {
+test("init --tool codex installs hooks, agents, shared skills, and preserves user config on rerun", () => {
+  const cwd = tempProject();
+  mkdirSync(path.join(cwd, ".codex"), { recursive: true });
+  writeFileSync(
+    path.join(cwd, ".codex/hooks.json"),
+    JSON.stringify(
+      {
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: "Read",
+              hooks: [{ type: "command", command: "echo user-codex-hook" }]
+            }
+          ]
+        }
+      },
+      null,
+      2
+    ) + "\n"
+  );
+  writeFileSync(
+    path.join(cwd, ".codex/config.toml"),
+    "[features]\nother_feature = true\ncodex_hooks = false\n"
+  );
+  writeFileSync(path.join(cwd, "AGENTS.md"), "# Existing Instructions\n");
+
+  const first = mustRun(cwd, ["init", "--tool", "codex"]);
+  assert.match(first.stdout, /shared-skills adapter:/);
+  assert.match(first.stdout, /codex adapter:/);
+  assert.doesNotMatch(first.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(first.stdout, /codex \(shared skills installed; hooks and instructions remain pending\)/);
+
+  assertInstalledSkillTree(cwd, ".agents/skills");
+  assert.equal(existsSync(path.join(cwd, ".claude/skills")), false, "Codex-only install must not create .claude/skills");
+
+  for (const rel of [
+    ".codex/hooks.json",
+    ".codex/config.toml",
+    ".codex/hooks/user-prompt-submit.sh",
+    ".codex/hooks/post-tool-use.sh",
+    ".codex/hooks/stop.sh",
+    ".codex/agents/codewiki-wiki-updater.toml",
+    ".codex/agents/codewiki-verifier.toml",
+    "AGENTS.md"
+  ]) {
+    assert.equal(existsSync(path.join(cwd, rel)), true, `missing ${rel}`);
+  }
+
+  const firstHooks = JSON.parse(readFileSync(path.join(cwd, ".codex/hooks.json"), "utf8")) as {
+    hooks: { PreToolUse: Array<{ matcher?: string; hooks?: Array<{ command?: string }> }> };
+  };
+  assert.equal(
+    firstHooks.hooks.PreToolUse.some((entry) =>
+      entry.hooks?.some((hook) => hook.command === "echo user-codex-hook")
+    ),
+    true
+  );
+  assert.equal(
+    firstHooks.hooks.PreToolUse.some((entry) => entry.matcher === "Edit|Write|apply_patch"),
+    true
+  );
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/user-prompt-submit.sh"), 1);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/pre-tool-use.sh"), 1);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/post-tool-use.sh"), 1);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/stop.sh"), 1);
+
+  const firstConfig = readFileSync(path.join(cwd, ".codex/config.toml"), "utf8");
+  assert.match(firstConfig, /other_feature = true/);
+  assert.match(firstConfig, /codex_hooks = true/);
+  assert.doesNotMatch(firstConfig, /codex_hooks = false/);
+
+  const firstAgents = readFileSync(path.join(cwd, "AGENTS.md"), "utf8");
+  assert.match(firstAgents, /^# Existing Instructions/m);
+  assert.equal(countOccurrences(firstAgents, "<!-- codewiki:start -->"), 1);
+
+  mustRun(cwd, ["init", "--tool", "codex"]);
+
+  const secondAgents = readFileSync(path.join(cwd, "AGENTS.md"), "utf8");
+  assert.equal(countOccurrences(secondAgents, "<!-- codewiki:start -->"), 1);
+
+  const secondHooks = JSON.parse(readFileSync(path.join(cwd, ".codex/hooks.json"), "utf8"));
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/user-prompt-submit.sh"), 1);
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/pre-tool-use.sh"), 1);
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/post-tool-use.sh"), 1);
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/stop.sh"), 1);
+});
+
+test("init --tool claude-code,codex installs both skill trees and the real Codex adapter", () => {
   const cwd = tempProject();
   const result = mustRun(cwd, ["init", "--tool", "claude-code,codex"]);
+  assert.match(result.stdout, /claude-code adapter:/);
   assert.match(result.stdout, /shared-skills adapter:/);
-  assert.match(result.stdout, /Tool-specific integrations pending:/);
-  assert.match(result.stdout, /codex \(shared skills installed; hooks and instructions remain pending\)/);
+  assert.match(result.stdout, /codex adapter:/);
+  assert.doesNotMatch(result.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(result.stdout, /codex \(shared skills installed; hooks and instructions remain pending\)/);
   assert.doesNotMatch(result.stdout, /Unsupported \(not yet implemented\):/);
   assertInstalledSkillTree(cwd, ".claude/skills");
   assertInstalledSkillTree(cwd, ".agents/skills");
-  assert.equal(existsSync(path.join(cwd, ".codewiki/adapters/codex")), false);
+  assert.equal(existsSync(path.join(cwd, ".codex/hooks.json")), true);
+  assert.equal(existsSync(path.join(cwd, "AGENTS.md")), true);
+  assert.equal(existsSync(path.join(cwd, "CLAUDE.md")), true);
 
   const bad = runCli(tempProject(), ["init", "--tool", "unknown"]);
   assert.notEqual(bad.status, 0);
@@ -165,9 +281,14 @@ test("init reports pending non-Claude integrations without failing the Claude in
   const duplicateSelection = mustRun(deduped, ["init", "--tool", "claude-code,claude-code,codex"]);
   assert.match(duplicateSelection.stdout, /claude-code adapter:/);
   assert.match(duplicateSelection.stdout, /shared-skills adapter:/);
-  assert.match(duplicateSelection.stdout, /codex \(shared skills installed; hooks and instructions remain pending\)/);
+  assert.match(duplicateSelection.stdout, /codex adapter:/);
+  assert.doesNotMatch(
+    duplicateSelection.stdout,
+    /codex \(shared skills installed; hooks and instructions remain pending\)/
+  );
   assertInstalledSkillTree(deduped, ".claude/skills");
   assertInstalledSkillTree(deduped, ".agents/skills");
+  assert.equal(existsSync(path.join(deduped, ".codex/hooks.json")), true);
 });
 
 test("init preserves existing Claude settings and instructions without duplication on rerun", () => {
