@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4.1.5: Product Docs Canon Refresh** - Align README, implementation docs, and handoff docs to the skills canon (INSERTED) (completed 2026-04-13)
 - [x] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
 - [ ] **Phase 6: OpenCode Adapter** - plugin-based hook strategy with shared `.agents/skills`, OpenCode agents, and AGENTS wiring
-- [ ] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps
+- [x] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps (completed 2026-05-01)
 - [ ] **Phase 8: npm Publish Hardening** - Build script, pack verification, engines field, README
 
 ## Phase Details
@@ -236,7 +236,7 @@ Plans:
   2. Codex hook wiring enables `codex_hooks`, uses `UserPromptSubmit` for prompt-level wiki-context injection, uses `PreToolUse`/`PostToolUse` matchers for `apply_patch` via `Edit|Write`, and routes `PostToolUse`/`Stop` through Codex-specific JSON wrappers
   3. Running `npx codewiki init` on a project with `.github/copilot-instructions.md` creates `.github/hooks/codewiki-hooks.json` with `"version": 1`, appends to `.github/copilot-instructions.md`, and documents `agentStop` as the meaningful post-turn lifecycle hook while `sessionEnd` remains cleanup-only
   4. Mixed selections such as `claude-code,codex` or `claude-code,copilot` still write both `.claude/skills/` and `.agents/skills/` exactly once
-**Plans:** 6 plans
+**Plans:** 6/6 plans complete
 Plans:
 **Wave 1**
 - [x] 07-01-PLAN.md — Codex hook/config/wrapper/agent/instruction templates
@@ -284,5 +284,5 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 4.1.5 Product Docs Canon Refresh (INSERTED) | 1/1 | Complete    | 2026-04-13 |
 | 5. Test Suite | 1/1 | Complete | 2026-04-10 |
 | 6. OpenCode Adapter | 0/2 | Not started | - |
-| 7. Codex and Copilot Adapters | 0/TBD | Not started | - |
+| 7. Codex and Copilot Adapters | 6/6 | Complete    | 2026-05-01 |
 | 8. npm Publish Hardening | 0/TBD | Not started | - |
