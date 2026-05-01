@@ -9,6 +9,11 @@ const adapterFactories: Partial<Record<SupportedTool, () => Promise<ToolAdapter>
     const { ClaudeCodeAdapter } = await import(modulePath);
     return new ClaudeCodeAdapter();
   },
+  codex: async () => {
+    const modulePath = "./codex.js";
+    const { CodexAdapter } = await import(modulePath);
+    return new CodexAdapter();
+  },
   opencode: async () => {
     const modulePath = "./opencode.js";
     const { OpenCodeAdapter } = await import(modulePath);
