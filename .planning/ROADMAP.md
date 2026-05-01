@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Test Suite** - Merge correctness, idempotency, and npm pack coverage
 - [ ] **Phase 6: OpenCode Adapter** - plugin-based hook strategy with shared `.agents/skills`, OpenCode agents, and AGENTS wiring
 - [x] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps (completed 2026-05-01)
-- [ ] **Phase 8: npm Publish Hardening** - Build script, pack verification, engines field, README
+- [x] **Phase 8: npm Publish Hardening** - Build script, pack verification, engines field, README
 
 ## Phase Details
 
@@ -268,7 +268,7 @@ Plans:
 - [x] 08-02-PLAN.md — Local npm tarball npx smoke test
 
 **Wave 3** *(blocked on Wave 1 and Wave 2 completion)*
-- [ ] 08-03-PLAN.md — README publish verification and troubleshooting docs
+- [x] 08-03-PLAN.md — README publish verification and troubleshooting docs
 
 ## Progress
 
@@ -292,4 +292,4 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 5. Test Suite | 1/1 | Complete | 2026-04-10 |
 | 6. OpenCode Adapter | 0/2 | Not started | - |
 | 7. Codex and Copilot Adapters | 6/6 | Complete    | 2026-05-01 |
-| 8. npm Publish Hardening | 2/3 | In progress | - |
+| 8. npm Publish Hardening | 3/3 | Complete | 2026-05-01 |
