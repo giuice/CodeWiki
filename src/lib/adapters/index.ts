@@ -14,6 +14,11 @@ const adapterFactories: Partial<Record<SupportedTool, () => Promise<ToolAdapter>
     const { CodexAdapter } = await import(modulePath);
     return new CodexAdapter();
   },
+  copilot: async () => {
+    const modulePath = "./copilot.js";
+    const { CopilotAdapter } = await import(modulePath);
+    return new CopilotAdapter();
+  },
   opencode: async () => {
     const modulePath = "./opencode.js";
     const { OpenCodeAdapter } = await import(modulePath);
