@@ -204,6 +204,8 @@ Auto-detects your local AI tool markers and installs the wiki plus the matching 
 ```bash
 npx codewiki init --tool claude-code
 npx codewiki init --tool codex
+npx codewiki init --tool copilot
+npx codewiki init --tool opencode
 npx codewiki init --tool claude-code,codex
 ```
 
@@ -235,9 +237,9 @@ npx codewiki init --name "My Project" --tool claude-code,codex
 #    codewiki-query "what do we know about auth middleware?"
 
 # 3. Shared hook scripts are installed into .codewiki/hooks/
-#    Claude Code wires them today; future non-Claude adapters reuse the same scripts
+#    Each adapter maps them to its host tool's hook or plugin model
 
-# 4. Claude installs agents today:
+# 4. Claude, Codex, and OpenCode install supporting agents:
 #    codewiki-wiki-updater
 #    codewiki-verifier
 ```
@@ -275,11 +277,11 @@ Shared shell scripts live in `.codewiki/hooks/`:
 | `post-verify.sh` | Emits structured change context so the tool can run the wiki-updater flow after verified work |
 | `session-end.sh` | Produces a lightweight session summary that can seed an absorb pass |
 
-Today, Claude Code is the fully wired hook adapter. The same scripts are the canonical shared assets for future Codex, Copilot, and OpenCode adapters.
+Each adapter maps those shared scripts to the host tool's integration model.
 
 ## Agents
 
-Claude installs two supporting agents today:
+Claude Code, Codex, and OpenCode install two supporting agents:
 
 | Agent | Purpose |
 | --- | --- |
@@ -288,14 +290,14 @@ Claude installs two supporting agents today:
 
 ## Multi-tool support
 
-`codewiki init` auto-detects tool markers and installs the matching shipped surfaces. Current status:
+`codewiki init` auto-detects tool markers and installs the matching shipped surfaces. Use `--tool` to override detection, `--name` to set the project name in `.codewiki/config.yml`, and `--force` to replace CodeWiki-managed sections while preserving unrelated user content.
 
-| Tool | Skills installed today | Hooks today | Agents today | Instructions today |
+| Tool | Skills | Hook or integration strategy | Agents | Instructions |
 | --- | --- | --- | --- | --- |
-| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` | `.claude/agents/` | Appends to `CLAUDE.md` |
-| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | Pending future adapter work | Pending future adapter work | Pending future adapter work |
-| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | Pending future adapter work | Pending future adapter work | Pending future adapter work |
-| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | Pending future adapter work | Pending future adapter work | Pending future adapter work |
+| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` wires shared shell hooks | `.claude/agents/` | Appends to `CLAUDE.md` |
+| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` plus `.codex/config.toml`; uses `UserPromptSubmit`, `PreToolUse`/`PostToolUse` for edit/write events, and Stop wrappers | `.codex/agents/` | Appends to `AGENTS.md` |
+| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; uses `preToolUse`, `postToolUse`, and `agentStop` for post-turn follow-up | Shared skill-driven flow | Appends to `.github/copilot-instructions.md` |
+| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` dispatches plugin events to shared hooks | `.opencode/agents/` | Appends to `AGENTS.md` |
 
 Dual-tree rule:
 
@@ -316,7 +318,27 @@ npm test
 
 The package compiles TypeScript from `src/` into `dist/` and copies template assets during build. Tests combine unit coverage with built integration checks for installer behavior and packaged assets.
 
-**Zero runtime dependencies.** TypeScript, vitest, and `@types/node` are dev-only. The published package contains compiled JavaScript plus bundled template assets.
+### Publish verification
+
+The published package targets `node >=20.11.0` and contains compiled JavaScript plus bundled template assets.
+
+Before publishing, verify the local release candidate:
+
+```bash
+npm run build
+npm test
+npm pack --dry-run --json
+npm pack --json
+npx --yes ./codewiki-<version>.tgz init --name packed-smoke --tool claude-code,codex,copilot,opencode
+```
+
+The local tarball smoke is the blocking pre-publish check because it runs the package candidate you are about to publish. After publishing, run the registry smoke separately:
+
+```bash
+npx codewiki@latest init --name latest-smoke
+```
+
+This is a post-publish check because `codewiki@latest` targets the already-published registry package, not the local source tree or release candidate.
 
 ## Current non-goals
 
@@ -344,8 +366,8 @@ CodeWiki v2 is under active development, but the installer-only architecture and
 | 4 | Claude Code Adapter plus init rewrite | ✅ Complete |
 | 4.1 | Skills Migration and docs canon refresh | ✅ Complete |
 | 5 | Test Suite | ✅ Complete |
-| 6 | OpenCode Adapter | ⬜ Planned |
-| 7 | Codex and Copilot Adapters | ⬜ Planned |
+| 6 | OpenCode Adapter | ✅ Complete |
+| 7 | Codex and Copilot Adapters | ✅ Complete |
 | 8 | npm Publish Hardening | ⬜ Planned |
 
 ## License
