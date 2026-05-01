@@ -17,6 +17,14 @@ function assertInstalledSkillTree(cwd: string, baseDir: string): void {
   }
 }
 
+function assertInstalledSkillTreeOnce(cwd: string, baseDir: string): void {
+  assertInstalledSkillTree(cwd, baseDir);
+
+  const files = listRecursive(path.join(cwd, baseDir));
+  const skillFiles = files.filter((rel) => rel.endsWith("/SKILL.md"));
+  assert.equal(skillFiles.length, CANONICAL_SKILLS.length, `${baseDir} should contain each CodeWiki skill exactly once`);
+}
+
 function countHookCommands(config: unknown, commandFragment: string): number {
   let count = 0;
 
@@ -340,6 +348,41 @@ test("init --tool claude-code,codex installs both skill trees and the real Codex
   assertInstalledSkillTree(deduped, ".claude/skills");
   assertInstalledSkillTree(deduped, ".agents/skills");
   assert.equal(existsSync(path.join(deduped, ".codex/hooks.json")), true);
+});
+
+test("init --tool claude-code,copilot installs both skill trees and the real Copilot adapter", () => {
+  const cwd = tempProject();
+  const result = mustRun(cwd, ["init", "--tool", "claude-code,copilot"]);
+  assert.match(result.stdout, /claude-code adapter:/);
+  assert.match(result.stdout, /shared-skills adapter:/);
+  assert.match(result.stdout, /copilot adapter:/);
+  assert.doesNotMatch(result.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(result.stdout, /copilot \(shared skills installed; hooks and instructions remain pending\)/);
+
+  assertInstalledSkillTreeOnce(cwd, ".claude/skills");
+  assertInstalledSkillTreeOnce(cwd, ".agents/skills");
+  assert.equal(existsSync(path.join(cwd, ".github/hooks/codewiki-hooks.json")), true);
+  assert.equal(existsSync(path.join(cwd, ".github/copilot-instructions.md")), true);
+  assert.equal(existsSync(path.join(cwd, "CLAUDE.md")), true);
+});
+
+test("init --tool claude-code,codex,copilot,opencode reports all real adapters without pending integrations", () => {
+  const cwd = tempProject();
+  const result = mustRun(cwd, ["init", "--tool", "claude-code,codex,copilot,opencode"]);
+
+  assert.match(result.stdout, /claude-code adapter:/);
+  assert.match(result.stdout, /shared-skills adapter:/);
+  assert.match(result.stdout, /codex adapter:/);
+  assert.match(result.stdout, /copilot adapter:/);
+  assert.match(result.stdout, /opencode adapter:/);
+  assert.doesNotMatch(result.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(result.stdout, /shared skills installed; hooks and instructions remain pending/);
+
+  assertInstalledSkillTreeOnce(cwd, ".claude/skills");
+  assertInstalledSkillTreeOnce(cwd, ".agents/skills");
+  assert.equal(existsSync(path.join(cwd, ".codex/hooks.json")), true);
+  assert.equal(existsSync(path.join(cwd, ".github/hooks/codewiki-hooks.json")), true);
+  assert.equal(existsSync(path.join(cwd, ".opencode/plugins/codewiki.ts")), true);
 });
 
 test("init preserves existing Claude settings and instructions without duplication on rerun", () => {
