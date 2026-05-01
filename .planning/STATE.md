@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 7 context gathered
-last_updated: "2026-05-01T14:36:21.806Z"
-last_activity: 2026-05-01 -- Phase 7 planning complete
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-05-01T16:06:50.610Z"
+last_activity: 2026-05-01
 progress:
   total_phases: 15
   completed_phases: 12
   total_plans: 33
-  completed_plans: 27
-  percent: 82
+  completed_plans: 30
+  percent: 91
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-13)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 07 - codex-and-copilot-adapters
+**Current focus:** Phase 7 — codex-and-copilot-adapters
 
 ## Current Position
 
-Phase: 7
-Plan: Not started
+Phase: 7 (codex-and-copilot-adapters) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-05-01 -- Phase 7 planning complete
+Last activity: 2026-05-01
 
 Progress: [██████████] 100%
 
@@ -67,6 +67,7 @@ Progress: [██████████] 100%
 | Phase 04.1.2 P02 | 3 min | 2 tasks | 3 files |
 | Phase 04.1.2 P03 | 2 min | 2 tasks | 1 files |
 | Phase 04.1.5 P01 | 25 | 3 tasks | 4 files |
+| Phase 07 P02 | 4 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,8 @@ Recent decisions affecting current work:
 - Phase 04.1.2: skills canon install surface is `.claude/skills/codewiki-<name>/SKILL.md` for Claude and `.agents/skills/codewiki-<name>/SKILL.md` for non-Claude tools, replacing the legacy Claude command directory
 - Phase 04.1.5: product docs now describe the shipped eight-skill surface and the `.claude/skills/` / `.agents/skills/` split consistently across README, PRD, implementation docs, and migration reference
 - 2026-05-01 Codex hook canon refresh: current Codex docs supersede the 2026-04-13 hook model. Codex uses `UserPromptSubmit` for prompt-level context, can match `apply_patch` through `PreToolUse`/`PostToolUse` aliases `Edit|Write`, and needs event-specific JSON wrappers for `PostToolUse`/`Stop`; Copilot uses `agentStop` for meaningful post-turn follow-up and treats `sessionEnd` as cleanup-only; OpenCode uses plugin events `tool.execute.before`, `file.edited`, and `session.idle`
+- [Phase 07]: Codex config merging uses a narrow text helper for codex_hooks — Preserves unrelated .codex/config.toml user settings and comments while enabling hooks.
+- [Phase 07]: Codex remains in SHARED_SKILLS_TOOLS while also resolving a real CodexAdapter — Preserves canonical shared .agents/skills installation for Codex selections.
 
 ### Pending Todos
 
@@ -119,6 +122,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T14:08:28.727Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-codex-and-copilot-adapters/07-CONTEXT.md
+Last session: 2026-05-01T16:06:41.263Z
+Stopped at: Completed 07-02-PLAN.md
+Resume file: None

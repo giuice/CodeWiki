@@ -75,9 +75,9 @@
 
 ### Codex Adapter
 
-- [ ] **CODEX-01**: Codex selections reuse `.agents/skills/codewiki-<name>/SKILL.md` as the canonical skill tree; no separate Codex-only skill directory is introduced in v1
-- [ ] **CODEX-02**: Merges hook config into `.codex/hooks.json` and enables hooks in `.codex/config.toml` without clobbering existing config; uses `UserPromptSubmit` for prompt-level context, `PreToolUse`/`PostToolUse` matchers for `apply_patch` via `Edit|Write`, and Codex-specific JSON wrappers where event stdout contracts require them
-- [ ] **CODEX-03**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
+- [x] **CODEX-01**: Codex selections reuse `.agents/skills/codewiki-<name>/SKILL.md` as the canonical skill tree; no separate Codex-only skill directory is introduced in v1
+- [x] **CODEX-02**: Merges hook config into `.codex/hooks.json` and enables hooks in `.codex/config.toml` without clobbering existing config; uses `UserPromptSubmit` for prompt-level context, `PreToolUse`/`PostToolUse` matchers for `apply_patch` via `Edit|Write`, and Codex-specific JSON wrappers where event stdout contracts require them
+- [x] **CODEX-03**: Appends CodeWiki instructions to `AGENTS.md` using marker comments
 
 ### Copilot Adapter
 
@@ -186,9 +186,9 @@
 | OC-02 | Phase 6 (OpenCode Adapter) | Complete |
 | OC-03 | Phase 6 (OpenCode Adapter) | Complete |
 | OC-04 | Phase 6 (OpenCode Adapter) | Complete |
-| CODEX-01 | Phase 7 (Codex and Copilot Adapters) | Pending |
-| CODEX-02 | Phase 7 (Codex and Copilot Adapters) | Pending |
-| CODEX-03 | Phase 7 (Codex and Copilot Adapters) | Pending |
+| CODEX-01 | Phase 7 (Codex and Copilot Adapters) | Complete |
+| CODEX-02 | Phase 7 (Codex and Copilot Adapters) | Complete |
+| CODEX-03 | Phase 7 (Codex and Copilot Adapters) | Complete |
 | COP-01 | Phase 7 (Codex and Copilot Adapters) | Pending |
 | COP-02 | Phase 7 (Codex and Copilot Adapters) | Pending |
 | COP-03 | Phase 7 (Codex and Copilot Adapters) | Pending |

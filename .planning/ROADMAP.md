@@ -239,11 +239,11 @@ Plans:
 **Plans:** 6 plans
 Plans:
 **Wave 1**
-- [ ] 07-01-PLAN.md — Codex hook/config/wrapper/agent/instruction templates
-- [ ] 07-04-PLAN.md — Copilot hook/wrapper/instruction templates
+- [x] 07-01-PLAN.md — Codex hook/config/wrapper/agent/instruction templates
+- [x] 07-04-PLAN.md — Copilot hook/wrapper/instruction templates
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 07-02-PLAN.md — Codex adapter wiring and pending-report cleanup
+- [x] 07-02-PLAN.md — Codex adapter wiring and pending-report cleanup
 - [ ] 07-05-PLAN.md — Copilot adapter wiring and pending-report cleanup
 
 **Wave 3** *(blocked on Wave 2 completion)*
