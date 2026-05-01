@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "bash .github/hooks/codewiki/pre-tool-use.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "bash .github/hooks/codewiki/post-tool-use.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "bash .github/hooks/codewiki/agent-stop.sh",
+        "cwd": ".",
+        "timeoutSec": 30,
+        "env": {
+          "CODEWIKI_COPILOT_AGENT_STOP": "1"
+        }
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "bash .codewiki/hooks/session-end.sh >/dev/null 2>&1 || true",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}
