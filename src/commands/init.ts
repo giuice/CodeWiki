@@ -5,7 +5,7 @@ import pc from "picocolors";
 import { SUPPORTED_TOOLS, type SupportedTool } from "../core/types.js";
 import { resolveAdapters } from "../lib/adapters/index.js";
 import { detectTools } from "../lib/detect.js";
-import { formatSectionedReport, type ReportSection } from "../lib/reporter.js";
+import { formatBrandBanner, formatSectionedReport, type ReportSection } from "../lib/reporter.js";
 import { scaffoldProject } from "../lib/scaffold.js";
 
 export interface InitOptions {
@@ -77,7 +77,7 @@ async function promptForTool(): Promise<SupportedTool[]> {
   try {
     const choices = SUPPORTED_TOOLS.map((tool, index) => `  ${pc.cyan(`${index + 1})`)} ${tool}`).join("\n");
     const answer = await readline.question(
-      `${pc.yellow("No AI tools detected.")} Install ${pc.bold("CodeWiki")} for:\n${choices}\n  ${pc.cyan("A)")} all\n\nEnter numbers, names, or A for all: `
+      `${formatBrandBanner()}\n\n${pc.yellow("No AI tools detected.")} Install ${pc.bold("CodeWiki")} for:\n${choices}\n  ${pc.cyan("A)")} all\n\nEnter numbers, names, or A for all: `
     );
 
     return parsePromptToolSelection(answer);

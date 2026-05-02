@@ -28,9 +28,10 @@ afterEach(async () => {
 });
 
 test("prompts for Claude when no tools are detected in a TTY session", async () => {
+  const question = vi.fn().mockResolvedValue("1");
   vi.doMock("node:readline/promises", () => ({
     createInterface: () => ({
-      question: vi.fn().mockResolvedValue("1"),
+      question,
       close: vi.fn()
     })
   }));
@@ -45,6 +46,10 @@ test("prompts for Claude when no tools are detected in a TTY session", async () 
   expect(output).toContain("claude-code adapter:");
   expect(output).not.toContain("Tool-specific integrations pending:");
   expect(existsSync(path.join(root, ".claude/skills/codewiki-ingest/SKILL.md"))).toBe(true);
+  expect(question).toHaveBeenCalledOnce();
+  expect(question.mock.calls[0]?.[0]).toContain("____ ___");
+  expect(question.mock.calls[0]?.[0]).toContain("A)");
+  expect(question.mock.calls[0]?.[0]).toContain("all");
 });
 
 test("prompt accepts comma-separated numeric selections", async () => {

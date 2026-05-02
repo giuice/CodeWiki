@@ -22,14 +22,14 @@ const ACTION_SYMBOLS: Record<ReportAction, string> = {
 
 const ACTION_ORDER: ReportAction[] = ["created", "skipped", "replaced", "failed"];
 
-function brandBanner(): string[] {
+export function formatBrandBanner(): string {
   return [
     `${pc.green("  ____ ___  ____  _____ ")}${pc.magenta("__        _____ _  _____ ")}`,
     `${pc.green(" / ___/ _ \\|  _ \\| ____|")}${pc.magenta("\\ \\      / /_ _| |/ /_ _|")}`,
     `${pc.green("| |  | | | | | | |  _|  ")}${pc.magenta(" \\ \\ /\\ / / | || ' / | | ")}`,
     `${pc.green("| |__| |_| | |_| | |___ ")}${pc.magenta("  \\ V  V /  | || . \\ | | ")}`,
     `${pc.green(" \\____\\___/|____/|_____|")}${pc.magenta("   \\_/\\_/  |___|_|\\_\\___|")}`
-  ];
+  ].join("\n");
 }
 
 function formatActionSymbol(action: ReportAction): string {
@@ -66,7 +66,7 @@ export function formatReport(entries: ReportEntry[]): string {
 }
 
 export function formatSectionedReport(projectName: string, sections: ReportSection[]): string {
-  const lines: string[] = [...brandBanner(), "", `${pc.bold("CodeWiki")} initialized for ${pc.green(projectName)}.`, ""];
+  const lines: string[] = [formatBrandBanner(), "", `${pc.bold("CodeWiki")} initialized for ${pc.green(projectName)}.`, ""];
 
   for (const section of sections) {
     if (section.entries.length === 0) {
