@@ -2,7 +2,7 @@
 
 CodeWiki is a framework that turns a repository into a persistent, LLM-maintained knowledge system for AI coding tools.
 
-Run `npx codewiki init` once and the CLI scaffolds the wiki plus the tool-facing integration assets that exist today: eight Skills, shared hook scripts, and agent definitions. The logical skill names stay stable across tools (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`), while the installer writes them into the canonical skill trees:
+Run `npx @giuice/codewiki init` once and the CLI scaffolds the wiki plus the tool-facing integration assets that exist today: eight Skills, shared hook scripts, and agent definitions. The logical skill names stay stable across tools (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`), while the installer writes them into the canonical skill trees:
 
 - Claude Code selections write `.claude/skills/codewiki-<name>/SKILL.md`
 - Codex, Copilot, and OpenCode selections write `.agents/skills/codewiki-<name>/SKILL.md`
@@ -22,7 +22,7 @@ The canonical skill names are `codewiki-*`. Different tools may surface them thr
 
 ```mermaid
 flowchart TD
-  Init["<b>1. SETUP</b><br/>npx codewiki init"] --> Feed
+  Init["<b>1. SETUP</b><br/>npx @giuice/codewiki init"] --> Feed
 
   subgraph Feed["<b>2. FEED KNOWLEDGE</b>"]
     direction LR
@@ -81,7 +81,7 @@ flowchart TD
 
 **Step by step:**
 
-1. **Setup**: Run `npx codewiki init` once. It scaffolds the wiki and installs the currently shipped integration assets for the selected tool set.
+1. **Setup**: Run `npx @giuice/codewiki init` once. It scaffolds the wiki and installs the currently shipped integration assets for the selected tool set.
 2. **Feed knowledge**: Drop existing docs into `raw/` and run `codewiki-ingest` to digest them into wiki pages. The agent proposes; you approve.
 3. **Plan a feature**: Run `codewiki-prd` with a feature idea. The agent drafts the PRD, then `codewiki-tasks` turns it into a task breakdown.
 4. **Build**: Run `codewiki-process`. The agent works through tasks one sub-task at a time. `pre-wiki-context.sh` injects relevant wiki context before edits, and `post-verify.sh` emits structured change context so the wiki-updater flow can propose targeted wiki updates.
@@ -90,7 +90,7 @@ flowchart TD
 
 ### Recommended operating order
 
-1. Run `npx codewiki init` once per repository.
+1. Run `npx @giuice/codewiki init` once per repository.
 2. Put existing source material in `raw/` and run `codewiki-ingest` until the wiki reflects the project's current state.
 3. For new work, run `codewiki-prd` and then `codewiki-tasks` before implementation.
 4. Execute the work through `codewiki-process` so the task list, verification, commits, and hook-driven wiki proposals stay aligned.
@@ -196,17 +196,17 @@ The shared non-Claude skill install surface is the same eight directories under 
 ### Quick start
 
 ```bash
-npx codewiki init --name "My Project"
+npx @giuice/codewiki init --name "My Project"
 ```
 
 Auto-detects your local AI tool markers and installs the wiki plus the matching shipped adapters. Use `--tool` when you want to be explicit:
 
 ```bash
-npx codewiki init --tool claude-code
-npx codewiki init --tool codex
-npx codewiki init --tool copilot
-npx codewiki init --tool opencode
-npx codewiki init --tool claude-code,codex
+npx @giuice/codewiki init --tool claude-code
+npx @giuice/codewiki init --tool codex
+npx @giuice/codewiki init --tool copilot
+npx @giuice/codewiki init --tool opencode
+npx @giuice/codewiki init --tool claude-code,codex
 ```
 
 ### From source
@@ -224,7 +224,7 @@ codewiki init --name "My Project"
 
 ```bash
 # 1. Initialize CodeWiki in your project
-npx codewiki init --name "My Project" --tool claude-code,codex
+npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 
 # 2. Invoke the installed skills by their canonical names inside your AI tool
 #    codewiki-ingest raw/api-redesign.md
@@ -328,8 +328,7 @@ Before publishing, verify the local release candidate:
 npm run build
 npm test
 npm pack --dry-run --json
-npm pack --json
-TARBALL="$(pwd)/codewiki-$(node -p "require('./package.json').version").tgz"
+TARBALL="$(npm pack --json | node -e "let s=''; process.stdin.on('data', d => s += d); process.stdin.on('end', () => console.log(require('path').resolve(JSON.parse(s)[0].filename)))")"
 SMOKE_DIR="$(mktemp -d)"
 (cd "$SMOKE_DIR" && npx --yes --package "$TARBALL" codewiki init --name packed-smoke --tool claude-code,codex,copilot,opencode)
 ```
@@ -338,14 +337,14 @@ The local tarball smoke is the blocking pre-publish check because it runs the pa
 
 ```bash
 REGISTRY_SMOKE_DIR="$(mktemp -d)"
-(cd "$REGISTRY_SMOKE_DIR" && npx --yes codewiki@latest init --name latest-smoke --tool claude-code,codex,copilot,opencode)
+(cd "$REGISTRY_SMOKE_DIR" && npx --yes @giuice/codewiki@latest init --name latest-smoke --tool claude-code,codex,copilot,opencode)
 ```
 
-This is a post-publish check because `codewiki@latest` targets the already-published registry package, not the local source tree or release candidate.
+This is a post-publish check because `@giuice/codewiki@latest` targets the already-published registry package, not the local source tree or release candidate.
 
 ### Publish troubleshooting
 
-If the local tarball smoke cannot find templates, check that `npm run build` copied `src/templates/**` to `dist/templates/**`, then confirm `npm pack --dry-run --json` lists the expected `dist/templates/...` files. If `npx codewiki@latest init` fails after publish while the local tarball passed, treat it as a registry or publish verification issue rather than a source-tree test failure.
+If the local tarball smoke cannot find templates, check that `npm run build` copied `src/templates/**` to `dist/templates/**`, then confirm `npm pack --dry-run --json` lists the expected `dist/templates/...` files. If `npx @giuice/codewiki@latest init` fails after publish while the local tarball passed, treat it as a registry or publish verification issue rather than a source-tree test failure.
 
 ## Current non-goals
 

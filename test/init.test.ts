@@ -54,7 +54,7 @@ function countHookCommands(config: unknown, commandFragment: string): number {
 test("package baseline and compiled help expose all commands", () => {
   const pkg = JSON.parse(readFileSync(path.join(process.cwd(), "package.json"), "utf8")) as Record<string, unknown>;
   assert.equal(pkg.type, "module");
-  assert.deepEqual(pkg.bin, { codewiki: "./dist/bin/codewiki.js" });
+  assert.deepEqual(pkg.bin, { codewiki: "dist/bin/codewiki.js" });
   assert.equal("dependencies" in pkg, false);
   assert.ok(existsSync(path.join(process.cwd(), "tsconfig.json")));
   assert.ok(existsSync(cliPath()));
