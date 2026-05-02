@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-05-01T18:18:58.000Z"
-last_activity: 2026-05-01
+status: complete
+stopped_at: Completed Phase 08 UAT and transition
+last_updated: "2026-05-02T14:36:28.000Z"
+last_activity: 2026-05-02
 progress:
   total_phases: 15
   completed_phases: 13
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-13)
+See: .planning/PROJECT.md (updated 2026-05-02)
 
 **Core value:** `npx codewiki init` turns any project into an AI-tool-native knowledge system in 30 seconds, where every session starts smarter than the last.
-**Current focus:** Phase 8 — npm-publish-hardening
+**Current focus:** Milestone completion — Phase 8 UAT passed and npm publish hardening is complete
 
 ## Current Position
 
 Phase: 8
-Plan: 08-03 complete
-Status: Phase 8 complete
-Last activity: 2026-05-01
+Plan: complete
+Status: Phase 8 UAT complete; milestone ready for final audit/cleanup
+Last activity: 2026-05-02
 
 Progress: [██████████] 100%
 
@@ -115,6 +115,7 @@ Recent decisions affecting current work:
 - [Phase 08]: Local packed CLI tests preserve the direct `npx --yes <tarball>` form but fall back to `npx --yes --package <tarball> codewiki` when npm/npx treats the `.tgz` path as an executable.
 - [Phase 08]: README publish guidance distinguishes the blocking local tarball smoke from the post-publish `npx codewiki@latest init` registry check.
 - [Phase 08]: README now documents `node >=20.11.0`, zero runtime dependencies, dev-only TypeScript/Vitest/@types/node, and template/registry troubleshooting.
+- [Phase 08]: UAT passed 5/5 user-facing checks on 2026-05-02 with no issues, skips, or blocked items.
 
 ### Pending Todos
 
@@ -141,6 +142,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T18:18:58.000Z
-Stopped at: Completed 08-03-PLAN.md
+Last session: 2026-05-02T14:36:28.000Z
+Stopped at: Completed Phase 08 UAT and transition
 Resume file: None
