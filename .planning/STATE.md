@@ -126,6 +126,7 @@ None yet.
 - Phase 03.1 inserted after Phase 3: Auto-Improvement Engine (URGENT) — adds absorb, breakdown, backlinks, session-end hook to make wiki auto-improve instead of passively remind. Inspired by Farzaa wiki skill and Karpathy/Spisak knowledge base patterns.
 - Phase 04.1 inserted after Phase 4: Skills Migration (URGENT) — umbrella corrective phase for migrating Phase 4 output from slash commands to standalone Skills.
 - Phase 04.1 was decomposed into 04.1.1-04.1.5 so template, adapter, test, and doc work can execute atomically with parser-safe numbering.
+- Phase 9 added: Global Agent Install Surface — explicit global install, uninstall, and doctor commands for CodeWiki agent skills/hooks while preserving project-local `codewiki init` as the default setup path.
 
 ### Blockers/Concerns
 

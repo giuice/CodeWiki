@@ -27,6 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 6: OpenCode Adapter** - plugin-based hook strategy with shared `.agents/skills`, OpenCode agents, and AGENTS wiring
 - [x] **Phase 7: Codex and Copilot Adapters** - Post-spike adapters for tools with research gaps (completed 2026-05-01)
 - [x] **Phase 8: npm Publish Hardening** - Build script, pack verification, engines field, README (completed 2026-05-02)
+- [ ] **Phase 9: Global Agent Install Surface** - Explicit global install, uninstall, and doctor commands for agent skills/hooks
 
 ## Phase Details
 
@@ -270,10 +271,25 @@ Plans:
 **Wave 3** *(blocked on Wave 1 and Wave 2 completion)*
 - [x] 08-03-PLAN.md — README publish verification and troubleshooting docs
 
+### Phase 9: Global Agent Install Surface
+**Goal**: Users can install CodeWiki agent skills, agents, hooks, and instructions into global AI-tool locations explicitly, while project-local `codewiki init` remains the default scoped setup path
+**Depends on**: Phase 8
+**Requirements**: (new global install requirements to be assigned during planning)
+**Success Criteria** (what must be TRUE):
+  1. `codewiki install-global` installs CodeWiki skills and supported hook/agent assets into the selected tool's global configuration directories only after an explicit user command
+  2. `codewiki install-global --tool <tool-list>` supports targeted installs for Claude Code, Codex, Copilot, and OpenCode without requiring a project-local adapter selection
+  3. Globally installed skills and hooks operate against the current working directory's `.codewiki/config.yml` and `wiki/` tree, and produce a clear setup message when the project has not run `codewiki init`
+  4. `codewiki uninstall-global` removes only CodeWiki-owned global assets and preserves unrelated user files, hooks, agents, and instructions
+  5. `codewiki doctor` reports project-local and global install status, including missing assets, stale versions, unsupported tools, and the command needed to repair each issue
+  6. README documents the difference between `npx @giuice/codewiki init`, `npm install -g @giuice/codewiki`, and global agent asset installation
+**Plans:** 0 plans
+Plans:
+- [ ] Not planned yet
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 4.1.1 -> 4.1.2 -> 4.1.3 -> 4.1.4 -> 4.1.5 -> 5 -> 6 -> 7 -> 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1 -> 4 -> 4.1.1 -> 4.1.2 -> 4.1.3 -> 4.1.4 -> 4.1.5 -> 5 -> 6 -> 7 -> 8 -> 9
 Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1.5.
 
 | Phase | Plans Complete | Status | Completed |
@@ -293,3 +309,4 @@ Phase 4.1 is an umbrella corrective phase tracked through child phases 4.1.1-4.1
 | 6. OpenCode Adapter | 0/2 | Not started | - |
 | 7. Codex and Copilot Adapters | 6/6 | Complete    | 2026-05-01 |
 | 8. npm Publish Hardening | 3/3 | Complete | 2026-05-02 |
+| 9. Global Agent Install Surface | 0/0 | Not planned | - |
