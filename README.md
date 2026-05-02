@@ -1,5 +1,7 @@
 # CodeWiki
 
+[English](README.md) | [Português](README.pt-BR.md)
+
 CodeWiki is a framework that turns a repository into a persistent, LLM-maintained knowledge system for AI coding tools.
 
 Run `npx @giuice/codewiki init` once and the CLI scaffolds the wiki plus the tool-facing integration assets that exist today: eight Skills, shared hook scripts, and agent definitions. The logical skill names stay stable across tools (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`), while the installer writes them into the canonical skill trees:
@@ -374,7 +376,8 @@ CodeWiki v2 is under active development, but the installer-only architecture and
 | 5 | Test Suite | ✅ Complete |
 | 6 | OpenCode Adapter | ✅ Complete |
 | 7 | Codex and Copilot Adapters | ✅ Complete |
-| 8 | npm Publish Hardening | ⬜ Planned |
+| 8 | npm Publish Hardening | ✅ Complete |
+| 9 | Global Agent Install Surface | ⬜ Planned |
 
 ## License
 
