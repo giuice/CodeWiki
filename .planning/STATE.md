@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: complete
-stopped_at: Completed Phase 08 UAT and transition
-last_updated: "2026-05-02T14:36:28.000Z"
+stopped_at: Completed quick task 260502-qcw
+last_updated: "2026-05-02T16:16:57.000Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 15
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-02)
 
 Phase: 8
 Plan: complete
-Status: Phase 8 UAT complete; milestone ready for final audit/cleanup
+Status: Quick task 260502-qcw complete; milestone ready for final audit/cleanup
 Last activity: 2026-05-02
 
 Progress: [██████████] 100%
@@ -140,9 +140,10 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260407-ulj | Update README.md to reflect current project direction and Phase 3 functionality | 2026-04-08 | 6ce8cae | [260407-ulj-update-readme-md-to-reflect-current-proj](./quick/260407-ulj-update-readme-md-to-reflect-current-proj/) |
 | 260411-mzx | Reconcile v2 docs to 8-command canon + initial OpenCode hook resolution (later superseded by the plugin-event canon) | 2026-04-11 | cace4e9 | [260411-mzx-reconcile-v2-docs-to-8-command-canon-plu](./quick/260411-mzx-reconcile-v2-docs-to-8-command-canon-plu/) |
+| 260502-qcw | Strengthen generated CodeWiki agent operating instructions | 2026-05-02 | this commit | [260502-qcw-strengthen-codewiki-agent-operating-instructions](./quick/260502-qcw-strengthen-codewiki-agent-operating-instructions/) |
 
 ## Session Continuity
 
-Last session: 2026-05-02T14:36:28.000Z
-Stopped at: Completed Phase 08 UAT and transition
+Last session: 2026-05-02T16:16:57.000Z
+Stopped at: Completed quick task 260502-qcw
 Resume file: None

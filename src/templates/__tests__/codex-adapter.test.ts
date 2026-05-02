@@ -76,5 +76,9 @@ describe("CODEX-02 and CODEX-03: Codex agents and instructions preserve CodeWiki
     expect(content).toMatch(/loop-safe `?Stop`?/);
     expect(content).toContain("wiki/_backlinks.json");
     expect(content).toContain(".codewiki/config.yml");
+    expect(content).toContain("not query-time RAG");
+    expect(content).toContain("New external source in `raw/`");
+    expect(content).toContain("After a substantial coding session");
+    expect(content).toContain("Hooks provide context and change signals");
   });
 });

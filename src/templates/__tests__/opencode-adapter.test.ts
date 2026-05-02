@@ -64,5 +64,9 @@ describe("OC-04: OpenCode instructions template stays concise and practical", ()
     expect(content).toContain(".codewiki/config.yml");
     expect(content).toContain("wiki/_backlinks.json");
     expect(content.toLowerCase()).toContain("approval");
+    expect(content).toContain("not query-time RAG");
+    expect(content).toContain("New external source in `raw/`");
+    expect(content).toContain("After a substantial coding session");
+    expect(content).toContain("Hooks provide context and change signals");
   });
 });
