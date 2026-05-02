@@ -61,6 +61,9 @@ test("package baseline and compiled help expose all commands", () => {
   const result = runCli(process.cwd(), ["--help"]);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /\binit\b/);
+  const version = runCli(process.cwd(), ["--version"]);
+  assert.equal(version.status, 0);
+  assert.equal(version.stdout.trim(), pkg.version);
   const unknown = runCli(process.cwd(), ["unknown-command"]);
   assert.notEqual(unknown.status, 0);
   assert.match(unknown.stderr, /Unknown command/);
@@ -385,7 +388,7 @@ test("init --tool claude-code,codex installs both skill trees and the real Codex
 
   const bad = runCli(tempProject(), ["init", "--tool", "unknown"]);
   assert.notEqual(bad.status, 0);
-  assert.match(bad.stderr, /Supported values: claude-code, codex, copilot, opencode/);
+  assert.match(bad.stderr, /Supported values: claude-code, codex, copilot, opencode, all/);
 
   const missingToolValue = runCli(tempProject(), ["init", "--tool", "--force"]);
   assert.notEqual(missingToolValue.status, 0);
@@ -407,6 +410,25 @@ test("init --tool claude-code,codex installs both skill trees and the real Codex
   assertInstalledSkillTree(deduped, ".claude/skills");
   assertInstalledSkillTree(deduped, ".agents/skills");
   assert.equal(existsSync(path.join(deduped, ".codex/hooks.json")), true);
+});
+
+test("init --tool all installs every supported adapter", () => {
+  const cwd = tempProject();
+  const result = mustRun(cwd, ["init", "--tool", "all"]);
+
+  assert.match(result.stdout, /claude-code adapter:/);
+  assert.match(result.stdout, /shared-skills adapter:/);
+  assert.match(result.stdout, /codex adapter:/);
+  assert.match(result.stdout, /copilot adapter:/);
+  assert.match(result.stdout, /opencode adapter:/);
+  assert.doesNotMatch(result.stdout, /Tool-specific integrations pending:/);
+  assert.doesNotMatch(result.stdout, /shared skills installed; hooks and instructions remain pending/);
+
+  assertInstalledSkillTreeOnce(cwd, ".claude/skills");
+  assertInstalledSkillTreeOnce(cwd, ".agents/skills");
+  assert.equal(existsSync(path.join(cwd, ".codex/hooks.json")), true);
+  assert.equal(existsSync(path.join(cwd, ".github/hooks/codewiki-hooks.json")), true);
+  assert.equal(existsSync(path.join(cwd, ".opencode/plugins/codewiki.ts")), true);
 });
 
 test("init --tool claude-code,copilot installs both skill trees and the real Copilot adapter", () => {
