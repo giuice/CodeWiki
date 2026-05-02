@@ -104,6 +104,10 @@ describe("CMD-04: codewiki-prd preserves task-driven PRD workflow checks", () =>
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
     expect(content).toContain("--fast");
+    expect(content).toContain("interactive mode");
+    expect(content).toContain("wiki.tasks_path");
+    expect(content).toContain("tasks/");
+    expect(content.toLowerCase()).not.toContain("mentorship");
   });
 
   test("codewiki-prd preserves clarifying questions and uses Task for multi-agent", async () => {
@@ -124,6 +128,10 @@ describe("CMD-05: codewiki-tasks preserves task generation workflow checks", () 
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
     expect(content).toContain("--fast");
+    expect(content).toContain("interactive mode");
+    expect(content).toContain("wiki.tasks_path");
+    expect(content).toContain("search the task directory for `*-prd-*.md`");
+    expect(content.toLowerCase()).not.toContain("mentorship");
   });
 
   test("codewiki-tasks preserves Go gate and uses Task for multi-agent", async () => {
@@ -144,6 +152,10 @@ describe("CMD-06: codewiki-process preserves process workflow checks", () => {
     expect(content).toContain("<purpose>");
     expect(content).toContain("<process>");
     expect(content).toContain("--fast");
+    expect(content).toContain("interactive mode");
+    expect(content).toContain("wiki.tasks_path");
+    expect(content).toContain("search the task directory for `tasks-*.md`");
+    expect(content.toLowerCase()).not.toContain("mentorship");
   });
 
   test("codewiki-process preserves one sub-task pattern and uses Task", async () => {

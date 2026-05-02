@@ -7,7 +7,7 @@ Scope: review and documentation lane for the TypeScript npm CLI described by `.o
 
 The implementation should not be considered complete until all items below are true:
 
-- `package.json` identifies the package as `codewiki`, exposes `bin.codewiki` as `./dist/bin/codewiki.js`, keeps runtime `dependencies` empty, and includes `clean`, `build`, `typecheck`, `test`, and `prepack` scripts.
+- `package.json` identifies the package as `codewiki`, exposes `bin.codewiki` as `./dist/bin/codewiki.js`, keeps runtime `dependencies` narrow, and includes `clean`, `build`, `typecheck`, `test`, and `prepack` scripts.
 - `tsconfig.json` uses Node ESM-compatible settings (`module`/`moduleResolution` set to `NodeNext`) with `strict` enabled.
 - `src/bin/codewiki.ts` compiles to a runnable `dist/bin/codewiki.js` CLI that lists `init`, `ingest`, `query`, `lint`, `prd`, `tasks`, and `status` in `--help`.
 - `init` creates the exact PRD scaffold and does not overwrite non-empty CodeWiki files without `--force`.

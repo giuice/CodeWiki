@@ -322,7 +322,7 @@ The package compiles TypeScript from `src/` into `dist/` and copies template ass
 
 ### Publish verification
 
-The published package targets `node >=20.11.0` and contains compiled JavaScript plus bundled template assets. Runtime dependencies are intentionally zero; TypeScript, Vitest, and `@types/node` are dev-only.
+The published package targets `node >=20.11.0` and contains compiled JavaScript plus bundled template assets. Runtime dependencies are intentionally narrow: `picocolors` powers CLI color output; TypeScript, Vitest, and `@types/node` are dev-only.
 
 Before publishing, verify the local release candidate:
 

@@ -1,5 +1,6 @@
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
+import pc from "picocolors";
 
 import { SUPPORTED_TOOLS, type SupportedTool } from "../core/types.js";
 import { resolveAdapters } from "../lib/adapters/index.js";
@@ -30,35 +31,56 @@ function parseTools(value: string): SupportedTool[] {
   if (requested.length === 0) {
     throw new Error("--tool requires at least one supported value");
   }
+  if (requested.some((tool) => tool.toLowerCase() === "all")) {
+    return [...SUPPORTED_TOOLS];
+  }
   const unknown = requested.filter((tool) => !SUPPORTED_TOOLS.includes(tool as SupportedTool));
   if (unknown.length > 0) {
-    throw new Error(`Unsupported tool value: ${unknown.join(", ")}. Supported values: ${SUPPORTED_TOOLS.join(", ")}`);
+    throw new Error(`Unsupported tool value: ${unknown.join(", ")}. Supported values: ${SUPPORTED_TOOLS.join(", ")}, all`);
   }
   return [...new Set(requested)] as SupportedTool[];
+}
+
+function parsePromptToolSelection(answer: string): SupportedTool[] {
+  const normalized = answer.trim().toLowerCase();
+  if (normalized === "a" || normalized === "all") {
+    return [...SUPPORTED_TOOLS];
+  }
+
+  const parts = normalized.split(",").map((part) => part.trim()).filter(Boolean);
+  if (parts.length === 0) {
+    throw new Error(`Invalid tool selection. Use --tool to specify: codewiki init --tool ${SUPPORTED_TOOLS.join(",")}`);
+  }
+
+  const selected: SupportedTool[] = [];
+  for (const part of parts) {
+    const selectedByNumber = Number.parseInt(part, 10);
+    const byNumber = Number.isInteger(selectedByNumber) && String(selectedByNumber) === part
+      ? SUPPORTED_TOOLS[selectedByNumber - 1]
+      : undefined;
+    const byName = SUPPORTED_TOOLS.includes(part as SupportedTool) ? part as SupportedTool : undefined;
+    const tool = byNumber ?? byName;
+
+    if (!tool) {
+      throw new Error(`Invalid tool selection. Use --tool to specify: codewiki init --tool ${SUPPORTED_TOOLS.join(",")}`);
+    }
+
+    selected.push(tool);
+  }
+
+  return [...new Set(selected)];
 }
 
 async function promptForTool(): Promise<SupportedTool[]> {
   const readline = createInterface({ input: process.stdin, output: process.stdout });
 
   try {
-    const choices = SUPPORTED_TOOLS.map((tool, index) => `  ${index + 1}) ${tool}`).join("\n");
-    const answer = (await readline.question(
-      `No AI tools detected. Install for:\n${choices}\n\nEnter number or tool name: `
-    )).trim().toLowerCase();
-    const selectedByNumber = Number.parseInt(answer, 10);
+    const choices = SUPPORTED_TOOLS.map((tool, index) => `  ${pc.cyan(`${index + 1})`)} ${tool}`).join("\n");
+    const answer = await readline.question(
+      `${pc.yellow("No AI tools detected.")} Install ${pc.bold("CodeWiki")} for:\n${choices}\n  ${pc.cyan("A)")} all\n\nEnter numbers, names, or A for all: `
+    );
 
-    if (Number.isInteger(selectedByNumber)) {
-      const selected = SUPPORTED_TOOLS[selectedByNumber - 1];
-      if (selected) {
-        return [selected];
-      }
-    }
-
-    if (SUPPORTED_TOOLS.includes(answer as SupportedTool)) {
-      return [answer as SupportedTool];
-    }
-
-    throw new Error(`Invalid tool selection. Use --tool to specify: codewiki init --tool ${SUPPORTED_TOOLS.join(",")}`);
+    return parsePromptToolSelection(answer);
   } finally {
     readline.close();
   }

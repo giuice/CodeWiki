@@ -18,6 +18,7 @@ ${renderedTools}
 wiki:
   path: "wiki/"
   raw_path: "raw/"
+  tasks_path: "tasks/"
 verification:
   require_human_approval: true
   require_tests: true

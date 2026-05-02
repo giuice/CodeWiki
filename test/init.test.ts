@@ -55,7 +55,7 @@ test("package baseline and compiled help expose all commands", () => {
   const pkg = JSON.parse(readFileSync(path.join(process.cwd(), "package.json"), "utf8")) as Record<string, unknown>;
   assert.equal(pkg.type, "module");
   assert.deepEqual(pkg.bin, { codewiki: "dist/bin/codewiki.js" });
-  assert.equal("dependencies" in pkg, false);
+  assert.deepEqual(pkg.dependencies, { picocolors: "^1.1.1" });
   assert.ok(existsSync(path.join(process.cwd(), "tsconfig.json")));
   assert.ok(existsSync(cliPath()));
   const result = runCli(process.cwd(), ["--help"]);
@@ -160,6 +160,7 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   }
   assert.match(config, /name: "demo"/);
   assert.match(config, /^tools: \[\]$/m);
+  assert.match(config, /tasks_path: "tasks\/"/);
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/entity.md"), "utf8"), /file_hashes:/);
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/lesson.md"), "utf8"), /verified_by: human/);
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/source-summary.md"), "utf8"), /approved: false/);
