@@ -198,6 +198,10 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   assert.match(claudeInstructions, /codewiki-breakdown/);
   assert.match(claudeInstructions, /not query-time RAG/);
   assert.match(claudeInstructions, /Hooks provide context and change signals/);
+  assert.match(claudeInstructions, /Schema Discipline/);
+  assert.match(claudeInstructions, /confidence/);
+  assert.match(claudeInstructions, /source_url/);
+  assert.match(claudeInstructions, /wiki\/queries\//);
 
   const quoted = tempProject();
   mustRun(quoted, ["init", "--name", 'demo "quoted"', "--tool", "claude-code"]);

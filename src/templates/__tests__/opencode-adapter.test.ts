@@ -75,5 +75,10 @@ describe("OC-04: OpenCode instructions template stays concise and practical", ()
     expect(content).toContain("New external source in `wiki/raw/`");
     expect(content).toContain("After a substantial coding session");
     expect(content).toContain("Hooks provide context and change signals");
+    expect(content).toContain("### Schema Discipline");
+    expect(content).toContain("confidence");
+    expect(content).toContain("contested");
+    expect(content).toContain("source_url");
+    expect(content).toContain("wiki/queries/");
   });
 });
