@@ -143,8 +143,11 @@ project-root/
 │   ├── templates/                    # Templates de páginas da wiki
 │   │   ├── entity.md
 │   │   ├── decision.md
+│   │   ├── concept.md
+│   │   ├── comparison.md
 │   │   ├── lesson.md
 │   │   ├── issue.md
+│   │   ├── query.md
 │   │   └── source-summary.md
 │   └── hooks/                        # Scripts de hook compartilhados
 │       ├── pre-wiki-context.sh
@@ -316,6 +319,16 @@ Regra das duas árvores:
 - Seleções mistas que incluem Claude Code escrevem nas duas árvores.
 
 A wiki em si é independente de ferramenta. O instalador mantém o conteúdo dos prompts portável e muda apenas onde as skills são copiadas.
+
+## Changelog
+
+### Unreleased
+
+- Adicionada uma estrutura padrão de wiki mais forte: templates de página `concept`, `comparison` e `query` agora são instalados junto com os templates existentes de entidade, decisão, lição, issue e resumo de fonte.
+- Expandido o `wiki/SCHEMA.md` com proveniência de fontes raw, checks de drift por `sha256`, campos obrigatórios de qualidade das páginas, taxonomia de tags, thresholds de criação de páginas, política de archive, metadados do index e entradas de log padronizadas.
+- Atualizados os workflows de ingest, query, lint, absorb e breakdown para que agentes possam pular fontes sem mudança, expor claims fracas ou contestadas, salvar respostas substanciais de query após aprovação e executar checks mais programáticos de saúde da wiki.
+- Atualizados os agentes verifier e wiki-updater para checar frontmatter, drift de tags, confidence, claims contestadas, hashes de fontes, regras de ciclo de vida de páginas e manutenção obrigatória de index/log/backlinks.
+- Adicionada cobertura de testes para o scaffold expandido, skills geradas, mirrors de comandos Claude e templates de agentes multi-ferramenta.
 
 ## Desenvolvimento
 

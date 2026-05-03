@@ -65,7 +65,12 @@ describe("CODEX-02 and CODEX-03: Codex agents and instructions preserve CodeWiki
     }
 
     expect(updater.toLowerCase()).toContain("approval");
+    expect(updater).toContain("confidence");
+    expect(updater).toContain("wiki/_archive/");
     expect(verifier.toLowerCase()).toContain("read-only");
+    expect(verifier).toContain("FRONTMATTER");
+    expect(verifier).toContain("QUALITY");
+    expect(verifier).toContain("sha256");
   });
 
   test("AGENTS.md instruction block references skills, hooks, and important wiki paths", async () => {

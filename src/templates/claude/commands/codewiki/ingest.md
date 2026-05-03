@@ -22,6 +22,10 @@ until the user approves the proposal.
 - If the user provides a relative path that does not exist, also try resolving it under the raw source root.
 - Default raw source locations are `wiki/raw/articles/`, `wiki/raw/papers/`, `wiki/raw/transcripts/`, `wiki/raw/specs/`, and `wiki/raw/assets/`.
 - Read the source and note what kind of material it is (notes, article, transcript, spec, diff).
+- If the source has raw frontmatter with `sha256`, recompute the digest over the body after the closing `---`.
+- Skip re-ingest when the recomputed digest matches. Flag source drift when it does not match.
+- When capturing a new markdown source, add raw frontmatter with `source_url`, `ingested`, and `sha256` when those values are known.
+- If `$ARGUMENTS` names multiple sources or a directory, use the bulk ingest rule: read every source first, identify shared entities/concepts once, then update index/log/backlinks once.
 
 ## Step 2: Orient in the current wiki
 - Read `SCHEMA.md` from the resolved wiki root when it exists.
@@ -36,17 +40,25 @@ until the user approves the proposal.
 - Pull out candidate entities, decisions, lessons, issues, source summaries, and useful cross-links.
 - Separate verified facts from open questions, speculation, or disputed claims.
 - Keep the wiki grounded in what the source actually supports.
+- Assign `confidence: low` to weak, speculative, single-source, or fast-moving claims; use `confidence: high` only when evidence is strong.
+- Mark `contested: true` and `contradictions` when the source creates unresolved conflicts.
 
 ## Step 4: Cross-reference and de-duplicate
 - Compare each candidate item against existing wiki pages.
 - Prefer updating an existing page over creating a duplicate page when the topic already exists.
+- Create new pages only when the topic is central to one source or appears across two or more sources.
+- Do not create pages for passing mentions, incidental details, or out-of-domain topics.
+- Prefer splitting a page over about 200 lines into focused sub-pages with cross-links.
+- Use only tags already listed in `SCHEMA.md`; if a new tag is needed, include the schema taxonomy update in the proposal before using it.
 - Flag contradictions or stale claims that the new source strengthens, weakens, or overturns.
 
 ## Step 5: Propose changes
 - Present a concise proposal before making edits:
   - pages to create
   - pages to update
+  - raw source frontmatter or drift handling
   - index entries to add or revise
+  - log entry in `## [YYYY-MM-DD] ingest | Source Title` format
   - contradictions, gaps, and open questions
 - Wait for user approval before writing any file.
 
@@ -54,7 +66,10 @@ until the user approves the proposal.
 - After approval, create or update only the approved pages.
 - Use `.codewiki/templates/` as the default structure for new pages.
 - Update `index.md` in the resolved wiki root so new material is discoverable.
+- Keep the index "Last updated" date and "Total pages" count current.
 - Update `_backlinks.json` in the resolved wiki root by scanning all modified and new pages for `[[wikilink]]` references. Add new backlink entries; do not remove existing ones unless a link was actually deleted.
+- Append a concise ingest entry to `log.md` in the resolved wiki root.
+- In the log entry, list every file created or updated.
 - End with a short summary of what changed and what still needs human review.
 
 ## Step 7: Guardrails

@@ -33,6 +33,15 @@ describe("AGENT-01: codewiki-wiki-updater.md has description and approval-gated 
     expect(content).toContain("wiki/entities/");
     expect(content).toContain("git diff");
   });
+
+  test("wiki-updater applies schema taxonomy, thresholds, and quality signals", async () => {
+    const content = await readAgent("codewiki-wiki-updater.md");
+    expect(content).toContain("page thresholds");
+    expect(content).toContain("wiki/_archive/");
+    expect(content).toContain("confidence");
+    expect(content).toContain("contested");
+    expect(content).toContain("tag");
+  });
 });
 
 describe("AGENT-02: codewiki-verifier.md has description and read-only verification", () => {
@@ -68,5 +77,15 @@ describe("AGENT-02: codewiki-verifier.md has description and read-only verificat
   test("verifier checks wiki/index.md for coverage", async () => {
     const content = await readAgent("codewiki-verifier.md");
     expect(content).toContain("wiki/index.md");
+  });
+
+  test("verifier checks frontmatter, taxonomy, quality signals, and log coverage", async () => {
+    const content = await readAgent("codewiki-verifier.md");
+    expect(content).toContain("FRONTMATTER");
+    expect(content).toContain("QUALITY");
+    expect(content).toContain("confidence");
+    expect(content).toContain("contested");
+    expect(content).toContain("wiki/_archive/");
+    expect(content).toContain("## [YYYY-MM-DD] action | subject");
   });
 });

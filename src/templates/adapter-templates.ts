@@ -8,7 +8,7 @@ Pre-hook behavior is file-modification-only: before editing files, read relevant
 
 Post-hook behavior: summarize changed files, tests, verification evidence, and proposed wiki updates. Do not mutate \`wiki/\` without approval.
 
-Explicit query behavior: \`codewiki query\` is read-only and should resolve \`.codewiki/config.yml\`, then read \`wiki/SCHEMA.md\`, \`wiki/index.md\`, and matched pages.
+Explicit query behavior: \`codewiki query\` should resolve \`.codewiki/config.yml\`, then read \`wiki/SCHEMA.md\`, \`wiki/index.md\`, and matched pages. It may file substantial answers back into \`wiki/queries/\` or \`wiki/comparisons/\` only after explicit human approval.
 `;
 
 const instructionOnly = `

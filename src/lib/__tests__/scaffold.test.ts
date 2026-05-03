@@ -52,6 +52,7 @@ describe("scaffoldProject", () => {
       "wiki/raw/transcripts",
       "wiki/raw/specs",
       "wiki/raw/assets",
+      "wiki/_archive",
       "wiki/entities",
       "wiki/decisions",
       "wiki/concepts",
@@ -65,7 +66,7 @@ describe("scaffoldProject", () => {
     }
   });
 
-  test("creates config and exactly five page templates", async () => {
+  test("creates config and all page templates", async () => {
     const root = await makeTempRoot();
 
     await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code", "codex"] });
@@ -73,10 +74,13 @@ describe("scaffoldProject", () => {
     await expect(existsAt(root, ".codewiki/config.yml")).resolves.toBe(true);
     const config = await readdir(path.join(root, ".codewiki/templates"));
     expect(config.sort()).toEqual([
+      "comparison.md",
+      "concept.md",
       "decision.md",
       "entity.md",
       "issue.md",
       "lesson.md",
+      "query.md",
       "source-summary.md"
     ]);
   });
@@ -91,6 +95,21 @@ describe("scaffoldProject", () => {
     expect(config).toMatch(/^tools: \[\]$/m);
     expect(config).toContain('raw_path: "wiki/raw/"');
     expect(config).toContain('tasks_path: ".codewiki/tasks/"');
+  });
+
+  test("schema includes provenance, quality signals, taxonomy, thresholds, and log format", async () => {
+    const root = await makeTempRoot();
+
+    await scaffoldProject({ force: false, projectName: "demo", root, tools: [] });
+
+    const schema = await readFile(path.join(root, "wiki/SCHEMA.md"), "utf8");
+    expect(schema).toContain("sha256");
+    expect(schema).toContain("confidence: high | medium | low");
+    expect(schema).toContain("contested: false");
+    expect(schema).toContain("## Tag Taxonomy");
+    expect(schema).toContain("## Page Thresholds");
+    expect(schema).toContain("## Bulk Ingest");
+    expect(schema).toContain("## [YYYY-MM-DD] action | subject");
   });
 
   test("reports created, skipped, and replaced based on actual file state", async () => {

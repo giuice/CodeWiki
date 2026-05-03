@@ -38,20 +38,24 @@ gaps get filled first.
   - backlink count from `_backlinks.json`
   - number of wiki pages mentioning the entity
   - whether the entity is also visible in code
+- Drop candidates that are only passing mentions, incidental details, or outside the project domain.
+- Prefer candidates that are central to one source/change or appear across two or more sources/wiki pages.
 
 ## Step 6: Propose batch
 - Present the top 5-10 candidates with:
   - entity name
   - reference count
   - suggested wiki category (`entity`, `decision`, `lesson`, or `issue`)
+  - schema-approved tags to use, or a proposed taxonomy addition
   - one-line description
 - Wait for user approval or selection before creating any page.
 
 ## Step 7: Create approved pages
 - For each approved candidate, create the page using `.codewiki/templates/`.
 - Update `index.md` in the resolved wiki root with the new entries.
+- Keep the index "Last updated" date and "Total pages" count current.
 - Update `_backlinks.json` in the resolved wiki root after the new pages and links exist.
-- Append a concise breakdown entry to `log.md` in the resolved wiki root.
+- Append a concise `## [YYYY-MM-DD] breakdown | Subject` entry to `log.md` in the resolved wiki root.
 
 ## Step 8: Guardrails
 - Never create pages without approval.

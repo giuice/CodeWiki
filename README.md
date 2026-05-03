@@ -143,8 +143,11 @@ project-root/
 │   ├── templates/                    # Page templates for wiki entries
 │   │   ├── entity.md
 │   │   ├── decision.md
+│   │   ├── concept.md
+│   │   ├── comparison.md
 │   │   ├── lesson.md
 │   │   ├── issue.md
+│   │   ├── query.md
 │   │   └── source-summary.md
 │   └── hooks/                        # Shared hook scripts
 │       ├── pre-wiki-context.sh
@@ -316,6 +319,16 @@ Dual-tree rule:
 - Mixed selections that include Claude Code write both trees.
 
 The wiki itself is tool-agnostic. The installer keeps the prompt content portable and only changes where the skills are copied.
+
+## Changelog
+
+### Unreleased
+
+- Added stronger default wiki structure: `concept`, `comparison`, and `query` page templates now ship with the scaffold alongside the existing entity, decision, lesson, issue, and source-summary templates.
+- Expanded `wiki/SCHEMA.md` with raw source provenance, `sha256` drift checks, required page quality fields, tag taxonomy, page creation thresholds, archive policy, index metadata, and standardized log entries.
+- Updated ingest, query, lint, absorb, and breakdown workflows so agents can skip unchanged sources, surface weak or contested claims, file substantial query answers after approval, and run more programmatic wiki health checks.
+- Updated verifier and wiki-updater agents to check frontmatter, tag drift, confidence, contested claims, source hashes, page lifecycle rules, and required index/log/backlink maintenance.
+- Added test coverage for the expanded scaffold, generated skills, Claude command mirrors, and multi-tool agent templates.
 
 ## Development
 

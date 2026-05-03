@@ -21,11 +21,25 @@ cross-reference integrity. You report problems but never modify files.
 5. Validate cross-reference links:
    - does every referenced page exist?
    - are the references coherent and discoverable from related pages?
-6. Verify that any new entity or page is added to `wiki/index.md` and logged in `wiki/log.md`.
+6. Validate frontmatter and taxonomy:
+   - required fields include `title`, `created`, `updated`, `type`, `tags`, `sources`, `confidence`, `contested`, and `contradictions`
+   - every tag must exist in the `wiki/SCHEMA.md` tag taxonomy
+   - low-confidence, contested, and contradictory claims must be explicit rather than hidden in prose
+7. Verify page lifecycle rules:
+   - new pages should meet the schema thresholds and avoid passing mentions
+   - oversized pages should be split instead of expanded indefinitely
+   - archived pages belong under `wiki/_archive/` and should not remain active in the index
+8. Verify raw-source and maintenance surfaces:
+   - raw markdown sources should include `source_url`, `ingested`, and `sha256` when applicable
+   - any new entity or page is added to `wiki/index.md`, including current metadata
+   - accepted changes are logged in `wiki/log.md` using `## [YYYY-MM-DD] action | subject`
 7. Report findings as a structured list:
    - `CONFLICT: [page A] says X but the proposed change says Y`
    - `BROKEN REF: [page] references [missing-page] which does not exist`
    - `MISSING INDEX: [entity] is not listed in wiki/index.md`
+   - `MISSING LOG: [change] is not represented in wiki/log.md`
+   - `FRONTMATTER: [page] is missing required fields or uses unknown tags`
+   - `QUALITY: [page] needs confidence/contested/contradiction handling`
    - `OK: No contradictions or broken references detected`
 
 ## Wiki Structure Reference
@@ -40,9 +54,10 @@ cross-reference integrity. You report problems but never modify files.
 - `wiki/issues/` - known issues and workarounds
 - `wiki/sources/` - source document summaries
 - `wiki/queries/` - substantial filed answers
+- `wiki/_archive/` - superseded pages removed from the active index
 
 ## Rules
 
 - Never modify any file. This agent is read-only verification only.
 - Report all conflicts before any write happens.
-- Focus on contradiction, broken cross-reference, and missing-index problems.
+- Focus on contradiction, broken cross-reference, missing index/log updates, invalid frontmatter, tag drift, quality signals, and page lifecycle problems.

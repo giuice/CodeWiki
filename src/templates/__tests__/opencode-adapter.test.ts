@@ -38,6 +38,8 @@ describe("OC-02: OpenCode agent templates preserve updater and verifier responsi
     expect(frontmatter).toMatch(/^mode: subagent$/m);
     expect(content.toLowerCase()).toContain("approval");
     expect(content).toContain("wiki/index.md");
+    expect(content).toContain("confidence");
+    expect(content).toContain("wiki/_archive/");
   });
 
   test("verifier remains read-only and checks contradiction/reference drift", async () => {
@@ -51,6 +53,9 @@ describe("OC-02: OpenCode agent templates preserve updater and verifier responsi
     expect(content.toLowerCase()).toContain("contradiction");
     expect(content.toLowerCase()).toContain("broken ref");
     expect(content).toContain("wiki/index.md");
+    expect(content).toContain("FRONTMATTER");
+    expect(content).toContain("QUALITY");
+    expect(content).toContain("sha256");
   });
 });
 
