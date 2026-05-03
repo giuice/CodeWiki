@@ -627,3 +627,24 @@ test("init --force replaces existing skill and agent files", () => {
   assertInstalledSkillTree(cwd, ".claude/skills");
   assert.equal(existsSync(path.join(cwd, ".agents/skills")), false, "Force reruns must keep .agents/skills absent for Claude-only installs");
 });
+
+test("init updates stale managed adapter assets without --force", () => {
+  const cwd = tempProject();
+  mustRun(cwd, ["init", "--tool", "claude-code,codex"]);
+
+  writeFileSync(path.join(cwd, ".claude/skills/codewiki-ingest/SKILL.md"), "# Stale Claude skill\n");
+  writeFileSync(path.join(cwd, ".agents/skills/codewiki-ingest/SKILL.md"), "# Stale shared skill\n");
+  writeFileSync(path.join(cwd, ".claude/agents/codewiki-verifier.md"), "# Stale Claude agent\n");
+  writeFileSync(path.join(cwd, ".codewiki/hooks/pre-wiki-context.sh"), "#!/bin/sh\n# Stale hook\n");
+
+  const result = mustRun(cwd, ["init", "--tool", "claude-code,codex"]);
+
+  assert.match(result.stdout, /↻ replaced \.claude\/skills\/codewiki-ingest\/SKILL\.md/);
+  assert.match(result.stdout, /↻ replaced \.agents\/skills\/codewiki-ingest\/SKILL\.md/);
+  assert.match(result.stdout, /↻ replaced \.claude\/agents\/codewiki-verifier\.md/);
+  assert.match(result.stdout, /↻ replaced \.codewiki\/hooks\/pre-wiki-context\.sh/);
+  assert.ok(!/# Stale Claude skill/.test(readFileSync(path.join(cwd, ".claude/skills/codewiki-ingest/SKILL.md"), "utf8")));
+  assert.ok(!/# Stale shared skill/.test(readFileSync(path.join(cwd, ".agents/skills/codewiki-ingest/SKILL.md"), "utf8")));
+  assert.ok(!/# Stale Claude agent/.test(readFileSync(path.join(cwd, ".claude/agents/codewiki-verifier.md"), "utf8")));
+  assert.ok(!/# Stale hook/.test(readFileSync(path.join(cwd, ".codewiki/hooks/pre-wiki-context.sh"), "utf8")));
+});

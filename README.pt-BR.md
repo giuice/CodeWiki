@@ -263,7 +263,7 @@ npx @giuice/codewiki init --name "Meu Projeto" --tool claude-code,codex
 
 | Comando | O que faz |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Cria `.codewiki/`, `.codewiki/tasks/` e `wiki/`, instala as nove Skills nas árvores canônicas de skills, instala assets de hook compartilhados e aplica os adapters disponíveis. Reexecutar atualiza seções de instrução gerenciadas pelo CodeWiki preservando conteúdo de usuário fora delas; use `--force` para substituir assets copiados como skills, hooks e agentes. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Cria `.codewiki/`, `.codewiki/tasks/` e `wiki/`, instala as nove Skills nas árvores canônicas de skills, instala assets de hook compartilhados e aplica os adapters disponíveis. Reexecutar atualiza seções de instrução gerenciadas pelo CodeWiki e assets copiados dos adapters que mudaram, como skills, hooks e agentes, preservando conteúdo de usuário não relacionado. Use `--force` para substituir arquivos protegidos do scaffold. |
 
 Esse é o único comando da CLI. Toda a outra inteligência vive nos arquivos Skill instalados e nos scripts compartilhados que a sua ferramenta de IA executa nativamente.
 
@@ -333,7 +333,7 @@ A wiki em si é independente de ferramenta. O instalador mantém o conteúdo dos
 - Atualizados os agentes verifier e wiki-updater para checar frontmatter, drift de tags, confidence, claims contestadas, hashes de fontes, regras de ciclo de vida de páginas e manutenção obrigatória de index/log/backlinks.
 - Adicionada cobertura de testes para o scaffold expandido, skills geradas, mirrors de comandos Claude e templates de agentes multi-ferramenta.
 - Adicionada `codewiki-obsidian` como a nona skill do CodeWiki, com orientação para vault Obsidian sobre `raw/assets/`, wikilinks, frontmatter compatível com Dataview, navegação pelo grafo e migração segura de vaults existentes.
-- Alteradas as seções de instruções gerenciadas para serem atualizadas em reinstalações sem exigir `--force`, então instalações existentes recebem instruções CodeWiki atualizadas enquanto texto de usuário fora dos marcadores é preservado.
+- Alteradas as seções de instruções gerenciadas e os assets copiados dos adapters para serem atualizados em reinstalações sem exigir `--force`, então instalações existentes recebem instruções, skills, hooks e agentes CodeWiki atualizados enquanto arquivos protegidos do scaffold e texto de usuário fora dos marcadores são preservados.
 
 ## Desenvolvimento
 

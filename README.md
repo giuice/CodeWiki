@@ -263,7 +263,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 
 | Command | What it does |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs the nine Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running updates CodeWiki-managed instruction sections while preserving unrelated user content; use `--force` to replace existing copied assets such as skills, hooks, and agents. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs the nine Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running updates CodeWiki-managed instruction sections and changed copied adapter assets such as skills, hooks, and agents while preserving unrelated user content. Use `--force` to replace protected scaffold files. |
 
 This is the only CLI command. All other intelligence lives in the installed Skill files and shared scripts that your AI tool executes natively.
 
@@ -333,7 +333,7 @@ The wiki itself is tool-agnostic. The installer keeps the prompt content portabl
 - Updated verifier and wiki-updater agents to check frontmatter, tag drift, confidence, contested claims, source hashes, page lifecycle rules, and required index/log/backlink maintenance.
 - Added test coverage for the expanded scaffold, generated skills, Claude command mirrors, and multi-tool agent templates.
 - Added `codewiki-obsidian` as the ninth CodeWiki skill, with Obsidian vault guidance for `raw/assets/`, wikilinks, Dataview-ready frontmatter, graph navigation, and existing-vault migration safety.
-- Changed managed instruction sections to update on reinstall without requiring `--force`, so existing installs receive refreshed CodeWiki guidance while user-owned text outside the markers is preserved.
+- Changed managed instruction sections and copied adapter assets to update on reinstall without requiring `--force`, so existing installs receive refreshed CodeWiki guidance, skills, hooks, and agents while protected scaffold files and user-owned text outside markers are preserved.
 
 ## Development
 

@@ -10,12 +10,16 @@ export async function copyTemplateFile(
   force: boolean
 ): Promise<ReportEntry> {
   const existed = await exists(targetPath);
+  const content = await readFile(templatePath, "utf8");
+
   if (existed && !force) {
-    return { action: "skipped", path: targetPath, reason: "exists" };
+    const existingContent = await readFile(targetPath, "utf8");
+    if (existingContent === content) {
+      return { action: "skipped", path: targetPath, reason: "exists" };
+    }
   }
 
   await mkdir(path.dirname(targetPath), { recursive: true });
-  const content = await readFile(templatePath, "utf8");
   await writeFile(targetPath, content, "utf8");
   return { action: existed ? "replaced" : "created", path: targetPath };
 }
