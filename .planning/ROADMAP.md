@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3.1: Auto-Improvement Engine** - absorb, breakdown, backlinks, session-end hook (INSERTED)
 - [x] **Phase 4: Claude Code Adapter + init Command** - Full end-to-end install via npx codewiki init
 - [x] **Phase 4.1: Skills Migration** - Umbrella corrective phase split into atomic skill/template, adapter, test, and doc sub-phases (INSERTED) (completed 2026-04-13)
-- [x] **Phase 4.1.1: Skill Template Source** - Move the eight source templates into per-skill SKILL.md directories and preserve prompt behavior (INSERTED)
+- [x] **Phase 4.1.1: Skill Template Source** - Move the source templates into per-skill SKILL.md directories and preserve prompt behavior (INSERTED)
 - [x] **Phase 4.1.2: Adapter Skill Install Paths** - Install skills into .claude/skills and conditional .agents/skills trees (INSERTED)
 - [x] **Phase 4.1.3: Skills Regression Coverage** - Update init and pack verification to assert skill-based install surfaces (INSERTED)
 - [x] **Phase 4.1.4: Planning Docs Canon Refresh** - Align roadmap, requirements, state, and active planning artifacts to the skills canon (INSERTED)
@@ -65,7 +65,7 @@ Plans:
 **Depends on**: Phase 2
 **Requirements**: CMD-01, CMD-02, CMD-03, CMD-04, CMD-05, CMD-06, CMD-07, HOOK-01, HOOK-02, HOOK-03, HOOK-04, HOOK-05, AGENT-01, AGENT-02
 **Success Criteria** (what must be TRUE):
-  1. Six skill source files exist in `src/templates/` with `description:` frontmatter and correct instruction content derived from source prompts
+  1. Skill source files exist in `src/templates/skills/` with `description:` frontmatter and correct instruction content derived from source prompts
   2. `pre-wiki-context.sh` reads wiki/index.md and outputs context to stdout; exits 0 even when wiki/index.md does not exist
   3. `post-verify.sh` exits 0 under all conditions including empty JSON payload input
   4. `shellcheck --shell=sh` passes on both hook scripts with zero warnings
@@ -100,7 +100,7 @@ Plans:
 **Depends on**: Phase 3.1
 **Requirements**: CLI-01, CLI-02, CLI-03, CLI-04, CLI-05, CLI-06, CLI-07, CC-01, CC-02, CC-03, CC-04, CC-05
 **Success Criteria** (what must be TRUE):
-  1. Running `npx codewiki init` in a project with `.claude/` present creates all wiki directories, installs 8 skills to `.claude/skills/codewiki-<name>/`, installs 2 agents to `.claude/agents/`, and prints a structured install report
+  1. Running `npx codewiki init` in a project with `.claude/` present creates all wiki directories, installs 9 skills to `.claude/skills/codewiki-<name>/`, installs 2 agents to `.claude/agents/`, and prints a structured install report
   2. Running `npx codewiki init --tool claude-code` on a project that also has `.codex/` installs only the Claude Code adapter (not Codex)
   3. Running `npx codewiki init` twice without `--force` produces no duplicate hook entries in `.claude/settings.json` and no duplicate `<!-- codewiki:start -->` blocks in `CLAUDE.md`
   4. Running `npx codewiki init --force` replaces existing CodeWiki marker sections in `CLAUDE.md` without touching content outside the markers
@@ -108,12 +108,12 @@ Plans:
 **Plans:** 3/3 plans complete
 Plans:
 - [x] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
-- [x] 04-02-PLAN.md — Claude Code adapter (8 skills, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [x] 04-02-PLAN.md — Claude Code adapter (9 skills, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
 - [x] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ### Phase 4.1: Skills Migration (INSERTED)
 
-**Goal**: Migrate from the legacy command install surface to the verified eight-skill canon across templates, adapters, tests, and docs without violating GSD atomicity
+**Goal**: Migrate from the legacy command install surface to the verified skill canon across templates, adapters, tests, and docs without violating GSD atomicity
 **Requirements**: SM-01, SM-02, SM-03, SM-04, SM-05, SM-06
 **Depends on:** Phase 4
 **Planning Note**: This umbrella phase is executed through child phases 4.1.1-4.1.5 because the local GSD parser supports chained decimals like 4.1.1 but not suffixes like 4.1a. Use `/create-skill` as a reference for metadata quality and structure, not as a generator.
@@ -150,8 +150,8 @@ Plans:
 **Depends on**: Phase 4.1.1
 **Requirements**: SM-02, SM-03
 **Success Criteria** (what must be TRUE):
-  1. `npx codewiki init --tool claude-code` installs `.claude/skills/codewiki-<name>/SKILL.md` for all eight skills
-  2. Tool selections including Codex, Copilot, or OpenCode install the same eight skills into `.agents/skills/codewiki-<name>/SKILL.md`
+  1. `npx codewiki init --tool claude-code` installs `.claude/skills/codewiki-<name>/SKILL.md` for all nine skills
+  2. Tool selections including Codex, Copilot, or OpenCode install the same nine skills into `.agents/skills/codewiki-<name>/SKILL.md`
   3. Claude-only installs do not create a redundant `.agents/skills/` tree
   4. Hook wiring, agent installation, and instruction-file merging remain unchanged by the skill-path migration
 **Plans:** 3 plans
@@ -218,7 +218,7 @@ Plans:
 **Depends on**: Phase 5
 **Requirements**: OC-01, OC-02, OC-03, OC-04
 **Success Criteria** (what must be TRUE):
-  1. Running `npx codewiki init` on a project with OpenCode selected installs 8 skills to `.agents/skills/codewiki-<name>/SKILL.md` and 2 agents to `.opencode/agents/`
+  1. Running `npx codewiki init` on a project with OpenCode selected installs 9 skills to `.agents/skills/codewiki-<name>/SKILL.md` and 2 agents to `.opencode/agents/`
   2. The resulting `.opencode/plugins/codewiki.ts` dispatches `tool.execute.before` to `pre-wiki-context.sh`, `file.edited` to `post-verify.sh`, and `session.idle` to `session-end.sh`
   3. OpenCode documentation and adapter code treat `session.idle` as a turn-end or assistant-idle signal, not literal session teardown semantics
   4. Re-running `npx codewiki init` twice does not create duplicate plugin wiring, duplicate OpenCode agent files, or duplicate marker sections in `AGENTS.md`

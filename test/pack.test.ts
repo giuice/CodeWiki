@@ -7,6 +7,7 @@ const REQUIRED_TEMPLATE_FILES = [
   "dist/templates/skills/codewiki-breakdown/SKILL.md",
   "dist/templates/skills/codewiki-ingest/SKILL.md",
   "dist/templates/skills/codewiki-lint/SKILL.md",
+  "dist/templates/skills/codewiki-obsidian/SKILL.md",
   "dist/templates/skills/codewiki-prd/SKILL.md",
   "dist/templates/skills/codewiki-process/SKILL.md",
   "dist/templates/skills/codewiki-query/SKILL.md",

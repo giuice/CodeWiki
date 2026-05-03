@@ -69,9 +69,16 @@ describe("mergeMarkerSection", () => {
     );
   });
 
-  test("skips duplicate marker sections without force", () => {
-    const existing = "# Existing\n<!-- codewiki:start -->\nold\n<!-- codewiki:end -->";
+  test("skips unchanged marker sections without force", () => {
+    const existing = "# Existing\n<!-- codewiki:start -->\nnew\n<!-- codewiki:end -->";
     expect(mergeMarkerSection(existing, "new", false)).toBe(existing);
+  });
+
+  test("updates managed marker sections without force", () => {
+    const existing = "# Existing\n<!-- codewiki:start -->\nold\n<!-- codewiki:end -->";
+    expect(mergeMarkerSection(existing, "new", false)).toBe(
+      "# Existing\n<!-- codewiki:start -->\nnew\n<!-- codewiki:end -->"
+    );
   });
 
   test("replaces marker content with force=true", () => {

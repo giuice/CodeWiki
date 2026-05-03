@@ -316,6 +316,7 @@ CodeWiki maintains durable, human-reviewed project knowledge as markdown. It is 
 
 - Wiki root: \`wiki/\`
 - Raw sources: \`wiki/raw/\`
+- Obsidian attachments: \`wiki/raw/assets/\`
 - Backlinks index: \`wiki/_backlinks.json\`
 - Chronological log: \`wiki/log.md\`
 - Content index: \`wiki/index.md\`
@@ -329,6 +330,8 @@ CodeWiki maintains durable, human-reviewed project knowledge as markdown. It is 
 - Store meeting notes, interviews, and transcripts in \`wiki/raw/transcripts/\`.
 - Store specs, PRDs from outside this project, and design docs in \`wiki/raw/specs/\`.
 - Store referenced images and attachments in \`wiki/raw/assets/\`.
+- If opening the wiki in Obsidian, use \`wiki/\` as the vault root and set the attachment folder path to \`raw/assets/\`.
+- Obsidian plugins such as Dataview are optional. CodeWiki pages must remain valid plain markdown with parseable YAML frontmatter.
 - Raw markdown sources should start with frontmatter:
   - \`source_url\`: original URL when applicable
   - \`ingested\`: date captured

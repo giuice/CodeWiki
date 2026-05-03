@@ -9,7 +9,7 @@ function countOccurrences(value: string, pattern: string): number {
   return value.split(pattern).length - 1;
 }
 
-const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "prd", "process", "query", "tasks"] as const;
+const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "obsidian", "prd", "process", "query", "tasks"] as const;
 
 function assertInstalledSkillTree(cwd: string, baseDir: string): void {
   for (const skill of CANONICAL_SKILLS) {
@@ -335,6 +335,46 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
   assert.equal(countHookCommands(secondHooks, ".codex/hooks/pre-tool-use.sh"), 1);
   assert.equal(countHookCommands(secondHooks, ".codex/hooks/post-tool-use.sh"), 1);
   assert.equal(countHookCommands(secondHooks, ".codex/hooks/stop.sh"), 1);
+});
+
+test("init updates stale CodeWiki-managed instruction sections without clobbering user text", () => {
+  const cases = [
+    { tool: "claude-code", instructionFile: "CLAUDE.md" },
+    { tool: "codex", instructionFile: "AGENTS.md" },
+    { tool: "copilot", instructionFile: ".github/copilot-instructions.md" },
+    { tool: "opencode", instructionFile: "AGENTS.md" }
+  ] as const;
+
+  for (const testCase of cases) {
+    const cwd = tempProject();
+    mkdirSync(path.dirname(path.join(cwd, testCase.instructionFile)), { recursive: true });
+    writeFileSync(
+      path.join(cwd, testCase.instructionFile),
+      [
+        "# Existing Instructions",
+        "",
+        "Keep this user-owned note.",
+        "",
+        "<!-- codewiki:start -->",
+        "old generated CodeWiki instructions",
+        "<!-- codewiki:end -->",
+        "",
+        "Keep this footer."
+      ].join("\n")
+    );
+
+    const result = mustRun(cwd, ["init", "--tool", testCase.tool]);
+
+    assert.match(result.stdout, new RegExp(testCase.instructionFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+
+    const instructions = readFileSync(path.join(cwd, testCase.instructionFile), "utf8");
+    assert.match(instructions, /Keep this user-owned note\./);
+    assert.match(instructions, /Keep this footer\./);
+    assert.doesNotMatch(instructions, /old generated CodeWiki instructions/);
+    assert.match(instructions, /codewiki-obsidian/);
+    assert.equal(countOccurrences(instructions, "<!-- codewiki:start -->"), 1);
+    assert.equal(countOccurrences(instructions, "<!-- codewiki:end -->"), 1);
+  }
 });
 
 test("init --tool copilot installs hooks, shared skills, and preserves instructions on rerun", () => {

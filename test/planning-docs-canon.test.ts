@@ -13,7 +13,7 @@ test("planning docs canon keeps roadmap and requirements aligned to SM-05", () =
 
   assert.match(roadmap, /### Phase 4\.1\.4: Planning Docs Canon Refresh \(INSERTED\)/);
   assert.match(roadmap, /\*\*Requirements\*\*: SM-05/);
-  assert.match(roadmap, /installs 8 skills to `\.claude\/skills\/codewiki-<name>\//);
+  assert.match(roadmap, /installs 9 skills to `\.claude\/skills\/codewiki-<name>\//);
   assert.match(roadmap, /`\.agents\/skills\/codewiki-<name>\/SKILL\.md`/);
   assert.match(roadmap, /dist\/templates\/skills\/codewiki-ingest\/SKILL\.md/);
 
@@ -23,7 +23,7 @@ test("planning docs canon keeps roadmap and requirements aligned to SM-05", () =
   );
   assert.match(requirements, /\| SM-05 \| Phase 4\.1\.4 \(Planning Docs Canon Refresh\) \| Complete \(2026-04-12\) \|/);
   assert.match(requirements, /\| SM-06 \| Phase 4\.1\.5 \(Product Docs Canon Refresh\) \| Complete \(2026-04-13\) \|/);
-  assert.match(requirements, /\*\*CC-01\*\*: Installs 8 skills to `\.claude\/skills\/codewiki-<name>\/SKILL\.md`/);
+  assert.match(requirements, /\*\*CC-01\*\*: Installs 9 skills to `\.claude\/skills\/codewiki-<name>\/SKILL\.md`/);
   assert.match(
     requirements,
     /\*\*OC-01\*\*: Reuses the shared `\.agents\/skills\/codewiki-<name>\/SKILL\.md` tree for OpenCode selections; no separate OpenCode-only skill tree is introduced in v1/
@@ -40,6 +40,7 @@ test("planning docs canon keeps roadmap and requirements aligned to SM-05", () =
 
 test("planning docs canon keeps state, conventions, and active context parser-safe", () => {
   const state = readWorkspaceFile(".planning/STATE.md");
+  const project = readWorkspaceFile(".planning/PROJECT.md");
   const conventions = readWorkspaceFile(".planning/CONVENTIONS.md");
   const phaseContext = readWorkspaceFile(".planning/phases/04.1-skills-migration/04.1-CONTEXT.md");
 
@@ -51,6 +52,9 @@ test("planning docs canon keeps state, conventions, and active context parser-sa
   assert.match(state, /current Codex docs supersede the 2026-04-13 hook model/);
   assert.match(state, /can match `apply_patch` through `PreToolUse`\/`PostToolUse` aliases `Edit\|Write`/);
   assert.match(state, /OpenCode uses plugin events `tool\.execute\.before`, `file\.edited`, and `session\.idle`/);
+  assert.match(state, /nine-skill surface/);
+  assert.match(project, /canonical install surface is nine standalone Skills/);
+  assert.match(project, /Install surface = nine standalone Skills/);
 
   assert.match(conventions, /\(e\.g\., 4\.1\.1, 4\.1\.2\)/);
   assert.doesNotMatch(conventions, /\(e\.g\., 4\.1a, 4\.1b\)/);

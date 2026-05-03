@@ -4,7 +4,7 @@
 
 CodeWiki is a framework that turns a repository into a persistent, LLM-maintained knowledge system for AI coding tools.
 
-Run `npx @giuice/codewiki init` once and the CLI scaffolds the wiki plus the tool-facing integration assets that exist today: eight Skills, shared hook scripts, and agent definitions. The logical skill names stay stable across tools (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`), while the installer writes them into the canonical skill trees:
+Run `npx @giuice/codewiki init` once and the CLI scaffolds the wiki plus the tool-facing integration assets that exist today: nine Skills, shared hook scripts, and agent definitions. The logical skill names stay stable across tools (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`), while the installer writes them into the canonical skill trees:
 
 - Claude Code selections write `.claude/skills/codewiki-<name>/SKILL.md`
 - Codex, Copilot, and OpenCode selections write `.agents/skills/codewiki-<name>/SKILL.md`
@@ -193,6 +193,7 @@ Example Claude Code install surface:
 │   ├── codewiki-lint/SKILL.md
 │   ├── codewiki-absorb/SKILL.md
 │   ├── codewiki-breakdown/SKILL.md
+│   ├── codewiki-obsidian/SKILL.md
 │   ├── codewiki-prd/SKILL.md
 │   ├── codewiki-tasks/SKILL.md
 │   └── codewiki-process/SKILL.md
@@ -202,7 +203,7 @@ Example Claude Code install surface:
 CLAUDE.md                             # Appended CodeWiki instructions
 ```
 
-The shared non-Claude skill install surface is the same eight directories under `.agents/skills/`.
+The shared non-Claude skill install surface is the same nine directories under `.agents/skills/`.
 
 ## Install
 
@@ -247,6 +248,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 #    codewiki-absorb
 #    codewiki-breakdown
 #    codewiki-lint
+#    codewiki-obsidian
 #    codewiki-query "what do we know about auth middleware?"
 
 # 3. Shared hook scripts are installed into .codewiki/hooks/
@@ -261,7 +263,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 
 | Command | What it does |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs the eight Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running is safe; use `--force` to replace existing CodeWiki-managed sections. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs the nine Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running updates CodeWiki-managed instruction sections while preserving unrelated user content; use `--force` to replace existing copied assets such as skills, hooks, and agents. |
 
 This is the only CLI command. All other intelligence lives in the installed Skill files and shared scripts that your AI tool executes natively.
 
@@ -276,6 +278,7 @@ CodeWiki ships one `SKILL.md` per logical workflow. The invocation UI differs by
 | `codewiki-lint` | Health-check the wiki for contradictions, stale claims, missing links, or weak pages |
 | `codewiki-absorb` | Extract lessons, entities, and issues from recent code changes so each session compounds |
 | `codewiki-breakdown` | Find high-signal undocumented entities by backlink/reference count and propose new pages |
+| `codewiki-obsidian` | Configure and audit the wiki as an Obsidian-compatible vault with stable assets, wikilinks, and frontmatter |
 | `codewiki-prd` | Draft a PRD through clarifying questions and save it under `.codewiki/tasks/` |
 | `codewiki-tasks` | Generate a task breakdown from a PRD with checklist structure |
 | `codewiki-process` | Work through tasks one sub-task at a time with verification and clean commit hygiene |
@@ -329,6 +332,8 @@ The wiki itself is tool-agnostic. The installer keeps the prompt content portabl
 - Updated ingest, query, lint, absorb, and breakdown workflows so agents can skip unchanged sources, surface weak or contested claims, file substantial query answers after approval, and run more programmatic wiki health checks.
 - Updated verifier and wiki-updater agents to check frontmatter, tag drift, confidence, contested claims, source hashes, page lifecycle rules, and required index/log/backlink maintenance.
 - Added test coverage for the expanded scaffold, generated skills, Claude command mirrors, and multi-tool agent templates.
+- Added `codewiki-obsidian` as the ninth CodeWiki skill, with Obsidian vault guidance for `raw/assets/`, wikilinks, Dataview-ready frontmatter, graph navigation, and existing-vault migration safety.
+- Changed managed instruction sections to update on reinstall without requiring `--force`, so existing installs receive refreshed CodeWiki guidance while user-owned text outside the markers is preserved.
 
 ## Development
 

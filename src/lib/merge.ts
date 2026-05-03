@@ -83,7 +83,8 @@ export function mergeMarkerSection(existing: string, newContent: string, force: 
   }
 
   if (startIndex !== -1 && endIndex !== -1) {
-    if (!force) {
+    const existingContent = existing.slice(startIndex + START_MARKER.length, endIndex);
+    if (!force && existingContent === `\n${newContent}\n`) {
       return existing;
     }
 

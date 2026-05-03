@@ -11,6 +11,7 @@ CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdo
 - New feature or larger change: use `codewiki-prd`, then `codewiki-tasks`, then `codewiki-process` to work one sub-task at a time.
 - After a substantial coding session: run `codewiki-absorb` deliberately to capture durable lessons, entities, decisions, and issues from recent changes.
 - Periodically or when drift is suspected: run `codewiki-lint` and `codewiki-breakdown` to find contradictions, stale claims, orphan pages, and missing high-signal pages.
+- When setting up or auditing Obsidian usage: use `codewiki-obsidian` to keep vault structure, attachments, wikilinks, Dataview-ready frontmatter, and graph navigation compatible with CodeWiki.
 - Hooks provide context and change signals; they do not replace deliberate ingest/query/absorb/lint work or human approval of wiki writes.
 
 ### Schema Discipline
@@ -27,6 +28,7 @@ CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdo
 - `codewiki-lint` — Check the wiki for contradictions, orphan pages, stale claims, and structural drift
 - `codewiki-absorb` — Extract durable knowledge from recent git changes
 - `codewiki-breakdown` — Find undocumented entities ranked by backlink importance
+- `codewiki-obsidian` — Configure and audit the wiki as an Obsidian-compatible vault
 - `codewiki-prd` — Create a product requirements document
 - `codewiki-tasks` — Generate tasks from a PRD
 - `codewiki-process` — Process a task list one sub-task at a time

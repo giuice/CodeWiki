@@ -10,7 +10,7 @@ This file is no longer an urgent handoff for an unfinished migration. The migrat
 
 The skills-canon migration is complete through Phase 04.1.5:
 
-- `src/templates/skills/codewiki-<name>/SKILL.md` is the source of truth for the eight CodeWiki skills
+- `src/templates/skills/codewiki-<name>/SKILL.md` is the source of truth for the nine CodeWiki skills
 - Claude installs `.claude/skills/codewiki-<name>/SKILL.md`
 - Codex, Copilot, and OpenCode selections install `.agents/skills/codewiki-<name>/SKILL.md`
 - Mixed selections that include Claude Code write both trees
@@ -20,7 +20,7 @@ The skills-canon migration is complete through Phase 04.1.5:
 
 ## The canonical rule
 
-> **CodeWiki installs eight Skills, one per logical workflow.** Not a bundled mega-skill and not a flat command-file surface. Each workflow ships as its own `SKILL.md` so tools only load the prompt they need.
+> **CodeWiki installs nine Skills, one per focused workflow.** Not a bundled mega-skill and not a flat command-file surface. Each workflow ships as its own `SKILL.md` so tools only load the prompt they need.
 
 Canonical skill set:
 
@@ -29,6 +29,7 @@ Canonical skill set:
 - `codewiki-lint`
 - `codewiki-absorb`
 - `codewiki-breakdown`
+- `codewiki-obsidian`
 - `codewiki-prd`
 - `codewiki-tasks`
 - `codewiki-process`
@@ -77,7 +78,7 @@ Those roadmap items are adapter-completion work, not another install-surface mig
 
 | Scope | Evidence |
 | --- | --- |
-| Canon correction established | `96ada8a` reframed the v2 PRD around eight Skills and the dual-tree rationale |
+| Canon correction established | `96ada8a` reframed the v2 PRD around standalone Skills and the dual-tree rationale |
 | Requirements rewired to the canon | `5449b74` updated requirements language and supporting PRD precision |
 | Skill templates moved to the canonical tree | Phase 04.1.1 |
 | Installer wrote `.claude/skills/` and `.agents/skills/` correctly | Phase 04.1.2 |

@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 
 const SKILLS_DIR = path.resolve("src/templates/skills");
 const CLAUDE_COMMANDS_DIR = path.resolve("src/templates/claude/commands/codewiki");
-const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "prd", "process", "query", "tasks"];
+const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "obsidian", "prd", "process", "query", "tasks"];
 const ARGUMENT_HINT_SKILLS = new Set(["ingest", "query", "prd", "process", "tasks"]);
 
 async function readSkill(name: string): Promise<string> {
@@ -21,7 +21,7 @@ function extractFrontmatter(content: string): string | null {
   return match ? match[1] ?? null : null;
 }
 
-describe("SM-04: canonical skill files expose the eight-skill frontmatter contract", () => {
+describe("SM-04: canonical skill files expose the CodeWiki skill frontmatter contract", () => {
   for (const skill of CANONICAL_SKILLS) {
     test(`codewiki-${skill}/SKILL.md has name, description, purpose, and process`, async () => {
       const content = await readSkill(skill);
@@ -151,6 +151,25 @@ describe("CMD-03B: Claude command mirrors preserve Hermes-style wiki rules", () 
   });
 });
 
+describe("CMD-03C: codewiki-obsidian preserves vault guidance", () => {
+  test("codewiki-obsidian keeps Obsidian guidance scoped to vault compatibility", async () => {
+    const content = await readSkill("obsidian");
+    expect(content).toContain("attachment folder path to `raw/assets/`");
+    expect(content).toContain("Wikilinks enabled");
+    expect(content).toContain("Dataview");
+    expect(content).toContain("Do not introduce database-only state");
+    expect(content).toContain("Wait for explicit user approval");
+  });
+
+  test("Claude obsidian mirror includes the same vault guidance", async () => {
+    const content = await readClaudeCommand("obsidian");
+    expect(content).toContain("attachment folder path to `raw/assets/`");
+    expect(content).toContain("Wikilinks enabled");
+    expect(content).toContain("Dataview");
+    expect(content).toContain("Do not introduce database-only state");
+  });
+});
+
 describe("CMD-04: codewiki-prd preserves task-driven PRD workflow checks", () => {
   test("codewiki-prd exists with description, purpose, process, and --fast", async () => {
     const content = await readSkill("prd");
@@ -225,7 +244,7 @@ describe("CMD-06: codewiki-process preserves process workflow checks", () => {
   });
 });
 
-describe("CMD-07: All 8 canonical skill files have name and description in YAML frontmatter", () => {
+describe("CMD-07: All canonical skill files have name and description in YAML frontmatter", () => {
   for (const skill of CANONICAL_SKILLS) {
     test(`codewiki-${skill}/SKILL.md has name and description in YAML frontmatter`, async () => {
       const content = await readSkill(skill);
