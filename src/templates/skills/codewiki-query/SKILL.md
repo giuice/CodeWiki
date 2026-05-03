@@ -2,7 +2,7 @@
 name: codewiki-query
 description: Search wiki and synthesize an answer from wiki pages
 argument-hint: <question>
-allowed-tools: [Read, Glob, Grep, Bash]
+allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 
 # CodeWiki Query
@@ -41,11 +41,18 @@ matched wiki pages. Treat the wiki as the primary knowledge layer between the us
 - Cite the supporting wiki entries with file paths so the user can inspect them.
 - Call out uncertainty when the wiki is incomplete or conflicting.
 
-## Step 6: Handle misses explicitly
+## Step 6: File valuable answers
+- If the answer is a substantial comparison, deep dive, or new synthesis that would be painful to re-derive, propose filing it under `comparisons/` or `queries/`.
+- Do not file trivial lookups, simple pointers, or answers that add no durable synthesis.
+- Wait for explicit user approval before writing any query-derived page.
+- Filed pages must use schema-approved tags, include `sources`, `confidence`, `contested`, and `contradictions` frontmatter, and be added to `index.md`.
+- Append a `## [YYYY-MM-DD] query | Question summary` entry to `log.md` that says whether the answer was filed.
+
+## Step 7: Handle misses explicitly
 - If no relevant wiki pages are found, say so clearly.
 - Suggest what kind of source or wiki page would be needed to answer the question better.
 
-## Step 7: Boundaries
+## Step 8: Boundaries
 - Stay local: this is a wiki-grounded markdown search workflow, not an API call.
-- Do not edit files from this command.
+- Do not edit files unless the user explicitly approves filing the answer in the current conversation.
 </process>

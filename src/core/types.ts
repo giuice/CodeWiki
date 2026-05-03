@@ -28,6 +28,10 @@ export interface CodeWikiConfig {
     check_contradictions: boolean;
     check_stale_issues: boolean;
     check_file_drift: boolean;
+    check_frontmatter: boolean;
+    check_source_drift: boolean;
+    check_tag_taxonomy: boolean;
+    check_page_size: boolean;
   };
 }
 

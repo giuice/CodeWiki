@@ -104,6 +104,7 @@ test("local npm tarball works through npx in a fresh project", () => {
       ".codewiki/tasks",
       ".codewiki/hooks/pre-wiki-context.sh",
       "wiki/SCHEMA.md",
+      "wiki/_archive",
       "wiki/raw/specs",
       "wiki/index.md",
       ".claude/skills/codewiki-ingest/SKILL.md",
@@ -139,8 +140,11 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
     ".codewiki/hooks/session-end.sh",
     ".codewiki/templates/entity.md",
     ".codewiki/templates/decision.md",
+    ".codewiki/templates/concept.md",
+    ".codewiki/templates/comparison.md",
     ".codewiki/templates/lesson.md",
     ".codewiki/templates/issue.md",
+    ".codewiki/templates/query.md",
     ".codewiki/templates/source-summary.md",
     ".claude/agents/codewiki-verifier.md",
     ".claude/agents/codewiki-wiki-updater.md",
@@ -152,6 +156,7 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
     "wiki/raw/transcripts",
     "wiki/raw/specs",
     "wiki/raw/assets",
+    "wiki/_archive",
     "wiki/index.md",
     "wiki/log.md",
     "wiki/entities",
@@ -193,6 +198,10 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   assert.match(claudeInstructions, /codewiki-breakdown/);
   assert.match(claudeInstructions, /not query-time RAG/);
   assert.match(claudeInstructions, /Hooks provide context and change signals/);
+  assert.match(claudeInstructions, /Schema Discipline/);
+  assert.match(claudeInstructions, /confidence/);
+  assert.match(claudeInstructions, /source_url/);
+  assert.match(claudeInstructions, /wiki\/queries\//);
 
   const quoted = tempProject();
   mustRun(quoted, ["init", "--name", 'demo "quoted"', "--tool", "claude-code"]);

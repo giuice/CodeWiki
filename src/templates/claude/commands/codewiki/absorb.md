@@ -36,11 +36,15 @@ changed files, not from raw documents. Preserve the human approval boundary at a
 ## Step 4: Apply anti-cramming
 - If an existing page would gain a third paragraph about the same sub-topic, propose a new dedicated page instead.
 - Prefer 30 focused pages over 5 bloated ones.
+- Split pages over about 200 lines into focused sub-pages with cross-links.
+- Do not create pages for passing mentions; create a page only when the entity or concept is central to the change or already recurs across sources/wiki pages.
 
 ## Step 5: Apply anti-thinning
 - Every page you touch must get meaningfully richer.
 - If a topic is mentioned in 4+ other pages, its own page must not remain a three-sentence stub.
 - Flag thin pages that should be expanded while this change is fresh.
+- Use only tags from `SCHEMA.md`; propose a taxonomy update before using any new tag.
+- Set `confidence`, `contested`, and `contradictions` frontmatter when the code change weakens, disputes, or only partially supports an existing claim.
 
 ## Step 6: Update backlinks
 - After proposing changes, rebuild `_backlinks.json` by scanning all wiki pages for `[[wikilink]]` references.
@@ -57,6 +61,7 @@ changed files, not from raw documents. Preserve the human approval boundary at a
 ## Step 8: Write approved updates
 - After approval, create or update only the approved pages using `.codewiki/templates/`.
 - Update `index.md`, `log.md`, and `_backlinks.json` so the wiki stays navigable.
+- Keep index metadata current and append log entries in `## [YYYY-MM-DD] absorb | Subject` format.
 
 ## Step 9: Guardrails
 - Never write to `wiki/` without explicit approval in the current conversation.

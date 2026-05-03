@@ -4,11 +4,16 @@ import path from "node:path";
 import { describe, expect, test } from "vitest";
 
 const SKILLS_DIR = path.resolve("src/templates/skills");
+const CLAUDE_COMMANDS_DIR = path.resolve("src/templates/claude/commands/codewiki");
 const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "prd", "process", "query", "tasks"];
 const ARGUMENT_HINT_SKILLS = new Set(["ingest", "query", "prd", "process", "tasks"]);
 
 async function readSkill(name: string): Promise<string> {
   return readFile(path.join(SKILLS_DIR, `codewiki-${name}`, "SKILL.md"), "utf8");
+}
+
+async function readClaudeCommand(name: string): Promise<string> {
+  return readFile(path.join(CLAUDE_COMMANDS_DIR, `${name}.md`), "utf8");
 }
 
 function extractFrontmatter(content: string): string | null {
@@ -58,6 +63,15 @@ describe("CMD-01: codewiki-ingest preserves the ingest workflow checks", () => {
     const content = await readSkill("ingest");
     expect(content.toLowerCase()).toContain("approval");
   });
+
+  test("codewiki-ingest handles raw hashes, page thresholds, and bulk ingest", async () => {
+    const content = await readSkill("ingest");
+    expect(content).toContain("sha256");
+    expect(content).toContain("source_url");
+    expect(content).toContain("central to one source or appears across two or more sources");
+    expect(content).toContain("bulk ingest rule");
+    expect(content).toContain("schema taxonomy update");
+  });
 });
 
 describe("CMD-02: codewiki-query preserves the grounded search workflow", () => {
@@ -77,6 +91,13 @@ describe("CMD-02: codewiki-query preserves the grounded search workflow", () => 
     expect(content).toContain("Read `index.md` from the resolved wiki root");
     expect(content).toContain("SCHEMA.md");
   });
+
+  test("codewiki-query can file valuable answers with approval", async () => {
+    const content = await readSkill("query");
+    expect(content).toContain("File valuable answers");
+    expect(content).toContain("Wait for explicit user approval before writing any query-derived page.");
+    expect(content).toContain("Do not file trivial lookups");
+  });
 });
 
 describe("CMD-03: codewiki-lint preserves lint workflow checks", () => {
@@ -93,6 +114,40 @@ describe("CMD-03: codewiki-lint preserves lint workflow checks", () => {
   test("codewiki-lint includes orphan detection capability", async () => {
     const content = await readSkill("lint");
     expect(content.toLowerCase()).toContain("orphan");
+  });
+
+  test("codewiki-lint includes programmatic Hermes-style health checks", async () => {
+    const content = await readSkill("lint");
+    expect(content).toContain("broken wikilinks");
+    expect(content).toContain("Validate frontmatter and tags");
+    expect(content).toContain("source drift");
+    expect(content).toContain("confidence: low");
+    expect(content).toContain("log exceeds 500 entries");
+  });
+});
+
+describe("CMD-03B: Claude command mirrors preserve Hermes-style wiki rules", () => {
+  test("Claude ingest mirror includes raw hash, thresholds, taxonomy, and bulk ingest", async () => {
+    const content = await readClaudeCommand("ingest");
+    expect(content).toContain("sha256");
+    expect(content).toContain("central to one source or appears across two or more sources");
+    expect(content).toContain("schema taxonomy update");
+    expect(content).toContain("bulk ingest rule");
+  });
+
+  test("Claude query mirror can file valuable answers with approval", async () => {
+    const content = await readClaudeCommand("query");
+    expect(content).toContain("File valuable answers");
+    expect(content).toContain("Wait for explicit user approval before writing any query-derived page.");
+    expect(content).toContain("Do not file trivial lookups");
+  });
+
+  test("Claude lint mirror includes programmatic health checks", async () => {
+    const content = await readClaudeCommand("lint");
+    expect(content).toContain("broken wikilinks");
+    expect(content).toContain("Validate frontmatter and tags");
+    expect(content).toContain("source drift");
+    expect(content).toContain("log exceeds 500 entries");
   });
 });
 

@@ -20,12 +20,17 @@ so the project wiki stays aligned with the codebase.
    check `wiki/decisions/`, `wiki/concepts/`, `wiki/comparisons/`, `wiki/lessons/`,
    `wiki/issues/`, `wiki/sources/`, and `wiki/queries/` when the change crosses those boundaries.
 4. Read the current wiki page for each affected topic before proposing any edit.
-5. Propose concrete before/after diffs that show exactly what text should change.
-6. Present all proposed changes to the user for individual approval. Do not write any file until
+5. Apply the schema's page thresholds: avoid pages for passing mentions, split pages over about
+   200 lines, and propose archive moves under `wiki/_archive/` when content is fully superseded.
+6. Use only tags from the `wiki/SCHEMA.md` taxonomy; propose a taxonomy update before using a new tag.
+7. Set or update `confidence`, `contested`, and `contradictions` frontmatter when the change affects claim quality.
+8. Propose concrete before/after diffs that show exactly what text should change.
+9. Present all proposed changes to the user for individual approval. Do not write any file until
    the user approves that specific change.
-7. After approval, apply only the approved edits.
-8. Update `wiki/index.md`, `wiki/log.md`, and `wiki/_backlinks.json` when pages or cross-references change.
-9. If no wiki pages are affected, say so clearly and stop.
+10. After approval, apply only the approved edits.
+11. Update `wiki/index.md` metadata, append `wiki/log.md` entries in `## [YYYY-MM-DD] action | subject`
+    format, and refresh `wiki/_backlinks.json` when pages or cross-references change.
+12. If no wiki pages are affected, say so clearly and stop.
 
 ## Wiki Structure Reference
 
@@ -39,6 +44,7 @@ so the project wiki stays aligned with the codebase.
 - `wiki/issues/` - known issues and workarounds
 - `wiki/sources/` - source document summaries
 - `wiki/queries/` - substantial filed answers
+- `wiki/_archive/` - superseded pages removed from the active index
 
 ## Rules
 
@@ -46,3 +52,4 @@ so the project wiki stays aligned with the codebase.
 - Never create commits automatically.
 - Show before/after diffs for every proposed edit.
 - Prefer updating an existing wiki page over creating a duplicate page.
+- Do not let weak or contested claims harden silently; make uncertainty visible in frontmatter.

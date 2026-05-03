@@ -118,25 +118,36 @@ project-root/
 │   ├── templates/                 # Page templates for each wiki type
 │   │   ├── entity.md
 │   │   ├── decision.md
+│   │   ├── concept.md
+│   │   ├── comparison.md
 │   │   ├── lesson.md
 │   │   ├── issue.md
+│   │   ├── query.md
 │   │   └── source-summary.md
 │   └── hooks/                     # Hook scripts (shared across tools)
 │       ├── pre-wiki-context.sh    # Reads wiki/index.md, finds relevant pages
 │       ├── post-verify.sh         # Emits structured change context for wiki updates
 │       └── session-end.sh         # Emits structured session summary for absorb follow-up
-├── raw/                           # Immutable source documents
-│   └── (user drops markdown here)
-├── tasks/                         # Generated PRDs and task breakdowns
+├── wiki/raw/                      # Immutable source documents
+│   ├── articles/
+│   ├── papers/
+│   ├── transcripts/
+│   ├── specs/
+│   └── assets/
+├── .codewiki/tasks/               # Generated PRDs and task breakdowns
 ├── wiki/
 │   ├── index.md                   # Auto-maintained catalog of all pages
 │   ├── log.md                     # Chronological record of all operations
 │   ├── _backlinks.json            # Reverse link index for importance ranking
+│   ├── _archive/
 │   ├── entities/
 │   ├── decisions/
+│   ├── concepts/
+│   ├── comparisons/
 │   ├── lessons/
 │   ├── issues/
-│   └── sources/
+│   ├── sources/
+│   └── queries/
 ├── CLAUDE.md                      # (appended) CodeWiki instructions
 └── (rest of project)
 ```
@@ -145,7 +156,7 @@ Skills directories are verified for all four tools (research completed 2026-04-1
 
 ### 4.4 Wiki Page Types
 
-(Unchanged from v1 — see entity, decision, lesson, issue, source-summary templates in §8.)
+Default templates cover entity, decision, concept, comparison, lesson, issue, source-summary, and query pages. Each page carries provenance and quality frontmatter such as sources, confidence, contested, and contradictions.
 
 #### Entity Pages (`wiki/entities/`)
 One per module, service, or major component. Contains: purpose, key files, dependencies, known issues (linked), relevant lessons (linked), current status. Stores file hashes in `file_hashes` frontmatter for drift detection.
@@ -303,9 +314,9 @@ Skill, not CLI. Invoked from the AI tool's native skill interface. The agent:
 
 Three Skills adapted from the original prompts (each shipped as its own SKILL.md):
 
-1. **`/codewiki-prd`** — Agent asks clarifying questions, generates a PRD in `tasks/`, following the create-prd prompt template. Human reviews and refines. (Adapted from `docs/prompts/create-prd.md`)
+1. **`/codewiki-prd`** — Agent asks clarifying questions, generates a PRD in `.codewiki/tasks/`, following the create-prd prompt template. Human reviews and refines. (Adapted from `docs/prompts/create-prd.md`)
 
-2. **`/codewiki-tasks`** — Agent analyzes PRD + codebase, generates parent tasks (waits for "Go"), then generates sub-tasks with checklist format. Output goes to `/tasks/tasks-[prd-name].md`. (Adapted from `docs/prompts/generate-tasks.md`)
+2. **`/codewiki-tasks`** — Agent analyzes PRD + codebase, generates parent tasks (waits for "Go"), then generates sub-tasks with checklist format. Output goes to `.codewiki/tasks/tasks-[prd-name].md`. (Adapted from `docs/prompts/generate-tasks.md`)
 
 3. **`/codewiki-process`** — Agent works through tasks one sub-task at a time. Marks `[x]` on completion, runs tests when parent task is done, commits with conventional commits, pauses for user approval between each sub-task. Each task goes through the Verification Loop (§5.1). (Adapted from `docs/prompts/process-task-list.md`)
 
@@ -404,9 +415,9 @@ That's it. The CLI does one thing: install CodeWiki into your project.
 1. Creates `.codewiki/config.yml` with project settings.
 2. Creates `.codewiki/templates/` with page templates.
 3. Creates `.codewiki/hooks/` with shared hook scripts.
-4. Creates `raw/` directory for source documents.
+4. Creates `wiki/raw/{articles,papers,transcripts,specs,assets}/` directories for source documents.
 5. Creates `wiki/` directory structure with `index.md`, `log.md`, and `_backlinks.json`.
-6. Creates `tasks/` directory for PRD and task files.
+6. Creates `.codewiki/tasks/` directory for PRD and task files.
 7. **Per tool:** installs hooks, skills, agents, and system instructions into the tool's native locations.
 8. Reports what was installed.
 
@@ -422,7 +433,9 @@ The eight Skills are pure markdown prompts (one SKILL.md per command). The AI to
 
 ## 8. Page Templates
 
-(Unchanged from v1. Templates live in `.codewiki/templates/`.)
+Templates live in `.codewiki/templates/` for entity, decision, concept, comparison, lesson, issue,
+source-summary, and query pages. All templates include provenance and quality frontmatter so
+agents do not silently promote weak or contested claims.
 
 ## 9. Configuration (`config.yml`)
 
@@ -440,8 +453,8 @@ tools:
 
 wiki:
   path: wiki/
-  raw_path: raw/
-  tasks_path: tasks/
+  raw_path: wiki/raw/
+  tasks_path: .codewiki/tasks/
 
 verification:
   require_human_approval: true
@@ -453,6 +466,10 @@ lint:
   check_contradictions: true
   check_stale_issues: true
   check_file_drift: true
+  check_frontmatter: true
+  check_source_drift: true
+  check_tag_taxonomy: true
+  check_page_size: true
 ```
 
 ## 10. Success Metrics
@@ -473,9 +490,9 @@ lint:
 
 2. **Hook granularity → File-modification only.** (Unchanged from v1.)
 
-3. **Wiki page lifecycle → Stay in place, never archive.** (Unchanged from v1.)
+3. **Wiki page lifecycle → Active pages stay discoverable; superseded pages archive.** Fully superseded pages move under `wiki/_archive/`, active index entries are removed, links are adjusted, and the action is logged.
 
-4. **Template evolution → Skip for v1.** (Unchanged from v1.)
+4. **Template evolution → Strong default frontmatter.** Templates include source provenance, confidence, contested state, and contradiction references across all default page types.
 
 5. **File drift → Lightweight hash-based detection.** (Unchanged from v1.)
 
