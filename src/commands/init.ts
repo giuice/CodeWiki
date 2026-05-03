@@ -71,13 +71,16 @@ function parsePromptToolSelection(answer: string): SupportedTool[] {
   return [...new Set(selected)];
 }
 
-async function promptForTool(): Promise<SupportedTool[]> {
+async function promptForTool(detectedTools: SupportedTool[] = []): Promise<SupportedTool[]> {
   const readline = createInterface({ input: process.stdin, output: process.stdout });
 
   try {
     const choices = SUPPORTED_TOOLS.map((tool, index) => `  ${pc.cyan(`${index + 1})`)} ${tool}`).join("\n");
+    const detectedLine = detectedTools.length > 0
+      ? `${pc.green("Detected:")} ${detectedTools.join(", ")}\n`
+      : `${pc.yellow("No AI tools detected.")}\n`;
     const answer = await readline.question(
-      `${formatBrandBanner()}\n\n${pc.yellow("No AI tools detected.")} Install ${pc.bold("CodeWiki")} for:\n${choices}\n  ${pc.cyan("A)")} all\n\nEnter numbers, names, or A for all: `
+      `${formatBrandBanner()}\n\n${detectedLine}Install ${pc.bold("CodeWiki")} for:\n${choices}\n  ${pc.cyan("A)")} all\n\nEnter numbers, names, or A for all: `
     );
 
     return parsePromptToolSelection(answer);
@@ -108,13 +111,18 @@ export async function initCommand({ root = process.cwd(), args }: InitOptions): 
     }
   }
 
-  let tools = requestedTools ?? await detectTools(root);
-  if (tools.length === 0) {
-    if (!process.stdin.isTTY) {
+  let tools: SupportedTool[];
+  if (requestedTools !== undefined) {
+    tools = requestedTools;
+  } else {
+    const detectedTools = await detectTools(root);
+    if (process.stdin.isTTY) {
+      tools = await promptForTool(detectedTools);
+    } else if (detectedTools.length > 0) {
+      tools = detectedTools;
+    } else {
       throw new Error("No AI tools detected. Use --tool to specify: codewiki init --tool claude-code");
     }
-
-    tools = await promptForTool();
   }
 
   // Resolve dist/templates/ from import.meta.dirname at runtime.

@@ -49,6 +49,13 @@ describe("detectTools", () => {
     await expect(detectTools(root)).resolves.toEqual(["claude-code", "codex"]);
   });
 
+  test("does not detect codex from a plain .codex file", async () => {
+    const root = await makeTempRoot();
+    await writeFile(path.join(root, ".codex"), "not a directory", "utf8");
+
+    await expect(detectTools(root)).resolves.toEqual([]);
+  });
+
   test("returns an empty list for an unmarked directory", async () => {
     const root = await makeTempRoot();
 

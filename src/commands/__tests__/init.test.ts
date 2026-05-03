@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -73,6 +73,31 @@ test("prompt accepts comma-separated numeric selections", async () => {
   expect(output).toContain("opencode adapter:");
   expect(existsSync(path.join(root, ".claude/skills/codewiki-ingest/SKILL.md"))).toBe(true);
   expect(existsSync(path.join(root, ".agents/skills/codewiki-ingest/SKILL.md"))).toBe(true);
+});
+
+test("prompts in TTY mode even when tools were already detected", async () => {
+  const question = vi.fn().mockResolvedValue("3");
+  vi.doMock("node:readline/promises", () => ({
+    createInterface: () => ({
+      question,
+      close: vi.fn()
+    })
+  }));
+
+  Object.defineProperty(process.stdin, "isTTY", { configurable: true, value: true });
+
+  const root = await makeTempRoot();
+  await mkdir(path.join(root, ".codewiki"));
+  await mkdir(path.join(root, ".codex"));
+  const { initCommand } = await import("../init.js");
+
+  const output = await initCommand({ root, args: ["--name", "update-demo"] });
+
+  expect(question).toHaveBeenCalledOnce();
+  expect(question.mock.calls[0]?.[0]).toContain("Detected:");
+  expect(question.mock.calls[0]?.[0]).toContain("codex");
+  expect(output).toContain("copilot adapter:");
+  expect(output).not.toContain("codex adapter:");
 });
 
 test("prompt accepts A for all tools", async () => {
