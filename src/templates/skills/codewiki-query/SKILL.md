@@ -17,15 +17,19 @@ matched wiki pages. Treat the wiki as the primary knowledge layer between the us
 - Treat `$ARGUMENTS` as the user question.
 - If the question is missing or unclear, ask for the exact question before searching.
 
-## Step 2: Read the wiki index first
-- Read `wiki/index.md` before anything else.
+## Step 2: Resolve and orient in the wiki
+- Read `.codewiki/config.yml` if it exists.
+- Use `wiki.path` as the wiki root when present; otherwise use `wiki/`.
+- Read `SCHEMA.md` from the resolved wiki root when it exists.
+- Read `index.md` from the resolved wiki root before anything else.
+- Read recent entries from `log.md` in the resolved wiki root.
 - Use the index to identify candidate entity, decision, lesson, issue, and source pages.
-- Read `wiki/_backlinks.json` to identify high-importance pages. Pages with many backlinks are more likely to contain authoritative answers.
+- Read `_backlinks.json` from the resolved wiki root to identify high-importance pages. Pages with many backlinks are more likely to contain authoritative answers.
 
 ## Step 3: Search for relevant pages
-- Use `Grep` on the wiki for keywords, aliases, file names, and adjacent concepts from the question.
+- Use `Grep` under the resolved wiki root for keywords, aliases, file names, and adjacent concepts from the question.
 - Use `Glob` to expand from promising matches into the specific markdown pages that matter.
-- Use `wiki/_backlinks.json` to prioritize pages with higher backlink counts when multiple pages match the query.
+- Use `_backlinks.json` from the resolved wiki root to prioritize pages with higher backlink counts when multiple pages match the query.
 - Prefer a small set of high-signal pages over broad, noisy retrieval.
 
 ## Step 4: Read matched pages

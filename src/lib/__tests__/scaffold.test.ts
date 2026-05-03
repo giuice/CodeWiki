@@ -28,30 +28,38 @@ afterEach(async () => {
 });
 
 describe("scaffoldProject", () => {
-  test("creates wiki index, log, and backlinks files", async () => {
+  test("creates wiki schema, index, log, and backlinks files", async () => {
     const root = await makeTempRoot();
 
     await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
 
+    await expect(existsAt(root, "wiki/SCHEMA.md")).resolves.toBe(true);
     await expect(existsAt(root, "wiki/index.md")).resolves.toBe(true);
     await expect(existsAt(root, "wiki/log.md")).resolves.toBe(true);
     await expect(existsAt(root, "wiki/_backlinks.json")).resolves.toBe(true);
   });
 
-  test("creates all wiki content directories plus raw and tasks", async () => {
+  test("creates all wiki content directories plus wiki raw and codewiki tasks", async () => {
     const root = await makeTempRoot();
 
     await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
 
     for (const relativePath of [
       ".codewiki/hooks",
+      ".codewiki/tasks",
+      "wiki/raw/articles",
+      "wiki/raw/papers",
+      "wiki/raw/transcripts",
+      "wiki/raw/specs",
+      "wiki/raw/assets",
       "wiki/entities",
       "wiki/decisions",
+      "wiki/concepts",
+      "wiki/comparisons",
       "wiki/lessons",
       "wiki/issues",
       "wiki/sources",
-      "raw",
-      "tasks"
+      "wiki/queries"
     ]) {
       await expect(existsAt(root, relativePath)).resolves.toBe(true);
     }
@@ -79,20 +87,23 @@ describe("scaffoldProject", () => {
     await scaffoldProject({ force: false, projectName: "demo", root, tools: [] });
 
     await expect(existsAt(root, ".codewiki/adapters")).resolves.toBe(false);
-    expect(await readFile(path.join(root, ".codewiki/config.yml"), "utf8")).toMatch(/^tools: \[\]$/m);
+    const config = await readFile(path.join(root, ".codewiki/config.yml"), "utf8");
+    expect(config).toMatch(/^tools: \[\]$/m);
+    expect(config).toContain('raw_path: "wiki/raw/"');
+    expect(config).toContain('tasks_path: ".codewiki/tasks/"');
   });
 
   test("reports created, skipped, and replaced based on actual file state", async () => {
     const root = await makeTempRoot();
 
     const created = await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
-    expect(created.find((entry) => entry.path === "tasks")?.action).toBe("created");
+    expect(created.find((entry) => entry.path === ".codewiki/tasks")?.action).toBe("created");
     expect(created.find((entry) => entry.path === ".codewiki/config.yml")?.action).toBe("created");
 
     const skipped = await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
-    expect(skipped.find((entry) => entry.path === "tasks")).toEqual({
+    expect(skipped.find((entry) => entry.path === ".codewiki/tasks")).toEqual({
       action: "skipped",
-      path: "tasks",
+      path: ".codewiki/tasks",
       reason: "exists"
     });
     expect(skipped.find((entry) => entry.path === ".codewiki/config.yml")).toEqual({

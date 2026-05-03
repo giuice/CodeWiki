@@ -17,7 +17,7 @@ current codebase. Default to the two-phase parent-task then sub-task interaction
 ## Step 1: Resolve the task directory
 - Read `.codewiki/config.yml` if it exists.
 - Use `wiki.tasks_path` as the PRD/task directory when present.
-- If `wiki.tasks_path` is missing, use `tasks/`.
+- If `wiki.tasks_path` is missing, use `.codewiki/tasks/`.
 
 ## Step 2: Resolve the PRD
 - Treat `$ARGUMENTS` as the PRD path.

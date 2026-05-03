@@ -12,18 +12,22 @@ instead of silently drifting out of sync with the project.
 </purpose>
 
 <process>
-## Step 1: Load the wiki catalog
-- Read `wiki/index.md` first.
-- Glob `wiki/**/*.md` to inventory every wiki page currently present.
-- Read `wiki/_backlinks.json` to identify high-importance pages (many backlinks) versus orphaned pages (zero backlinks).
+## Step 1: Resolve and load the wiki catalog
+- Read `.codewiki/config.yml` if it exists.
+- Use `wiki.path` as the wiki root when present; otherwise use `wiki/`.
+- Read `SCHEMA.md` from the resolved wiki root when it exists.
+- Read `index.md` from the resolved wiki root first.
+- Read recent entries from `log.md` in the resolved wiki root.
+- Glob all markdown files under the resolved wiki root to inventory every wiki page currently present.
+- Read `_backlinks.json` from the resolved wiki root to identify high-importance pages (many backlinks) versus orphaned pages (zero backlinks).
 
 ## Step 2: Detect contradictions
 - Look for conflicting claims about the same entity, decision, issue status, or file ownership.
 - Report the conflicting pages and the statements that disagree.
 
 ## Step 3: Detect orphaned pages
-- Find pages that exist under `wiki/` but are not listed in `wiki/index.md`.
-- Cross-reference with `wiki/_backlinks.json`: pages with zero backlinks and missing index coverage are strong orphan candidates.
+- Find pages that exist under the resolved wiki root but are not listed in its `index.md`.
+- Cross-reference with `_backlinks.json` from the resolved wiki root: pages with zero backlinks and missing index coverage are strong orphan candidates.
 - Flag each orphan with its path and likely category.
 
 ## Step 4: Detect stale content

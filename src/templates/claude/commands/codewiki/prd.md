@@ -9,7 +9,7 @@ argument-hint: <feature-description>
 <purpose>
 Turn a feature idea into a concrete Product Requirements Document that fits the current codebase.
 Use the existing repository and wiki as context, preserve the original clarifying-question workflow,
-and support both mentorship mode and fast mode.
+and default to interactive mode and support `--fast` for one-pass drafting.
 </purpose>
 
 <process>
@@ -17,19 +17,25 @@ and support both mentorship mode and fast mode.
 - Treat `$ARGUMENTS` as the feature description.
 - If the feature description is missing, ask the user to describe the feature first.
 
-## Step 2: Choose the interaction mode
-- If `$ARGUMENTS` contains `--fast` or `fast`, switch to fast mode.
-- Otherwise default to mentorship mode.
-- In mentorship mode, ask clarifying questions before writing the PRD. Use lettered or numbered
+## Step 2: Resolve the task directory
+- Read `.codewiki/config.yml` if it exists.
+- Use `wiki.tasks_path` as the PRD/task directory when present.
+- If `wiki.tasks_path` is missing, use `.codewiki/tasks/`.
+- Create the directory if it does not exist.
+
+## Step 5: Choose the interaction mode
+- If `` contains `--fast`, switch to fast mode.
+- Otherwise default to interactive mode.
+- In interactive mode, ask clarifying questions before writing the PRD. Use lettered or numbered
   options so the user can answer quickly.
 
-## Step 3: Research current state with subagents
+## Step 5: Research current state with subagents
 - Use `Task` to spawn parallel research agents:
   1. one agent reads architecture, schema, and project docs
   2. one agent searches the codebase for related features, patterns, and reusable modules
 - Synthesize their findings before drafting the PRD.
 
-## Step 4: Ask clarifying questions in mentorship mode
+## Step 5: Ask clarifying questions in interactive mode
 - Focus on the what and why:
   - problem or goal
   - target user
@@ -56,7 +62,7 @@ and support both mentorship mode and fast mode.
 - Keep requirements explicit, unambiguous, and implementation-ready without junior-developer framing.
 
 ## Step 6: Save the PRD
-- Save the document as `tasks/[n]-prd-[feature-name].md`.
+- Save the document as `[task-directory]/[n]-prd-[feature-name].md`.
 - Use a zero-padded 4-digit sequence such as `0001-prd-example-feature.md`.
 - If a filename collision exists, increment the sequence rather than overwriting.
 

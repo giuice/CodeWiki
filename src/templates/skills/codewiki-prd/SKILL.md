@@ -21,7 +21,7 @@ Use the existing repository and wiki as context. Default to an interactive clari
 ## Step 2: Resolve the task directory
 - Read `.codewiki/config.yml` if it exists.
 - Use `wiki.tasks_path` as the PRD/task directory when present.
-- If `wiki.tasks_path` is missing, use `tasks/`.
+- If `wiki.tasks_path` is missing, use `.codewiki/tasks/`.
 - Create the directory if it does not exist.
 
 ## Step 3: Choose the interaction mode

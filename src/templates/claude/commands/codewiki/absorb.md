@@ -17,13 +17,17 @@ changed files, not from raw documents. Preserve the human approval boundary at a
 - If the working tree has uncommitted changes, also check `git diff --cached` and plain `git diff`.
 - List the changed files and summarize what changed semantically, not line-by-line.
 
-## Step 2: Load wiki state
-- Read `wiki/index.md` first.
-- Read `wiki/_backlinks.json` to see which pages are most referenced and interconnected.
-- Use `Glob` on `wiki/**/*.md` to inventory the full wiki before proposing edits.
+## Step 2: Resolve and load wiki state
+- Read `.codewiki/config.yml` if it exists.
+- Use `wiki.path` as the wiki root when present; otherwise use `wiki/`.
+- Read `SCHEMA.md` from the resolved wiki root when it exists.
+- Read `index.md` from the resolved wiki root first.
+- Read recent entries from `log.md` in the resolved wiki root.
+- Read `_backlinks.json` from the resolved wiki root to see which pages are most referenced and interconnected.
+- Use `Glob` under the resolved wiki root to inventory the full wiki before proposing edits.
 
 ## Step 3: Cross-reference changes against wiki
-- For each changed file, search the wiki for existing pages that mention it or the concepts it affects.
+- For each changed file, search the resolved wiki root for existing pages that mention it or the concepts it affects.
 - Identify three buckets:
   - existing pages that need updating
   - new entities, decisions, lessons, or issues implied by the changes
@@ -39,20 +43,20 @@ changed files, not from raw documents. Preserve the human approval boundary at a
 - Flag thin pages that should be expanded while this change is fresh.
 
 ## Step 6: Update backlinks
-- After proposing changes, rebuild `wiki/_backlinks.json` by scanning all wiki pages for `[[wikilink]]` references.
+- After proposing changes, rebuild `_backlinks.json` by scanning all wiki pages for `[[wikilink]]` references.
 - Use the structure `{ "page-path": ["referencing-page-1", "referencing-page-2"] }`.
 
 ## Step 7: Propose changes
 - Present a concise proposal covering:
   - pages to create
   - pages to update
-  - backlink changes needed in `wiki/_backlinks.json`
+  - backlink changes needed in `_backlinks.json`
   - contradictions or stale claims found
 - Wait for user approval before writing any wiki files.
 
 ## Step 8: Write approved updates
 - After approval, create or update only the approved pages using `.codewiki/templates/`.
-- Update `wiki/index.md` and `wiki/_backlinks.json` so the wiki stays navigable.
+- Update `index.md`, `log.md`, and `_backlinks.json` so the wiki stays navigable.
 
 ## Step 9: Guardrails
 - Never write to `wiki/` without explicit approval in the current conversation.

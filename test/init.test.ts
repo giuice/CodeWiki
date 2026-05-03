@@ -101,7 +101,10 @@ test("local npm tarball works through npx in a fresh project", () => {
     const files = new Set(listRecursive(cwd));
     for (const rel of [
       ".codewiki/config.yml",
+      ".codewiki/tasks",
       ".codewiki/hooks/pre-wiki-context.sh",
+      "wiki/SCHEMA.md",
+      "wiki/raw/specs",
       "wiki/index.md",
       ".claude/skills/codewiki-ingest/SKILL.md",
       ".agents/skills/codewiki-ingest/SKILL.md",
@@ -129,6 +132,7 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   const files = new Set(listRecursive(cwd));
   for (const rel of [
     ".codewiki/config.yml",
+    ".codewiki/tasks",
     ".codewiki/hooks",
     ".codewiki/hooks/post-verify.sh",
     ".codewiki/hooks/pre-wiki-context.sh",
@@ -142,14 +146,22 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
     ".claude/agents/codewiki-wiki-updater.md",
     ".claude/settings.json",
     "CLAUDE.md",
-    "raw",
+    "wiki/SCHEMA.md",
+    "wiki/raw/articles",
+    "wiki/raw/papers",
+    "wiki/raw/transcripts",
+    "wiki/raw/specs",
+    "wiki/raw/assets",
     "wiki/index.md",
     "wiki/log.md",
     "wiki/entities",
     "wiki/decisions",
+    "wiki/concepts",
+    "wiki/comparisons",
     "wiki/lessons",
     "wiki/issues",
-    "wiki/sources"
+    "wiki/sources",
+    "wiki/queries"
   ]) {
     assert.equal(files.has(rel), true, `missing ${rel}`);
   }
@@ -163,10 +175,12 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   }
   assert.match(config, /name: "demo"/);
   assert.match(config, /^tools: \[\]$/m);
-  assert.match(config, /tasks_path: "tasks\/"/);
+  assert.match(config, /raw_path: "wiki\/raw\/"/);
+  assert.match(config, /tasks_path: "\.codewiki\/tasks\/"/);
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/entity.md"), "utf8"), /file_hashes:/);
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/lesson.md"), "utf8"), /verified_by: human/);
   assert.match(readFileSync(path.join(cwd, ".codewiki/templates/source-summary.md"), "utf8"), /approved: false/);
+  assert.match(readFileSync(path.join(cwd, "wiki/SCHEMA.md"), "utf8"), /Raw sources: `wiki\/raw\/`/);
 
   const settings = JSON.parse(readFileSync(path.join(cwd, ".claude/settings.json"), "utf8")) as {
     hooks: { PreToolUse: Array<unknown>; PostToolUse: Array<unknown> };

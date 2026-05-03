@@ -55,9 +55,12 @@ describe("COP-02 and COP-03: Copilot instructions preserve shared skill and wiki
     expect(content).toContain("sessionEnd");
     expect(content).toContain("cleanup-only");
     expect(content).toContain("wiki/_backlinks.json");
+    expect(content).toContain("wiki/SCHEMA.md");
+    expect(content).toContain("wiki/raw/");
+    expect(content).toContain(".codewiki/tasks/");
     expect(content).toContain(".codewiki/config.yml");
     expect(content).toContain("not query-time RAG");
-    expect(content).toContain("New external source in `raw/`");
+    expect(content).toContain("New external source in `wiki/raw/`");
     expect(content).toContain("After a substantial coding session");
     expect(content).toContain("Hooks provide context and change signals");
     expect(content).not.toContain(".github/skills");

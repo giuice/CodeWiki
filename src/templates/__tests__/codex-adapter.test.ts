@@ -61,6 +61,7 @@ describe("CODEX-02 and CODEX-03: Codex agents and instructions preserve CodeWiki
       expect(content).toContain("developer_instructions =");
       expect(content).toContain("wiki/index.md");
       expect(content).toContain("wiki/log.md");
+      expect(content).toContain("wiki/SCHEMA.md");
     }
 
     expect(updater.toLowerCase()).toContain("approval");
@@ -75,9 +76,12 @@ describe("CODEX-02 and CODEX-03: Codex agents and instructions preserve CodeWiki
     expect(content).toContain("PostToolUse");
     expect(content).toMatch(/loop-safe `?Stop`?/);
     expect(content).toContain("wiki/_backlinks.json");
+    expect(content).toContain("wiki/SCHEMA.md");
+    expect(content).toContain("wiki/raw/");
+    expect(content).toContain(".codewiki/tasks/");
     expect(content).toContain(".codewiki/config.yml");
     expect(content).toContain("not query-time RAG");
-    expect(content).toContain("New external source in `raw/`");
+    expect(content).toContain("New external source in `wiki/raw/`");
     expect(content).toContain("After a substantial coding session");
     expect(content).toContain("Hooks provide context and change signals");
   });

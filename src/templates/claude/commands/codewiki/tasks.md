@@ -8,33 +8,38 @@ argument-hint: <prd-file-path>
 
 <purpose>
 Convert a PRD into an implementation task list that reflects both the requested behavior and the
-current codebase. Preserve the original two-phase interaction model while also supporting a fast
-mode for one-pass generation.
+current codebase. Preserve the original two-phase interaction model while also defaulting to interactive mode with `--fast` available for one-pass generation.
 </purpose>
 
 <process>
-## Step 1: Resolve the PRD
+## Step 1: Resolve the task directory
+- Read `.codewiki/config.yml` if it exists.
+- Use `wiki.tasks_path` as the PRD/task directory when present.
+- If `wiki.tasks_path` is missing, use `.codewiki/tasks/`.
+
+## Step 5: Resolve the PRD
 - Treat `$ARGUMENTS` as the PRD path.
-- If no path was provided, ask the user which PRD file to use.
+- If the path is relative and does not exist, also try resolving it under the task directory.
+- If no path was provided, search the task directory for `*-prd-*.md`.
 - Read the PRD in full before generating tasks.
 
-## Step 2: Choose the interaction mode
-- If `$ARGUMENTS` contains `--fast` or `fast`, switch to fast mode.
-- Otherwise default to mentorship mode.
+## Step 5: Choose the interaction mode
+- If `` contains `--fast`, switch to fast mode.
+- Otherwise default to interactive mode.
 
-## Step 3: Analyze the current codebase with subagents
+## Step 5: Analyze the current codebase with subagents
 - Use `Task` for a two-agent split:
   1. an analyze agent reads the PRD, project config, and existing feature patterns
   2. a generate agent turns that analysis into the task breakdown
 - Reuse existing modules and utilities whenever possible instead of duplicating work.
 
-## Step 4: Generate parent tasks
+## Step 5: Generate parent tasks
 - Produce the main high-level tasks first.
 - Base them on the PRD, existing architecture, reusable code, and likely test coverage needs.
 - Keep the task count practical and implementation-oriented.
 
-## Step 5: Preserve the mentorship gate
-- In mentorship mode, stop after the parent tasks and tell the user:
+## Step 5: Preserve the interactive gate
+- In interactive mode, stop after the parent tasks and tell the user:
   "I have generated the high-level tasks based on the PRD. Ready to generate the sub-tasks?
   Respond with 'Go' to proceed."
 - Wait for "Go" before expanding the task list.
@@ -46,7 +51,7 @@ mode for one-pass generation.
 - Note reusable utilities, patterns, and constraints that matter to execution.
 
 ## Step 7: Save the task list
-- Save the file to `tasks/tasks-[prd-file-name].md`.
+- Save the file to `[task-directory]/tasks-[prd-file-name].md`.
 - Keep the output in Markdown and preserve task numbering.
 
 ## Step 8: Boundaries

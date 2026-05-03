@@ -95,5 +95,13 @@ export function formatSectionedReport(projectName: string, sections: ReportSecti
     .join(", ");
 
   lines.push(`Summary: ${summary || "0 changes"}`);
+  lines.push(
+    "",
+    pc.bold("Next steps:"),
+    "  1. Put source docs in wiki/raw/articles/ or wiki/raw/specs/",
+    "  2. Ask your agent to use codewiki-ingest on the source file",
+    "  3. Ask wiki-grounded questions with codewiki-query",
+    "  4. After substantial code work, run codewiki-absorb"
+  );
   return lines.join("\n");
 }

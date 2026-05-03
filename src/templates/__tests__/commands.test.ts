@@ -71,9 +71,11 @@ describe("CMD-02: codewiki-query preserves the grounded search workflow", () => 
     expect(content).toContain("<process>");
   });
 
-  test("codewiki-query references wiki/index.md for grounded search", async () => {
+  test("codewiki-query resolves wiki root and reads index for grounded search", async () => {
     const content = await readSkill("query");
-    expect(content).toContain("wiki/index.md");
+    expect(content).toContain("wiki.path");
+    expect(content).toContain("Read `index.md` from the resolved wiki root");
+    expect(content).toContain("SCHEMA.md");
   });
 });
 
@@ -106,7 +108,7 @@ describe("CMD-04: codewiki-prd preserves task-driven PRD workflow checks", () =>
     expect(content).toContain("--fast");
     expect(content).toContain("interactive mode");
     expect(content).toContain("wiki.tasks_path");
-    expect(content).toContain("tasks/");
+    expect(content).toContain(".codewiki/tasks/");
     expect(content.toLowerCase()).not.toContain("mentorship");
   });
 
@@ -130,6 +132,7 @@ describe("CMD-05: codewiki-tasks preserves task generation workflow checks", () 
     expect(content).toContain("--fast");
     expect(content).toContain("interactive mode");
     expect(content).toContain("wiki.tasks_path");
+    expect(content).toContain(".codewiki/tasks/");
     expect(content).toContain("search the task directory for `*-prd-*.md`");
     expect(content.toLowerCase()).not.toContain("mentorship");
   });
@@ -154,6 +157,7 @@ describe("CMD-06: codewiki-process preserves process workflow checks", () => {
     expect(content).toContain("--fast");
     expect(content).toContain("interactive mode");
     expect(content).toContain("wiki.tasks_path");
+    expect(content).toContain(".codewiki/tasks/");
     expect(content).toContain("search the task directory for `tasks-*.md`");
     expect(content.toLowerCase()).not.toContain("mentorship");
   });

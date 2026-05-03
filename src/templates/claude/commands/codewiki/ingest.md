@@ -15,15 +15,22 @@ until the user approves the proposal.
 <process>
 ## Step 1: Resolve the source
 - Treat `$ARGUMENTS` as the source file path.
+- Read `.codewiki/config.yml` if it exists.
+- Use `wiki.path` as the wiki root when present; otherwise use `wiki/`.
+- Use `wiki.raw_path` as the raw source root when present; otherwise use `wiki/raw/`.
 - If no path was provided, ask the user which raw file to ingest.
+- If the user provides a relative path that does not exist, also try resolving it under the raw source root.
+- Default raw source locations are `wiki/raw/articles/`, `wiki/raw/papers/`, `wiki/raw/transcripts/`, `wiki/raw/specs/`, and `wiki/raw/assets/`.
 - Read the source and note what kind of material it is (notes, article, transcript, spec, diff).
 
-## Step 2: Load current wiki state
-- Read `wiki/index.md` first.
-- Use `Glob` and `Grep` to find existing wiki pages that match the source topic.
+## Step 2: Orient in the current wiki
+- Read `SCHEMA.md` from the resolved wiki root when it exists.
+- Read `index.md` from the resolved wiki root before proposing any page changes.
+- Read recent entries from `log.md` in the resolved wiki root.
+- Read `_backlinks.json` from the resolved wiki root to understand which pages are most referenced and interconnected.
+- Use `Glob` and `Grep` under the resolved wiki root to find existing wiki pages that match the source topic.
 - Read any relevant pages so you do not duplicate or overwrite existing knowledge blindly.
 - Read templates from `.codewiki/templates/` before creating any new page.
-- Read `wiki/_backlinks.json` to understand which pages are most referenced and interconnected.
 
 ## Step 3: Extract candidate knowledge
 - Pull out candidate entities, decisions, lessons, issues, source summaries, and useful cross-links.
@@ -39,19 +46,19 @@ until the user approves the proposal.
 - Present a concise proposal before making edits:
   - pages to create
   - pages to update
-  - `wiki/index.md` entries to add or revise
+  - index entries to add or revise
   - contradictions, gaps, and open questions
 - Wait for user approval before writing any file.
 
 ## Step 6: Write approved updates
 - After approval, create or update only the approved pages.
 - Use `.codewiki/templates/` as the default structure for new pages.
-- Update `wiki/index.md` so new material is discoverable.
-- Update `wiki/_backlinks.json` by scanning all modified and new pages for `[[wikilink]]` references. Add new backlink entries; do not remove existing ones unless a link was actually deleted.
+- Update `index.md` in the resolved wiki root so new material is discoverable.
+- Update `_backlinks.json` in the resolved wiki root by scanning all modified and new pages for `[[wikilink]]` references. Add new backlink entries; do not remove existing ones unless a link was actually deleted.
 - End with a short summary of what changed and what still needs human review.
 
 ## Step 7: Guardrails
-- Never mutate `wiki/` without explicit approval in the current conversation.
+- Never mutate the resolved wiki root without explicit approval in the current conversation.
 - Never assume a source is correct when it conflicts with already-verified wiki content.
 - Never create commits automatically; the user controls git operations.
 </process>

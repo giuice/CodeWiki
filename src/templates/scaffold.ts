@@ -1,5 +1,5 @@
 import type { SupportedTool } from "../core/types.js";
-import { configTemplate, decisionTemplate, entityTemplate, indexTemplate, issueTemplate, lessonTemplate, logTemplate, sourceSummaryTemplate } from "./page-templates.js";
+import { configTemplate, decisionTemplate, entityTemplate, indexTemplate, issueTemplate, lessonTemplate, logTemplate, schemaTemplate, sourceSummaryTemplate } from "./page-templates.js";
 
 export interface ScaffoldFile {
   path: string;
@@ -10,13 +10,20 @@ export function scaffoldDirectories(_tools: readonly SupportedTool[]): string[] 
   return [
     ".codewiki/templates",
     ".codewiki/hooks",
-    "raw",
-    "tasks",
+    ".codewiki/tasks",
+    "wiki/raw/articles",
+    "wiki/raw/papers",
+    "wiki/raw/transcripts",
+    "wiki/raw/specs",
+    "wiki/raw/assets",
     "wiki/entities",
     "wiki/decisions",
+    "wiki/concepts",
+    "wiki/comparisons",
     "wiki/lessons",
     "wiki/issues",
-    "wiki/sources"
+    "wiki/sources",
+    "wiki/queries"
   ];
 }
 
@@ -28,6 +35,7 @@ export function scaffoldFiles(projectName: string, _tools: readonly SupportedToo
     { path: ".codewiki/templates/lesson.md", content: lessonTemplate },
     { path: ".codewiki/templates/issue.md", content: issueTemplate },
     { path: ".codewiki/templates/source-summary.md", content: sourceSummaryTemplate },
+    { path: "wiki/SCHEMA.md", content: schemaTemplate(projectName) },
     { path: "wiki/index.md", content: indexTemplate(projectName) },
     { path: "wiki/log.md", content: logTemplate },
     { path: "wiki/_backlinks.json", content: "{}\n" }

@@ -25,7 +25,7 @@ Usage:
   codewiki <command> [args]
 
 Commands:
-  init     Create .codewiki/, raw/, and wiki/ scaffold
+  init     Create .codewiki/ and wiki/ scaffold
 
 Global:
   --help   Show this help

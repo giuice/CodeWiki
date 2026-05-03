@@ -5,7 +5,8 @@ This project uses [CodeWiki](https://github.com/user/codewiki) for AI-maintained
 CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdown wiki that compounds project knowledge across sessions. Use it as durable project memory: read/query the wiki before answering questions that depend on project history, and keep the wiki current when sources or substantial code changes add durable knowledge.
 
 ### Operating Flow
-- New external source in `raw/` or user asks to process docs: use `codewiki-ingest`. Raw sources are immutable; wiki edits are proposed for review.
+- At session start for wiki work: read `.codewiki/config.yml`, `wiki/SCHEMA.md`, `wiki/index.md`, and recent `wiki/log.md` before ingest/query/lint/absorb.
+- New external source in `wiki/raw/` or user asks to process docs: use `codewiki-ingest`. Raw sources are immutable; wiki edits are proposed for review.
 - User asks how the project works, why a decision was made, or where knowledge lives: use `codewiki-query` and cite wiki pages rather than inventing answers.
 - New feature or larger change: use `codewiki-prd`, then `codewiki-tasks`, then `codewiki-process` to work one sub-task at a time.
 - After a substantial coding session: run `codewiki-absorb` deliberately to capture durable lessons, entities, decisions, and issues from recent changes.
@@ -27,7 +28,9 @@ Claude Code discovers these from `.claude/skills/codewiki-<name>/SKILL.md` and c
 ### Wiki Location
 - Wiki pages: `wiki/`
 - Backlinks index: `wiki/_backlinks.json`
-- Raw sources: `raw/`
+- Schema: `wiki/SCHEMA.md`
+- Raw sources: `wiki/raw/`
+- PRD/task workflow: `.codewiki/tasks/`
 - Config: `.codewiki/config.yml`
 
 ### Hooks

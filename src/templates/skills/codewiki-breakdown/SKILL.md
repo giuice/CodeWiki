@@ -13,13 +13,17 @@ gaps get filled first.
 </purpose>
 
 <process>
-## Step 1: Load backlink index
-- Read `wiki/_backlinks.json` first.
-- If it is missing or empty, scan `wiki/**/*.md` for `[[wikilink]]` references and build the backlink index before continuing.
+## Step 1: Resolve and orient in the wiki
+- Read `.codewiki/config.yml` if it exists.
+- Use `wiki.path` as the wiki root when present; otherwise use `wiki/`.
+- Read `SCHEMA.md` from the resolved wiki root when it exists.
+- Read `index.md` from the resolved wiki root.
+- Read recent entries from `log.md` in the resolved wiki root.
 
-## Step 2: Load wiki inventory
-- Read `wiki/index.md`.
-- Use `Glob` on `wiki/**/*.md` to inventory all existing wiki pages.
+## Step 2: Load backlink index and wiki inventory
+- Read `_backlinks.json` from the resolved wiki root.
+- If it is missing or empty, scan markdown files under the resolved wiki root for `[[wikilink]]` references and build the backlink index before continuing.
+- Use `Glob` under the resolved wiki root to inventory all existing wiki pages.
 
 ## Step 3: Find undocumented references
 - For each `[[wikilink]]` target surfaced by the backlink index, check whether a corresponding wiki page exists.
@@ -31,7 +35,7 @@ gaps get filled first.
 
 ## Step 5: Rank by importance
 - Sort candidates using this order:
-  - backlink count from `wiki/_backlinks.json`
+  - backlink count from `_backlinks.json`
   - number of wiki pages mentioning the entity
   - whether the entity is also visible in code
 
@@ -45,8 +49,9 @@ gaps get filled first.
 
 ## Step 7: Create approved pages
 - For each approved candidate, create the page using `.codewiki/templates/`.
-- Update `wiki/index.md` with the new entries.
-- Update `wiki/_backlinks.json` after the new pages and links exist.
+- Update `index.md` in the resolved wiki root with the new entries.
+- Update `_backlinks.json` in the resolved wiki root after the new pages and links exist.
+- Append a concise breakdown entry to `log.md` in the resolved wiki root.
 
 ## Step 8: Guardrails
 - Never create pages without approval.

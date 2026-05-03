@@ -60,12 +60,14 @@ describe("OC-04: OpenCode instructions template stays concise and practical", ()
 
     expect(content).toContain(".agents/skills/codewiki-<name>/SKILL.md");
     expect(content).toContain("wiki/");
-    expect(content).toContain("raw/");
+    expect(content).toContain("wiki/raw/");
+    expect(content).toContain("wiki/SCHEMA.md");
+    expect(content).toContain(".codewiki/tasks/");
     expect(content).toContain(".codewiki/config.yml");
     expect(content).toContain("wiki/_backlinks.json");
     expect(content.toLowerCase()).toContain("approval");
     expect(content).toContain("not query-time RAG");
-    expect(content).toContain("New external source in `raw/`");
+    expect(content).toContain("New external source in `wiki/raw/`");
     expect(content).toContain("After a substantial coding session");
     expect(content).toContain("Hooks provide context and change signals");
   });

@@ -28,7 +28,7 @@ flowchart TD
 
   subgraph Feed["<b>2. FEED KNOWLEDGE</b>"]
     direction LR
-    F1["Drop docs into raw/"] --> F2["codewiki-ingest<br/>Propose source summaries + wiki updates"]
+    F1["Drop docs into wiki/raw/"] --> F2["codewiki-ingest<br/>Propose source summaries + wiki updates"]
     F2 --> F3{"Approve wiki writes?"}
     F3 -- "Yes" --> F4["Write wiki pages,<br/>index, log, backlinks"]
     F3 -- "No" --> F5["Keep raw docs only"]
@@ -84,7 +84,7 @@ flowchart TD
 **Step by step:**
 
 1. **Setup**: Run `npx @giuice/codewiki init` once. It scaffolds the wiki and installs the currently shipped integration assets for the selected tool set.
-2. **Feed knowledge**: Drop existing docs into `raw/` and run `codewiki-ingest` to digest them into wiki pages. The agent proposes; you approve.
+2. **Feed knowledge**: Drop existing docs into `wiki/raw/` and run `codewiki-ingest` to digest them into wiki pages. The agent proposes; you approve.
 3. **Plan a feature**: Run `codewiki-prd` with a feature idea. The agent drafts the PRD, then `codewiki-tasks` turns it into a task breakdown.
 4. **Build**: Run `codewiki-process`. The agent works through tasks one sub-task at a time. `pre-wiki-context.sh` injects relevant wiki context before edits, and `post-verify.sh` emits structured change context so the wiki-updater flow can propose targeted wiki updates.
 5. **Compound**: After a meaningful coding session, use `codewiki-absorb` to extract lessons, entity updates, and issues from recent diffs. Then run `codewiki-breakdown` periodically to create missing high-signal pages from repeated references.
@@ -93,7 +93,7 @@ flowchart TD
 ### Recommended operating order
 
 1. Run `npx @giuice/codewiki init` once per repository.
-2. Put existing source material in `raw/` and run `codewiki-ingest` until the wiki reflects the project's current state.
+2. Put existing source material in `wiki/raw/` and run `codewiki-ingest` until the wiki reflects the project's current state.
 3. For new work, run `codewiki-prd` and then `codewiki-tasks` before implementation.
 4. Execute the work through `codewiki-process` so the task list, verification, commits, and hook-driven wiki proposals stay aligned.
 5. Review every wiki proposal produced by the post-verify flow. Nothing should be written to `wiki/` without explicit approval.
@@ -105,7 +105,7 @@ flowchart TD
 ```mermaid
 flowchart TB
   subgraph Raw[Raw layer: human-curated source of truth]
-    R1[raw/*.md<br/>PRDs, notes, incidents, specs]
+    R1[wiki/raw/**<br/>PRDs, notes, incidents, specs]
   end
 
   subgraph Wiki[Wiki layer: LLM-written, human-approved]
@@ -150,17 +150,25 @@ project-root/
 │       ├── pre-wiki-context.sh
 │       ├── post-verify.sh
 │       └── session-end.sh
-├── raw/                              # Immutable human-curated source documents
-├── tasks/                            # Generated PRDs and task breakdowns
 ├── wiki/
+│   ├── SCHEMA.md
+│   ├── raw/                         # Immutable human-curated source documents
+│   │   ├── articles/
+│   │   ├── papers/
+│   │   ├── transcripts/
+│   │   ├── specs/
+│   │   └── assets/
 │   ├── index.md
 │   ├── log.md
 │   ├── _backlinks.json
 │   ├── entities/
 │   ├── decisions/
+│   ├── concepts/
+│   ├── comparisons/
 │   ├── lessons/
 │   ├── issues/
-│   └── sources/
+│   ├── sources/
+│   └── queries/
 └── (tool-specific integration files below)
 ```
 
@@ -229,9 +237,9 @@ codewiki init --name "My Project"
 npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 
 # 2. Invoke the installed skills by their canonical names inside your AI tool
-#    codewiki-ingest raw/api-redesign.md
+#    codewiki-ingest wiki/raw/specs/api-redesign.md
 #    codewiki-prd "add retry policy to API client"
-#    codewiki-tasks tasks/<prd-file>.md
+#    codewiki-tasks .codewiki/tasks/<prd-file>.md
 #    codewiki-process
 #    codewiki-absorb
 #    codewiki-breakdown
@@ -250,7 +258,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 
 | Command | What it does |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `raw/`, `tasks/`, `wiki/`, installs the eight Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running is safe; use `--force` to replace existing CodeWiki-managed sections. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs the eight Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running is safe; use `--force` to replace existing CodeWiki-managed sections. |
 
 This is the only CLI command. All other intelligence lives in the installed Skill files and shared scripts that your AI tool executes natively.
 
@@ -265,7 +273,7 @@ CodeWiki ships one `SKILL.md` per logical workflow. The invocation UI differs by
 | `codewiki-lint` | Health-check the wiki for contradictions, stale claims, missing links, or weak pages |
 | `codewiki-absorb` | Extract lessons, entities, and issues from recent code changes so each session compounds |
 | `codewiki-breakdown` | Find high-signal undocumented entities by backlink/reference count and propose new pages |
-| `codewiki-prd` | Draft a PRD through clarifying questions and save it under `tasks/` |
+| `codewiki-prd` | Draft a PRD through clarifying questions and save it under `.codewiki/tasks/` |
 | `codewiki-tasks` | Generate a task breakdown from a PRD with checklist structure |
 | `codewiki-process` | Work through tasks one sub-task at a time with verification and clean commit hygiene |
 
