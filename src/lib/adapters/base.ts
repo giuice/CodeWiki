@@ -15,7 +15,7 @@ export async function copyTemplateFile(
   if (existed && !force) {
     const existingContent = await readFile(targetPath, "utf8");
     if (existingContent === content) {
-      return { action: "skipped", path: targetPath, reason: "exists" };
+      return { action: "skipped", path: targetPath, reason: "up to date" };
     }
   }
 
