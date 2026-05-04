@@ -50,6 +50,8 @@ describe("COP-02 and COP-03: Copilot instructions preserve shared skill and wiki
     const content = await readTemplate("instructions.md");
 
     expect(content).toContain(".agents/skills/codewiki-<name>/SKILL.md");
+    expect(content).toContain(".github/agents/codewiki-wiki-updater.agent.md");
+    expect(content).toContain(".github/agents/codewiki-verifier.agent.md");
     expect(content).toContain(".github/hooks/codewiki-hooks.json");
     expect(content).toContain("agentStop");
     expect(content).toContain("sessionEnd");
@@ -69,5 +71,29 @@ describe("COP-02 and COP-03: Copilot instructions preserve shared skill and wiki
     expect(content).toContain("source_url");
     expect(content).toContain("wiki/queries/");
     expect(content).not.toContain(".github/skills");
+  });
+});
+
+describe("COP-04: Copilot custom agents preserve updater and verifier responsibilities", () => {
+  test("wiki-updater custom agent is approval-gated and grounded in CodeWiki paths", async () => {
+    const content = await readTemplate("agents/codewiki-wiki-updater.agent.md");
+
+    expect(content).toContain("name: codewiki-wiki-updater");
+    expect(content).toContain("description:");
+    expect(content).toContain("wiki/SCHEMA.md");
+    expect(content).toContain("wiki/_backlinks.json");
+    expect(content).toContain("Get explicit human approval before writing any file under `wiki/`");
+    expect(content).toContain("Do not create commits automatically");
+  });
+
+  test("verifier custom agent is read-only and checks required maintenance surfaces", async () => {
+    const content = await readTemplate("agents/codewiki-verifier.agent.md");
+
+    expect(content).toContain("name: codewiki-verifier");
+    expect(content).toContain("description:");
+    expect(content).toContain("Stay read-only");
+    expect(content).toContain("wiki/index.md");
+    expect(content).toContain("wiki/log.md");
+    expect(content).toContain("FRONTMATTER");
   });
 });

@@ -5,11 +5,12 @@ import { ensureDir, ensureInsideRoot, exists, readTextIfExists, relativePath } f
 import type { SupportedTool } from "../../core/types.js";
 import { mergeMarkerSection } from "../merge.js";
 import type { ReportEntry } from "../reporter.js";
-import { chmodExecutable, copyTemplateFile } from "./base.js";
+import { chmodExecutable, copyTemplateDir, copyTemplateFile } from "./base.js";
 import type { AdapterInstallOptions, ToolAdapter } from "./types.js";
 
 const GITHUB_HOOKS_DIR = ".github/hooks";
 const COPILOT_CODEWIKI_HOOKS_DIR = ".github/hooks/codewiki";
+const COPILOT_AGENTS_DIR = ".github/agents";
 const COPILOT_HOOKS_FILE = ".github/hooks/codewiki-hooks.json";
 const COPILOT_INSTRUCTIONS_FILE = ".github/copilot-instructions.md";
 
@@ -37,11 +38,19 @@ export class CopilotAdapter implements ToolAdapter {
 
     await Promise.all([
       ensureDir(options.root, GITHUB_HOOKS_DIR),
-      ensureDir(options.root, COPILOT_CODEWIKI_HOOKS_DIR)
+      ensureDir(options.root, COPILOT_CODEWIKI_HOOKS_DIR),
+      ensureDir(options.root, COPILOT_AGENTS_DIR)
     ]);
 
     const hookEntries = await this.copyHookWrappers(options);
     report.push(...(await this.applyHookPermissions(options, hookEntries)));
+    report.push(
+      ...(await this.copyAssetDirectory(
+        path.join(options.templateDir, "copilot", "agents"),
+        ensureInsideRoot(options.root, COPILOT_AGENTS_DIR),
+        options
+      ))
+    );
     report.push(await this.writeHooksConfig(options));
     report.push(await this.mergeInstructions(options));
 
@@ -67,6 +76,14 @@ export class CopilotAdapter implements ToolAdapter {
     }
 
     return entries;
+  }
+
+  private async copyAssetDirectory(
+    sourceDir: string,
+    targetDir: string,
+    options: AdapterInstallOptions
+  ): Promise<ReportEntry[]> {
+    return copyTemplateDir(sourceDir, targetDir, options.force, options.root);
   }
 
   private async applyHookPermissions(

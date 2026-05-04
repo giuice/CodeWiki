@@ -50,7 +50,20 @@ describe("HOOK-02: post-verify.sh exits 0 with empty/malformed JSON", () => {
     const content = await readHook("post-verify.sh");
     expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
     expect(content).toContain("END_CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain("codewiki-wiki-updater");
     expect(content).toContain("codewiki-absorb");
+  });
+
+  test("script emits topic candidates even before a matching entity page exists", () => {
+    const output = execSync(
+      `printf '%s' '{"file":"src/features/stable-master-pins.ts"}' | sh "${path.join(HOOKS_DIR, "post-verify.sh")}" 2>/dev/null`,
+      { encoding: "utf8", timeout: 5000 }
+    );
+
+    expect(output).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(output).toContain("Potential new topic candidates:");
+    expect(output).toContain("stable-master-pins");
+    expect(output).toContain("codewiki-wiki-updater");
   });
 });
 

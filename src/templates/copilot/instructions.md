@@ -1,6 +1,6 @@
 ## CodeWiki
 
-Copilot uses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree for CodeWiki skills, plus Copilot hooks installed under `.github/hooks/`.
+Copilot uses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree for CodeWiki skills, Copilot hooks installed under `.github/hooks/`, and custom agent profiles under `.github/agents/`.
 
 CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdown wiki that compounds project knowledge across sessions. Use it as durable project memory: read/query the wiki before answering questions that depend on project history, and keep the wiki current when sources or substantial code changes add durable knowledge.
 
@@ -43,6 +43,11 @@ CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdo
 - `.github/hooks/codewiki-hooks.json` wires `agentStop` as the meaningful post-turn CodeWiki follow-up hook
 - `.github/hooks/codewiki-hooks.json` wires `sessionEnd` as cleanup-only lifecycle handling
 
+### Copilot Agents
+
+- `.github/agents/codewiki-wiki-updater.agent.md` proposes approval-gated wiki updates after code changes.
+- `.github/agents/codewiki-verifier.agent.md` performs read-only consistency, reference, index, and log review.
+
 ### Important Paths
 
 - Wiki: `wiki/`
@@ -51,3 +56,4 @@ CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdo
 - PRD/task workflow: `.codewiki/tasks/`
 - Config: `.codewiki/config.yml`
 - Backlinks index: `wiki/_backlinks.json`
+- Agents: `.github/agents/`

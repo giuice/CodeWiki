@@ -29,6 +29,7 @@ The current codebase has already completed the skills-canon migration:
 | Shared hooks | `src/templates/hooks/*.sh` | Portable shell scripts reused by adapters |
 | Claude adapter | `src/lib/adapters/claude.ts` | Full shipped adapter |
 | Shared non-Claude skills adapter | `src/lib/adapters/shared-skills.ts` | Ships the `.agents/skills/` tree |
+| Copilot agents | `src/templates/copilot/agents/*.agent.md` | GitHub Copilot custom-agent profiles |
 | Init entry point | `src/commands/init.ts` | Orchestrates scaffold plus adapters |
 
 ### Installed surfaces in user projects
@@ -37,7 +38,7 @@ The current codebase has already completed the skills-canon migration:
 | --- | --- | --- |
 | `claude-code` | `.claude/skills/codewiki-<name>/SKILL.md` | Claude hook wiring, Claude agents, `CLAUDE.md` |
 | `codex` | `.agents/skills/codewiki-<name>/SKILL.md` | Not yet; planned future adapter work |
-| `copilot` | `.agents/skills/codewiki-<name>/SKILL.md` | Not yet; planned future adapter work |
+| `copilot` | `.agents/skills/codewiki-<name>/SKILL.md` | Copilot hooks, `.github/agents/`, and `.github/copilot-instructions.md` |
 | `opencode` | `.agents/skills/codewiki-<name>/SKILL.md` | Not yet; planned future adapter work |
 | `claude-code` plus any non-Claude tool | Both trees above | Claude adapter today, shared non-Claude skills today |
 

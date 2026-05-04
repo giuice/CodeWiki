@@ -31,6 +31,8 @@ const REQUIRED_TEMPLATE_FILES = [
   "dist/templates/copilot/hooks/pre-tool-use.sh",
   "dist/templates/copilot/hooks/post-tool-use.sh",
   "dist/templates/copilot/hooks/agent-stop.sh",
+  "dist/templates/copilot/agents/codewiki-verifier.agent.md",
+  "dist/templates/copilot/agents/codewiki-wiki-updater.agent.md",
   "dist/templates/copilot/instructions.md",
   "dist/templates/opencode/plugins/codewiki.ts",
   "dist/templates/opencode/agents/codewiki-verifier.md",

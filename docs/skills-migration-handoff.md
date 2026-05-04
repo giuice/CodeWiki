@@ -71,6 +71,7 @@ The project deliberately does not add third or fourth duplicated skill trees in 
 - Codex-specific hook and instruction integration
 - Copilot-specific hook and instruction integration
 - OpenCode-specific hook/plugin, instruction, and agent integration
+- Copilot custom-agent profiles under `.github/agents/`
 
 Those roadmap items are adapter-completion work, not another install-surface migration.
 

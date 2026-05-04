@@ -34,6 +34,7 @@
     "dist/templates/codex/instructions.md",
     "dist/templates/copilot/hooks/*.json",
     "dist/templates/copilot/hooks/*.sh",
+    "dist/templates/copilot/agents/*.agent.md",
     "dist/templates/copilot/instructions.md",
     "dist/templates/opencode/plugins/codewiki.ts",
     "dist/templates/opencode/agents/*.md",

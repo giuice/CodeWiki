@@ -46,7 +46,7 @@ flowchart TD
   subgraph Build["<b>4. EXECUTE TASKS</b>"]
     direction TB
     B1["codewiki-process<br/>Pick one sub-task"] --> B2["pre-wiki-context hook<br/>injects relevant wiki context"]
-    B2 --> B3["Agent edits code,<br/>runs verification,<br/>commits when parent task closes"]
+    B2 --> B3["Agent edits code<br/>and runs verification"]
     B3 --> B4["post-verify hook emits<br/>CODEWIKI_CHANGE_CONTEXT"]
     B4 --> B5["wiki-updater proposes<br/>lessons, entities, issues"]
     B5 --> B6{"Approve wiki writes?"}
@@ -297,7 +297,7 @@ Each adapter maps those shared scripts to the host tool's integration model.
 
 ## Agents
 
-Claude Code, Codex, and OpenCode install two supporting agents:
+Claude Code, Codex, Copilot, and OpenCode install two supporting agents:
 
 | Agent | Purpose |
 | --- | --- |
@@ -312,7 +312,7 @@ Claude Code, Codex, and OpenCode install two supporting agents:
 | --- | --- | --- | --- | --- |
 | **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` wires shared shell hooks | `.claude/agents/` | Appends to `CLAUDE.md` |
 | **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` plus `.codex/config.toml`; uses `UserPromptSubmit`, `PreToolUse`/`PostToolUse` for edit/write events, and Stop wrappers | `.codex/agents/` | Appends to `AGENTS.md` |
-| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; uses `preToolUse`, `postToolUse`, and `agentStop` for post-turn follow-up | Shared skill-driven flow | Appends to `.github/copilot-instructions.md` |
+| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; uses `preToolUse`, `postToolUse`, and `agentStop` for post-turn follow-up | `.github/agents/` | Appends to `.github/copilot-instructions.md` |
 | **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` dispatches plugin events to shared hooks | `.opencode/agents/` | Appends to `AGENTS.md` |
 
 Dual-tree rule:

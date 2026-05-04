@@ -46,7 +46,7 @@ flowchart TD
   subgraph Build["<b>4. EXECUTAR TAREFAS</b>"]
     direction TB
     B1["codewiki-process<br/>Escolhe uma subtarefa"] --> B2["hook pre-wiki-context<br/>injeta contexto relevante da wiki"]
-    B2 --> B3["Agente edita código,<br/>roda verificação,<br/>commita quando a tarefa-pai fecha"]
+    B2 --> B3["Agente edita código<br/>e roda verificação"]
     B3 --> B4["hook post-verify emite<br/>CODEWIKI_CHANGE_CONTEXT"]
     B4 --> B5["wiki-updater propõe<br/>lições, entidades, problemas"]
     B5 --> B6{"Aprovar escritas na wiki?"}
@@ -254,7 +254,7 @@ npx @giuice/codewiki init --name "Meu Projeto" --tool claude-code,codex
 # 3. Scripts de hook compartilhados são instalados em .codewiki/hooks/
 #    Cada adapter os mapeia para o modelo de hook ou plugin da ferramenta hospedeira
 
-# 4. Claude, Codex e OpenCode instalam agentes auxiliares:
+# 4. Claude, Codex, Copilot e OpenCode instalam agentes auxiliares:
 #    codewiki-wiki-updater
 #    codewiki-verifier
 ```
@@ -297,7 +297,7 @@ Cada adapter mapeia esses scripts compartilhados para o modelo de integração d
 
 ## Agentes
 
-Claude Code, Codex e OpenCode instalam dois agentes auxiliares:
+Claude Code, Codex, Copilot e OpenCode instalam dois agentes auxiliares:
 
 | Agente | Objetivo |
 | --- | --- |
@@ -312,7 +312,7 @@ Claude Code, Codex e OpenCode instalam dois agentes auxiliares:
 | --- | --- | --- | --- | --- |
 | **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` conecta hooks shell compartilhados | `.claude/agents/` | Anexa em `CLAUDE.md` |
 | **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` mais `.codex/config.toml`; usa `UserPromptSubmit`, `PreToolUse`/`PostToolUse` para eventos de edit/write, e wrappers de Stop | `.codex/agents/` | Anexa em `AGENTS.md` |
-| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; usa `preToolUse`, `postToolUse` e `agentStop` para acompanhamento pós-turno | Fluxo orientado por skills compartilhadas | Anexa em `.github/copilot-instructions.md` |
+| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; usa `preToolUse`, `postToolUse` e `agentStop` para acompanhamento pós-turno | `.github/agents/` | Anexa em `.github/copilot-instructions.md` |
 | **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` despacha eventos de plugin para hooks compartilhados | `.opencode/agents/` | Anexa em `AGENTS.md` |
 
 Regra das duas árvores:

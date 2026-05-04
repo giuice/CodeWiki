@@ -397,6 +397,8 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
     ".github/hooks/codewiki/pre-tool-use.sh",
     ".github/hooks/codewiki/post-tool-use.sh",
     ".github/hooks/codewiki/agent-stop.sh",
+    ".github/agents/codewiki-wiki-updater.agent.md",
+    ".github/agents/codewiki-verifier.agent.md",
     ".github/copilot-instructions.md",
     ".github/hooks/existing.json"
   ]) {
@@ -426,6 +428,8 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   const secondInstructions = readFileSync(path.join(cwd, ".github/copilot-instructions.md"), "utf8");
   assert.equal(countOccurrences(secondInstructions, "<!-- codewiki:start -->"), 1);
   assert.equal(existsSync(path.join(cwd, ".github/hooks/existing.json")), true);
+  assert.equal(existsSync(path.join(cwd, ".github/agents/codewiki-wiki-updater.agent.md")), true);
+  assert.equal(existsSync(path.join(cwd, ".github/agents/codewiki-verifier.agent.md")), true);
 
   const userEditedHooks = '{"version":1,"hooks":{"agentStop":[{"type":"command","bash":"echo user"}]}}\n';
   writeFileSync(path.join(cwd, ".github/hooks/codewiki-hooks.json"), userEditedHooks);

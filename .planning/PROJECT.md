@@ -30,7 +30,7 @@ Target users: solo developers using AI coding agents who have experienced agents
 - [ ] `codewiki init` installs the wiki scaffold plus the full per-tool integration surface for Claude Code, Codex, Copilot, and OpenCode
 - [ ] OpenCode adapter writes `.opencode/plugins/codewiki.ts`, `.opencode/agents/`, and `AGENTS.md` integration while reusing the shared `.agents/skills/codewiki-<name>/SKILL.md` tree
 - [ ] Codex adapter writes `.codex/hooks.json` plus `.codex/config.toml` hook feature integration, uses current Codex hook semantics (`UserPromptSubmit`, `PreToolUse`/`PostToolUse` for `apply_patch` via `Edit|Write`, and loop-safe `Stop`), appends to `AGENTS.md`, and reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree
-- [ ] Copilot adapter writes `.github/hooks/*.json`, appends to `.github/copilot-instructions.md`, uses `agentStop` as the meaningful post-turn hook, and reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree
+- [ ] Copilot adapter writes `.github/hooks/*.json`, `.github/agents/`, appends to `.github/copilot-instructions.md`, uses `agentStop` as the meaningful post-turn hook, and reuses the shared `.agents/skills/codewiki-<name>/SKILL.md` tree
 - [ ] Per-tool hooks and plugins inject wiki context and trigger wiki follow-up according to each host's documented event model
 - [ ] Wiki structure: `wiki/entities/`, `decisions/`, `lessons/`, `issues/`, `sources/`, `index.md`, `log.md`
 - [ ] Agents installed: `codewiki-wiki-updater`, `codewiki-verifier`
