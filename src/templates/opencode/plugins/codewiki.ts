@@ -16,6 +16,11 @@ async function runHook(root: string, hookName: string, payload?: unknown): Promi
     return await new Promise<string>((resolve) => {
       const child = spawn("bash", [hookPath], {
         cwd: root,
+        env: {
+          ...process.env,
+          CODEWIKI_HOOK_HOST: "opencode",
+          CODEWIKI_HOOK_EVENT: hookName
+        },
         stdio: ["pipe", "pipe", "ignore"]
       });
 

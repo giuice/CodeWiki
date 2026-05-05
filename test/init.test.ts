@@ -112,6 +112,7 @@ test("local npm tarball works through npx in a fresh project", () => {
     const files = new Set(listRecursive(cwd));
     for (const rel of [
       ".codewiki/config.yml",
+      ".codewiki/state",
       ".codewiki/tasks",
       ".codewiki/hooks/pre-wiki-context.sh",
       "wiki/SCHEMA.md",
@@ -144,6 +145,7 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   const files = new Set(listRecursive(cwd));
   for (const rel of [
     ".codewiki/config.yml",
+    ".codewiki/state",
     ".codewiki/tasks",
     ".codewiki/hooks",
     ".codewiki/hooks/post-verify.sh",
@@ -208,7 +210,8 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   assert.match(claudeInstructions, /<!-- codewiki:start -->/);
   assert.match(claudeInstructions, /codewiki-breakdown/);
   assert.match(claudeInstructions, /not query-time RAG/);
-  assert.match(claudeInstructions, /Hooks provide context and change signals/);
+  assert.match(claudeInstructions, /Hooks provide optional context and persistent change signals/);
+  assert.match(claudeInstructions, /pending-absorb\.jsonl/);
   assert.match(claudeInstructions, /Schema Discipline/);
   assert.match(claudeInstructions, /confidence/);
   assert.match(claudeInstructions, /source_url/);

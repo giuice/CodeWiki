@@ -28,7 +28,8 @@ describe("ABS-01: absorb.md has code-focused wiki absorption rules", () => {
 
   test("codewiki-absorb/SKILL.md references git diff, backlinks, anti-cramming, and anti-thinning", async () => {
     const content = await readSkill("absorb");
-    expect(content).toContain("git diff HEAD~1");
+    expect(content).toContain(".codewiki/state/pending-absorb.jsonl");
+    expect(content).toContain("git diff --cached");
     expect(content).toContain("wiki.path");
     expect(content).toContain("Read `index.md` from the resolved wiki root first.");
     expect(content).toContain("Read `_backlinks.json` from the resolved wiki root");

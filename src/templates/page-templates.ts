@@ -320,7 +320,8 @@ CodeWiki maintains durable, human-reviewed project knowledge as markdown. It is 
 - Backlinks index: \`wiki/_backlinks.json\`
 - Chronological log: \`wiki/log.md\`
 - Content index: \`wiki/index.md\`
-- Operational tasks: \`.codewiki/tasks/\`
+- PRDs and phase plans: \`.codewiki/tasks/\`
+- Hook state and pending absorb signals: \`.codewiki/state/\`
 
 ## Source Rules
 

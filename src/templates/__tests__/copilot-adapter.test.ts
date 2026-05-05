@@ -37,9 +37,11 @@ describe("COP-01: Copilot hook templates use agentStop for post-turn follow-up",
     expect(preToolUse).toContain("pre-wiki-context.sh");
     expect(postToolUse).toContain("post-verify.sh");
     expect(postToolUse).toContain("additionalContext");
+    expect(postToolUse).toContain("CODEWIKI_HOOK_DEBUG");
     expect(agentStop).toContain("session-end.sh");
     expect(agentStop).toContain("agentStop");
     expect(agentStop).toContain("sessionEnd");
+    expect(agentStop).toContain("CODEWIKI_HOOK_DEBUG");
     expect(agentStop).toContain('"decision":"block"');
     expect(agentStop).toContain('"decision":"allow"');
   });
@@ -64,11 +66,11 @@ describe("COP-02 and COP-03: Copilot instructions preserve shared skill and wiki
     expect(content).toContain("not query-time RAG");
     expect(content).toContain("New external source in `wiki/raw/`");
     expect(content).toContain("After a substantial coding session");
-    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
-    expect(content).toContain(".github/agents/codewiki-wiki-updater.agent.md` immediately");
+    expect(content).toContain(".codewiki/state/pending-absorb.jsonl");
+    expect(content).toContain(".github/agents/codewiki-wiki-updater.agent.md` for durable");
     expect(content).toContain(".github/agents/codewiki-verifier.agent.md` for read-only");
-    expect(content).toContain("Hooks provide context and change signals");
-    expect(content).toContain("discovery mechanism for invoking the wiki-updater custom agent");
+    expect(content).toContain("Hooks provide optional context and persistent change signals");
+    expect(content).toContain("Always fall back to reading `.codewiki/state/`");
     expect(content).toContain("### Schema Discipline");
     expect(content).toContain("confidence");
     expect(content).toContain("contested");

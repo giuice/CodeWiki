@@ -71,9 +71,9 @@ Solo developers using AI coding agents on real projects. Developers who have exp
 ┌─────────────────────────────────────────────┐
 │  TOOL INTEGRATION (installed by init)       │
 │                                             │
-│  Hooks ─── pre-tool: inject wiki context    │
-│        └── post-tool: verification prompt   │
-│        └── session-end: summary asset       │
+│  Hooks ─── pre-tool: optional short context  │
+│        └── post-tool: pending state signal   │
+│        └── session-end: state asset          │
 │                                             │
 │  Skills (10, one per focused workflow)      │
 │     ├── codewiki-ingest                     │
@@ -128,10 +128,12 @@ project-root/
 │   │   ├── issue.md
 │   │   ├── query.md
 │   │   └── source-summary.md
-│   └── hooks/                     # Hook scripts (shared across tools)
+│   ├── hooks/                     # Hook scripts (shared across tools)
 │       ├── pre-wiki-context.sh    # Reads wiki/index.md, finds relevant pages
-│       ├── post-verify.sh         # Emits structured change context for wiki updates
-│       └── session-end.sh         # Emits structured session summary for absorb follow-up
+│       ├── post-verify.sh         # Records pending absorb signals
+│       └── session-end.sh         # Records current uncommitted-change state
+│   ├── state/                     # Hook diagnostics and pending absorb signals
+│   └── tasks/                     # PRDs and phase plans
 ├── wiki/raw/                      # Immutable source documents
 │   ├── articles/
 │   ├── papers/
@@ -194,32 +196,35 @@ For day-to-day use, developers should follow this order:
 1. Run `npx codewiki init` once to scaffold the wiki, prompts, hooks, and tool-specific instructions.
 2. Add existing project material to `raw/` and run `/codewiki-ingest` until the wiki reflects the current project state.
 3. For net-new work, use `/codewiki-prd` and then `/codewiki-tasks` before writing code.
-4. Implement through `/codewiki-process` so task progression, tests, commits, pre-hook context injection, and post-verify wiki proposals stay in one loop.
-5. Review every wiki proposal from the post-verify flow before allowing writes to `wiki/`.
-6. At session end, run `/codewiki-absorb` manually to capture durable lessons from the recent diff. (`session-end.sh` ships on all four tools as a summary-emitting asset, but v1 remains manual-first because hook-to-skill chaining is not a documented cross-tool primitive; see §5.2.4.)
+4. Implement through `/codewiki-process` so phase progression, tests, commits, and pending absorb state stay in one loop.
+5. Review every wiki proposal from absorb or wiki-updater before allowing writes to `wiki/`.
+6. At a completed phase or explicit handoff point, run `/codewiki-absorb` manually to capture durable lessons from the recent diff and `.codewiki/state/`. (`session-end.sh` ships on all four tools as a state-recording asset, but v1 remains manual-first because hook-to-skill chaining is not a documented cross-tool primitive; see §5.2.4.)
 7. Use `/codewiki-breakdown`, `/codewiki-lint`, and `/codewiki-query` as the ongoing maintenance loop between features.
 
 ### 5.1 The Verification Loop (Primary Flow)
 
-This is the main loop. It runs via hooks — no CLI invocation needed.
+This is the main loop. Hooks are sensors for the loop, not a guaranteed context
+transport. They record durable signal in `.codewiki/state/`, and workflows read
+that state explicitly when they need it.
 
-**Hook trigger rule:** The pre-hook fires **only when the agent is about to modify files** — not on read-only actions.
+**Hook trigger rule:** Host adapters differ. Some can run prompt-time hooks, some
+run tool-time hooks, and some ignore hook stdout. CodeWiki treats any delivered
+hook context as advisory and keeps the reliable handoff in state files.
 
 ```
 Developer: "implement retry logic in api-client.ts"
          │
          ▼
-┌──── PRE-HOOK (automatic) ───────────────────────┐
-│ Hook script reads wiki/index.md                  │
-│ Finds pages relevant to modified files           │
-│ Outputs wiki context to stdout                   │
-│ Agent receives it as tool-use context            │
-│ "WIKI CONTEXT: ISSUE-012 says exponential        │
-│  backoff breaks with 0ms base delay."            │
+┌──── HOOK SENSOR (host-dependent) ────────────────┐
+│ Hook may read wiki/index.md for a short hint      │
+│ Hook may record pending absorb state             │
+│ Stdout delivery depends on the host/runtime      │
+│ Agent or skill reads .codewiki/state/ explicitly │
+│ "pending absorb signal: api-client.ts changed"   │
 └──────────────────────────────────────────────────┘
          │
          ▼
-   Agent codes WITH wiki context
+   Agent codes, then verifies and records follow-up state
          │
          ▼
 ┌──── POST-HOOK (automatic) ──────────────────────┐
@@ -284,22 +289,22 @@ A reverse-link map tracking which wiki pages reference each other. Maintained au
 
 High-backlink pages indicate important entities. The breakdown command uses this to prioritize gap-filling.
 
-#### 5.2.4 Session-End Hook (per-tool status, v1)
+#### 5.2.4 Hook State and Runtime Delivery (per-tool status, v1)
 
-`init` installs `session-end.sh` as a shell asset in `.codewiki/hooks/` on every tool. Whether the tool actually wires it depends on which session-lifecycle events the tool exposes. All four tools were re-verified against official docs on 2026-04-11:
+`init` installs shared shell assets in `.codewiki/hooks/` on every tool. Hooks are treated as state recorders first and context channels second: every host/runtime differs in which hook outputs are processed and delivered back to the agent. The reliable handoff is `.codewiki/state/pending-absorb.jsonl`; visible hook context is advisory.
 
 - **Claude Code.** `SessionEnd` exists but fires when the session terminates. Claude's docs also expose compaction-adjacent hooks (`PreCompact`, `PostCompact`, and `SessionStart` with `compact` matcher), but those are not treated as equivalent to true session-end semantics in v1. `SessionEnd` therefore remains dormant. Phase 4.1 may evaluate whether `PreCompact` can surface a summary before compaction, but not as the canonical end-of-session path.
-- **Codex.** `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, and `Stop` are available when `codex_hooks` is enabled. `Stop` fires per turn and can force a continuation, so it is useful for turn-completion follow-up but not true session teardown. `session-end.sh` remains dormant for teardown semantics.
-- **Copilot.** `sessionEnd` exists, but the official hooks reference marks it as terminal and its output is ignored. The useful event is **`agentStop`**: it fires when the main agent finishes a turn, its input payload includes `stopReason: "end_turn"`, and its output is processed (`decision: "block"` + `reason` can force continuation). Therefore `sessionEnd` is cleanup-only; any future automatic absorb flow on Copilot should target `agentStop`, not `sessionEnd`.
-- **OpenCode.** `session.idle` is not true session teardown. In the OpenCode runtime it is published when session status transitions to `idle` after a run completes. UI and notification code treat it as "response finished, waiting for next input." That makes it a **turn-end / assistant-idle** signal, not a session-end signal. It remains the best OpenCode candidate for surfacing a post-turn summary, but not for literal teardown semantics.
+- **Codex.** `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, and `Stop` are available when `codex_hooks` is enabled. `Stop` fires per turn and can force a continuation, so CodeWiki records state there without blocking by default.
+- **Copilot.** `sessionEnd` exists, but output is terminal/cleanup-oriented. `agentStop` is the turn-completion hook, but Copilot cloud, VS Code, CLI, and SDK differ in what output reaches the agent. CodeWiki records state and does not depend on `additionalContext` for critical flow.
+- **OpenCode.** `session.idle` is not true session teardown. In the OpenCode runtime it is published when session status transitions to `idle` after a run completes. CodeWiki treats it as a **turn-end / assistant-idle** state signal, not a teardown signal.
 
-**Primary end-of-session path in v1 remains manual** — the developer runs `/codewiki-absorb` before closing the session. Even if a host tool later wires `session-end.sh` automatically, that hook only emits structured summary context; v1 does not assume a documented hook-to-skill bridge that can invoke `/codewiki-absorb` for you. This matches the `docs/skills/wiki.md` philosophy — absorb is a deliberate batch operation, not a reflex.
+**Primary absorb path in v1 remains semantic** — the developer runs `/codewiki-absorb` when a phase completes or explicitly asks to absorb. Hooks can record that absorb is pending, but they do not invoke absorb automatically.
 
-When activated on any tool, `session-end.sh` will:
+When activated on any tool, hooks will:
 
-1. Summarize what was accomplished in the session.
-2. Emit a lightweight structured summary that a human or future automated flow can feed into an absorb pass.
-3. Never block session teardown if git state or repository context is unavailable.
+1. Record small JSONL entries under `.codewiki/state/`.
+2. Keep stdout empty by default to avoid recurring context noise.
+3. Never block the host if git state, payload shape, or repository context is unavailable.
 
 The install report marks each tool's status individually: `active` (hook wired and live), `inactive — activation pending platform spike` (tool has an event but timing not yet confirmed), or `inactive — no suitable event exists` (tool fundamentally doesn't expose an alive-agent session-lifecycle hook). This replaces the earlier uniform `(inactive — activation pending platform hook)` marker.
 
@@ -314,15 +319,15 @@ Skill, not CLI. Invoked from the AI tool's native skill interface. The agent:
 6. Human reviews and approves each wiki update.
 7. Agent appends to `wiki/log.md`.
 
-### 5.4 PRD-to-Tasks Flow
+### 5.4 PRD-to-Phases Flow
 
 Three Skills adapted from the original prompts (each shipped as its own SKILL.md):
 
 1. **`/codewiki-prd`** — Agent asks clarifying questions, generates a PRD in `.codewiki/tasks/`, following the create-prd prompt template. Human reviews and refines. (Adapted from `docs/prompts/create-prd.md`)
 
-2. **`/codewiki-tasks`** — Agent analyzes PRD + codebase, generates parent tasks (waits for "Go"), then generates sub-tasks with checklist format. Output goes to `.codewiki/tasks/tasks-[prd-name].md`. (Adapted from `docs/prompts/generate-tasks.md`)
+2. **`/codewiki-tasks`** — Agent analyzes PRD + codebase, generates phases (waits for "Go"), then generates tasks with checklist format. Output goes to `.codewiki/tasks/tasks-[prd-name].md`. (Adapted from `docs/prompts/generate-tasks.md`)
 
-3. **`/codewiki-process`** — Agent works through tasks one sub-task at a time. Marks `[x]` on completion, runs tests when parent task is done, commits with conventional commits, pauses for user approval between each sub-task. Each task goes through the Verification Loop (§5.1). (Adapted from `docs/prompts/process-task-list.md`)
+3. **`/codewiki-process`** — Agent works through tasks one task at a time. Marks `[x]` on completion, runs tests when phase is done, commits with conventional commits, pauses for user approval between each task. Each task goes through the Verification Loop (§5.1). (Adapted from `docs/prompts/process-task-list.md`)
 
 ### 5.5 Wiki Query (`/codewiki-query`)
 
@@ -352,8 +357,8 @@ CodeWiki's canonical adapter design uses three install surfaces: **Skills** (10 
 | Tool | Hooks | Skills (10 total, one per focused workflow) | Instructions | Agents |
 |------|-------|-----------------------------------|--------------|--------|
 | **Claude Code** | `.claude/settings.json` JSON config → `PreToolUse` + `PostToolUse` matcher `Edit\|Write`. `PreCompact` candidate for `session-end.sh` (Phase 4.1 evaluation). `SessionEnd` dormant. | `.claude/skills/codewiki-<name>/SKILL.md` (Claude Code reads `.claude/` only, not `.agents/`) | Appends to `CLAUDE.md` | `.claude/agents/codewiki-*.md` |
-| **Codex** | `.codex/hooks.json` plus `.codex/config.toml` feature enablement. `UserPromptSubmit` injects prompt-level wiki context; `PreToolUse`/`PostToolUse` can match `apply_patch` via `Edit\|Write` aliases; `Stop` can force a continuation at turn completion. Codex-specific wrappers are required because stdout/JSON contracts differ by event. `session-end.sh` remains dormant for true teardown semantics. | `.agents/skills/codewiki-<name>/SKILL.md` (Codex reads `.agents/` only) | Appends to `AGENTS.md` | `.codex/agents/codewiki-*.toml` |
-| **Copilot** | `.github/hooks/codewiki-*.json` JSON config → `preToolUse` + `postToolUse`. `sessionEnd` is cleanup-only; **`agentStop`** is the meaningful post-turn candidate for any automatic absorb/validation flow. | Canonical write target: `.agents/skills/codewiki-<name>/SKILL.md` for Copilot-only installs; if Claude Code is also selected, also write `.claude/skills/codewiki-<name>/SKILL.md`. Copilot also discovers `.github/skills/`, but CodeWiki does not use it as the canonical repo layout. | Appends to `.github/copilot-instructions.md` | `.github/agents/codewiki-*.agent.md` |
+| **Codex** | `.codex/hooks.json` plus `.codex/config.toml` feature enablement. `UserPromptSubmit` may inject short wiki context; `PreToolUse`/`PostToolUse` can match `apply_patch` via `Edit\|Write` aliases; `Stop` records turn-completion state without blocking by default. Codex-specific wrappers are required because stdout/JSON contracts differ by event. | `.agents/skills/codewiki-<name>/SKILL.md` (Codex reads `.agents/` only) | Appends to `AGENTS.md` | `.codex/agents/codewiki-*.toml` |
+| **Copilot** | `.github/hooks/codewiki-*.json` JSON config → `preToolUse` + `postToolUse`. `sessionEnd` is cleanup-only; **`agentStop`** records post-turn state. Copilot runtime output delivery must be verified per environment. | Canonical write target: `.agents/skills/codewiki-<name>/SKILL.md` for Copilot-only installs; if Claude Code is also selected, also write `.claude/skills/codewiki-<name>/SKILL.md`. Copilot also discovers `.github/skills/`, but CodeWiki does not use it as the canonical repo layout. | Appends to `.github/copilot-instructions.md` | `.github/agents/codewiki-*.agent.md` |
 | **OpenCode** | `.opencode/plugins/codewiki.ts` — **TypeScript plugin file**, not JSON. Subscribes to `tool.execute.before`, `file.edited`, `session.idle` and dispatches to shared shell scripts through a Node `child_process` bridge. `session.idle` is a turn-end idle signal, not true session teardown. | Canonical write target: `.agents/skills/codewiki-<name>/SKILL.md` for OpenCode-only installs; if Claude Code is also selected, also write `.claude/skills/codewiki-<name>/SKILL.md`. OpenCode also discovers `.opencode/skills/`, but CodeWiki does not use it as the canonical repo layout. | Appends to `AGENTS.md` (OpenCode reads it) | `.opencode/agents/codewiki-*.md` |
 
 **Skill file format is uniform across tools.** Each SKILL.md has YAML frontmatter with `name`, `description`, and `argument-hint` only when the skill requires positional input, following the `docs/skills/wiki.md` reference format. The prompt content is portable; only the on-disk directory varies. Because Claude Code reads only `.claude/skills/` and Codex reads only `.agents/skills/` (neither honors the other's convention), CodeWiki installs to a **dual tree** (`.claude/skills/codewiki-<name>/SKILL.md` + `.agents/skills/codewiki-<name>/SKILL.md`) whenever the `--tool` selection crosses that boundary. Copilot and OpenCode also honor tool-specific skill directories (`.github/skills/`, `.opencode/skills/`), but CodeWiki deliberately avoids adding a third or fourth copy tree in v1 because those locations do not resolve the Claude/Codex discovery split. Skills directories were verified against official docs 2026-04-11 — no remaining research gaps on skill install paths.
@@ -363,11 +368,11 @@ CodeWiki's canonical adapter design uses three install surfaces: **Skills** (10 
 | Tool | Pre-edit hook | Post-edit hook | Session-lifecycle (agent alive) |
 |------|--------------|----------------|---------------------------------|
 | Claude Code | ✅ `PreToolUse` matcher `Edit\|Write` → `pre-wiki-context.sh` | ✅ `PostToolUse` matcher `Edit\|Write` → `post-verify.sh` | `PreCompact` is only a compaction-adjacent candidate for surfacing a summary. `SessionEnd` remains dormant for true session-end semantics. |
-| Codex | ✅ `UserPromptSubmit` → prompt-level wiki context; `PreToolUse` matcher `Edit\|Write|apply_patch` is available for guardrails, but plain stdout is ignored and additional context is not supported there | ✅ `PostToolUse` matcher `Edit\|Write|apply_patch` → Codex wrapper around `post-verify.sh` that emits event-specific JSON/additional context; side effects cannot be undone after the tool runs | `Stop` can force a continuation at turn completion; true teardown remains dormant |
-| Copilot | ✅ `preToolUse` → `pre-wiki-context.sh` | ✅ `postToolUse` → `post-verify.sh` | ✅ `agentStop` is the documented turn-end hook. `sessionEnd` is terminal and output-ignored, so it is cleanup-only. |
-| OpenCode | ✅ `tool.execute.before` → `pre-wiki-context.sh` (via TS plugin) | ✅ `file.edited` → `post-verify.sh` (via TS plugin) | ✅ `session.idle` is emitted when the session becomes idle after a run completes. Treat as turn-end/assistant-idle, not teardown. |
+| Codex | ✅ `UserPromptSubmit` → short wiki context only for wiki-relevant prompts; `PreToolUse` matcher `Edit\|Write|apply_patch` is guardrail-only | ✅ `PostToolUse` matcher `Edit\|Write|apply_patch` records pending absorb state; visible context is debug-only | `Stop` records pending state and returns `{}` by default |
+| Copilot | ✅ `preToolUse` → `pre-wiki-context.sh` | ✅ `postToolUse` → `post-verify.sh` records pending state; context delivery differs by runtime | ✅ `agentStop` records turn-end state. `sessionEnd` is terminal and output-ignored, so it is cleanup-only. |
+| OpenCode | ✅ `tool.execute.before` → `pre-wiki-context.sh` (via TS plugin) | ✅ `file.edited` → `post-verify.sh` records pending state (via TS plugin) | ✅ `session.idle` records turn-end state. Treat as assistant-idle, not teardown. |
 
-**Copilot clarification.** Official GitHub docs expose two different lifecycles: `sessionEnd` for terminal cleanup/logging with ignored output, and `agentStop` / `subagentStop` for turn-completion with processed output. `agentStop` is therefore the correct Copilot analogue to Claude Code `Stop` or Codex `Stop` when CodeWiki wants to inspect a completed turn and optionally force one more continuation pass.
+**Copilot clarification.** Official GitHub docs expose multiple hook surfaces across cloud agent, CLI, and SDK. `sessionEnd` is terminal cleanup/logging, while `agentStop` / `subagentStop` are turn-completion events. CodeWiki does not assume `additionalContext` reaches the agent in every Copilot runtime; the fallback is explicit reading of `.codewiki/state/`.
 
 **OpenCode clarification.** OpenCode's docs only list `session.idle` as an available event, but the open-source runtime makes the semantics explicit: `session.idle` is published when the session status transitions to `idle`, and status becomes `idle` when the active run finishes. This is strong evidence for using it as a post-turn summary trigger, but not as a teardown signal.
 
@@ -376,8 +381,8 @@ CodeWiki's canonical adapter design uses three install surfaces: **Skills** (10 
 - Enable hooks with `[features] codex_hooks = true` in `.codex/config.toml` and install `.codex/hooks.json`.
 - Use `UserPromptSubmit` for prompt-level wiki context injection because plain stdout is added as developer context for that event.
 - Use `PreToolUse` on `Edit|Write|apply_patch` only for guardrails or policy checks; plain stdout is ignored and `additionalContext` is not currently supported there.
-- Use `PostToolUse` on `Edit|Write|apply_patch` for post-edit follow-up through a Codex-specific wrapper that converts `post-verify.sh` output into the JSON shape Codex expects.
-- Use `Stop` only through a Codex-specific wrapper, because `Stop` requires JSON stdout on exit 0 and can force a continuation; the wrapper must avoid continuation loops by respecting `stop_hook_active`.
+- Use `PostToolUse` on `Edit|Write|apply_patch` for post-edit state recording through a Codex-specific wrapper. Debug mode may surface context, but default behavior is silent.
+- Use `Stop` only through a Codex-specific wrapper, because `Stop` requires JSON stdout on exit 0 and can force a continuation; the wrapper returns `{}` by default and must avoid continuation loops by respecting `stop_hook_active`.
 - Resolve repo-local hook commands from `$(git rev-parse --show-toplevel)` rather than a relative path because Codex may start from a subdirectory.
 
 **OpenCode install format.** OpenCode's hook surface is not JSON config — it is a TypeScript plugin file at `.opencode/plugins/codewiki.ts`. The plugin subscribes to events (`tool.execute.before`, `file.edited`, `session.idle`) and dispatches them to the same shell scripts (`.codewiki/hooks/*.sh`) that the other tools call directly. This preserves the "one shared script library" pattern from Decision 7: the plugin file is a ~30-line dispatcher, the actual logic still lives in the portable shell scripts.
@@ -500,14 +505,14 @@ lint:
 
 5. **File drift → Lightweight hash-based detection.** (Unchanged from v1.)
 
-6. **PRD integration → Skills from original prompts.** The three prompts (`create-prd.md`, `generate-tasks.md`, `process-task-list.md`) become Skills installed by `init` (one SKILL.md per prompt). They preserve the original prompt's interaction model (clarifying questions, "Go" confirmation, one-sub-task-at-a-time).
+6. **PRD integration → Skills from original prompts.** The three prompts (`create-prd.md`, `generate-tasks.md`, `process-task-list.md`) become Skills installed by `init` (one SKILL.md per prompt). They preserve the original prompt's interaction model (clarifying questions, "Go" confirmation, one-task-at-a-time).
 
-7. **Shared hook scripts with tool wrappers where needed.** Hook scripts live in `.codewiki/hooks/` and remain the single source of portable behavior. Tool configs point to them directly only when the host hook event accepts the script's stdout contract. Codex events with JSON-only or ignored stdout use thin wrappers that translate shared script output into Codex's current event schema.
+7. **Shared hook scripts with tool wrappers where needed.** Hook scripts live in `.codewiki/hooks/` and remain the single source of portable behavior. They record reliable state under `.codewiki/state/` and keep stdout quiet by default. Tool wrappers may expose debug context, but production workflows must not depend on hook output delivery.
 
 8. **Install surface → Ten Skills, one per focused workflow (not a single bundled skill, not loose slash-command files).** CodeWiki ships exactly ten Skills — `codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`, `codewiki-flow` — each as its own SKILL.md with YAML frontmatter. This is explicitly **not** the `docs/skills/wiki.md` model of "one skill with many subcommands under one SKILL.md"; CodeWiki cites `wiki.md` as a file-format reference only, not as a packaging model. Rationale: (a) **token efficiency** — the AI tool only loads the prompt it needs per invocation; a bundled skill pays the full token cost even for a single query; (b) **discoverability** — each skill's frontmatter `description` surfaces independently in the tool's skill index so the agent can pick the right workflow without reading an unrelated prompt; (c) **independent evolution** — a change to `absorb` doesn't force a re-review of the entire bundled prompt; (d) **portability** — the same per-workflow structure maps cleanly to any tool's skill directory once the directory path is confirmed per tool. This decision supersedes v1's "slash commands" language throughout the doc.
 
 9. **Backlink index → JSON file, not computed on the fly.** `wiki/_backlinks.json` is a pre-computed reverse-link map maintained by absorb/ingest/lint. This avoids scanning all wiki pages on every query — the agent reads one file to find high-importance pages. Inspired by Farzaa's `_backlinks.json` pattern.
 
-10. **Post-hook → Active trigger, not passive reminder.** The post-hook triggers the wiki-updater agent with change context rather than just printing a reminder. The human approval gate stays (the agent proposes, human approves), but the trigger is automatic. This is the key difference from the v2 original design — the system is active, not passive.
+10. **Post-hook → Persistent signal, not chat noise.** The post-hook records pending absorb state instead of relying on long stdout blocks or guaranteed host context delivery. The human approval gate stays: absorb or wiki-updater proposes, human approves.
 
 11. **Anti-cramming / anti-thinning rules in lint.** Borrowed from Farzaa's wiki skill: articles over 120 lines should be split, stubs under 15 lines should be enriched or merged, and articles organized chronologically should be restructured by theme. These quality checks prevent the wiki from degrading over time.

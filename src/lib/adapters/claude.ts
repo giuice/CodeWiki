@@ -25,12 +25,12 @@ interface ClaudeSettings extends Record<string, unknown> {
 
 const PRE_TOOL_HOOK: ClaudeHookMatcher = {
   matcher: "Write|Edit",
-  hooks: [{ type: "command", command: "bash .codewiki/hooks/pre-wiki-context.sh", timeout: 10 }]
+  hooks: [{ type: "command", command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PreToolUse bash .codewiki/hooks/pre-wiki-context.sh", timeout: 10 }]
 };
 
 const POST_TOOL_HOOK: ClaudeHookMatcher = {
   matcher: "Write|Edit",
-  hooks: [{ type: "command", command: "bash .codewiki/hooks/post-verify.sh", timeout: 10 }]
+  hooks: [{ type: "command", command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PostToolUse bash .codewiki/hooks/post-verify.sh", timeout: 10 }]
 };
 
 const CLAUDE_SETTINGS_PATCH: ClaudeSettings = {
