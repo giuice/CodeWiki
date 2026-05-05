@@ -182,7 +182,7 @@ describe("CMD-03C: codewiki-obsidian preserves vault guidance", () => {
   });
 });
 
-describe("CMD-03D: codewiki-flow preserves lifecycle orchestration", () => {
+describe("CMD-03D: codewiki-flow preserves lifecycle routing", () => {
   test("codewiki-flow routes to focused skills without writing wiki files", async () => {
     const content = await readSkill("flow");
     const fm = extractFrontmatter(content);
@@ -190,7 +190,7 @@ describe("CMD-03D: codewiki-flow preserves lifecycle orchestration", () => {
     expect(fm).not.toBeNull();
     expect(fm).toMatch(/^name: codewiki-flow$/m);
     expect(fm).toContain("Use when");
-    expect(content).toContain("orchestration skill");
+    expect(content).toContain("routing skill");
     expect(content).toContain("codewiki-ingest");
     expect(content).toContain("codewiki-query");
     expect(content).toContain("codewiki-prd");
@@ -200,7 +200,7 @@ describe("CMD-03D: codewiki-flow preserves lifecycle orchestration", () => {
     expect(content).toContain("codewiki-breakdown");
     expect(content).toContain("codewiki-lint");
     expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
-    expect(content).toContain("Do not write wiki files from this orchestration skill");
+    expect(content).toContain("Do not write wiki files from this routing skill");
   });
 });
 

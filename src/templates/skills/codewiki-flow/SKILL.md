@@ -8,7 +8,7 @@ allowed-tools: [Read, Glob, Grep, Bash]
 
 <purpose>
 Choose the right CodeWiki workflow for the current repository state and user intent. This is an
-orchestration skill: identify the best next CodeWiki skill, state the next action, and avoid
+routing skill: identify the best next CodeWiki skill, state the next action, and avoid
 duplicating the detailed procedures that belong in the focused skills.
 </purpose>
 
@@ -47,7 +47,7 @@ duplicating the detailed procedures that belong in the focused skills.
   searchable, linked, and current.
 
 ## Step 4: Preserve boundaries
-- Do not write wiki files from this orchestration skill.
+- Do not write wiki files from this routing skill.
 - Do not bypass focused skills when the user intent clearly matches one of them.
 - Do not override an explicit user choice unless that choice is impossible, unsafe, or clearly mismatched.
 - Never mutate the resolved wiki root without explicit approval in the current conversation.

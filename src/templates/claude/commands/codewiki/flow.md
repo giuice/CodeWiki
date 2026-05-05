@@ -1,5 +1,5 @@
 ---
-description: Orchestrates the full CodeWiki lifecycle across ingest, query, PRD planning, task generation, task execution, wiki absorption, breakdown, and lint. Use when the user asks what to do next, wants the recommended CodeWiki workflow, resumes a session, starts a feature, reacts to hook-provided change context, or needs the agent to choose the right CodeWiki skill based on repository state.
+description: Routes the current request to the right CodeWiki skill based on user intent and repository state. Use when the user asks what to do next, wants the recommended workflow, resumes a session, starts a feature, reacts to hook-provided change context, or needs help choosing between CodeWiki skills.
 allowed-tools: [Read, Glob, Grep, Bash]
 ---
 
@@ -7,7 +7,7 @@ allowed-tools: [Read, Glob, Grep, Bash]
 
 <purpose>
 Choose the right CodeWiki workflow for the current repository state and user intent. This is an
-orchestration skill: route to the focused CodeWiki skills, state the next action, and avoid
+routing skill: identify the best next CodeWiki skill, state the next action, and avoid
 duplicating their detailed procedures.
 </purpose>
 
@@ -43,7 +43,7 @@ duplicating their detailed procedures.
   searchable, linked, and current.
 
 ## Step 4: Preserve boundaries
-- Do not write wiki files from this orchestration skill.
+- Do not write wiki files from this routing skill.
 - Do not bypass focused skills when the user intent clearly matches one of them.
 - Never mutate the resolved wiki root without explicit approval in the current conversation.
 - If multiple routes are plausible, state the recommended next skill and the reason before proceeding.
