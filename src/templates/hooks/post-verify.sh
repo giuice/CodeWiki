@@ -55,5 +55,6 @@ if [ -n "$_cwiki_candidates" ]; then
     printf 'Potential new topic candidates:\n'
     printf '%s\n' "$_cwiki_candidates"
 fi
-printf 'Action: Invoke codewiki-wiki-updater to propose approval-gated wiki updates, or run /codewiki-absorb at session end.\n'
+printf 'Required next step for the host agent: invoke codewiki-wiki-updater now to propose approval-gated wiki updates, or explicitly defer this to codewiki-absorb at session end.\n'
+printf 'Verification path: after a non-trivial wiki proposal, invoke codewiki-verifier for read-only review before applying approved wiki edits.\n'
 printf 'END_CODEWIKI_CHANGE_CONTEXT\n'

@@ -89,3 +89,14 @@ describe("AGENT-02: codewiki-verifier.md has description and read-only verificat
     expect(content).toContain("## [YYYY-MM-DD] action | subject");
   });
 });
+
+describe("CLAUDE instructions connect hook context to supporting agents", () => {
+  test("instructions treat CODEWIKI_CHANGE_CONTEXT as updater/verifier follow-up signal", async () => {
+    const content = await readFile(path.resolve("src/templates/claude/instructions.md"), "utf8");
+
+    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain("invoke `codewiki-wiki-updater`");
+    expect(content).toContain("invoke `codewiki-verifier`");
+    expect(content).toContain("discovery mechanism for invoking `codewiki-wiki-updater`");
+  });
+});

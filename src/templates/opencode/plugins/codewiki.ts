@@ -9,18 +9,24 @@ function toJson(value: unknown): string {
   }
 }
 
-async function runHook(root: string, hookName: string, payload?: unknown): Promise<void> {
+async function runHook(root: string, hookName: string, payload?: unknown): Promise<string> {
   const hookPath = path.join(root, ".codewiki", "hooks", hookName);
 
   try {
-    await new Promise<void>((resolve) => {
+    return await new Promise<string>((resolve) => {
       const child = spawn("bash", [hookPath], {
         cwd: root,
-        stdio: ["pipe", "ignore", "ignore"]
+        stdio: ["pipe", "pipe", "ignore"]
       });
 
-      child.on("error", () => resolve());
-      child.on("close", () => resolve());
+      let stdout = "";
+
+      child.stdout.on("data", (chunk: Buffer) => {
+        stdout += chunk.toString("utf8");
+      });
+
+      child.on("error", () => resolve(""));
+      child.on("close", () => resolve(stdout.trim()));
 
       if (payload === undefined) {
         child.stdin.end();
@@ -31,7 +37,12 @@ async function runHook(root: string, hookName: string, payload?: unknown): Promi
     });
   } catch {
     // CodeWiki hooks are advisory and must never block the host agent.
+    return "";
   }
+}
+
+function hookContext(output: string): Record<string, string> {
+  return output ? { codewikiContext: output } : {};
 }
 
 export const CodeWikiPlugin = async ({
@@ -45,16 +56,16 @@ export const CodeWikiPlugin = async ({
 
   return {
     "tool.execute.before": async (input: unknown, output: unknown) => {
-      await runHook(root, "pre-wiki-context.sh", { input, output });
+      return hookContext(await runHook(root, "pre-wiki-context.sh", { input, output }));
     },
 
     "file.edited": async (input: unknown, output: unknown) => {
-      await runHook(root, "post-verify.sh", { input, output });
+      return hookContext(await runHook(root, "post-verify.sh", { input, output }));
     },
 
     // `session.idle` is treated as assistant-idle / turn-end, not teardown.
     "session.idle": async (input: unknown) => {
-      await runHook(root, "session-end.sh", input);
+      return hookContext(await runHook(root, "session-end.sh", input));
     }
   };
 };

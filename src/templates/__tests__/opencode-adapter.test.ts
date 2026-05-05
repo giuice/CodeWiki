@@ -24,6 +24,8 @@ describe("OC-03: OpenCode plugin template stays a thin shared-hook dispatcher", 
     expect(content).toContain("pre-wiki-context.sh");
     expect(content).toContain("post-verify.sh");
     expect(content).toContain("session-end.sh");
+    expect(content).toContain("codewikiContext");
+    expect(content).toContain('stdio: ["pipe", "pipe", "ignore"]');
     expect(content).toContain("not teardown");
   });
 });
@@ -74,7 +76,11 @@ describe("OC-04: OpenCode instructions template stays concise and practical", ()
     expect(content).toContain("not query-time RAG");
     expect(content).toContain("New external source in `wiki/raw/`");
     expect(content).toContain("After a substantial coding session");
+    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain("invoke `codewiki-wiki-updater`");
+    expect(content).toContain("invoke `codewiki-verifier`");
     expect(content).toContain("Hooks provide context and change signals");
+    expect(content).toContain("discovery mechanism for invoking `codewiki-wiki-updater`");
     expect(content).toContain("### Schema Discipline");
     expect(content).toContain("confidence");
     expect(content).toContain("contested");
