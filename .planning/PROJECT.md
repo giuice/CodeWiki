@@ -2,7 +2,7 @@
 
 ## What This Is
 
-CodeWiki is a framework that installs into any AI coding tool (Claude Code, Codex, Copilot, OpenCode) and maintains a persistent, LLM-written wiki of verified project knowledge. Developers run `npx codewiki init` once — the CLI scaffolds a wiki structure and installs tool-facing integration assets into the host tool. The canonical install surface is nine standalone Skills plus shared hooks, agents, and instruction blocks. All intelligence (reading wiki, proposing updates, human approval loops) lives in markdown prompt files and shared scripts that the AI tool executes natively.
+CodeWiki is a framework that installs into any AI coding tool (Claude Code, Codex, Copilot, OpenCode) and maintains a persistent, LLM-written wiki of verified project knowledge. Developers run `npx codewiki init` once — the CLI scaffolds a wiki structure and installs tool-facing integration assets into the host tool. The canonical install surface is ten standalone Skills plus shared hooks, agents, and instruction blocks. All intelligence (reading wiki, proposing updates, human approval loops) lives in markdown prompt files and shared scripts that the AI tool executes natively.
 
 Target users: solo developers using AI coding agents who have experienced agents confidently producing broken code and want accumulated, cross-referenced, human-verified context that reduces hallucination over time.
 
@@ -77,7 +77,7 @@ Target users: solo developers using AI coding agents who have experienced agents
 | Auto-improvement uses dedicated prompts plus `_backlinks.json` | Keeps prompt context small while giving the wiki a shared ranking/maintenance primitive | Validated in Phase 3.1 |
 | Generic adapter pipeline powers `init` | Keeps tool-specific install behavior out of the command handler and makes future adapters additive | Validated in Phase 4 |
 | Install `session-end.sh` but leave it unwired in Claude | Ships the asset now while waiting for a confirmed Claude lifecycle hook for session completion | Validated in Phase 4 |
-| Install surface = nine standalone Skills in a dual-tree layout | Claude requires `.claude/skills/`; Codex, Copilot, and OpenCode use `.agents/skills/`; mixed selections write both | Validated in Phase 4.1 and extended with `codewiki-obsidian` on 2026-05-03 |
+| Install surface = ten standalone Skills in a dual-tree layout | Claude requires `.claude/skills/`; Codex, Copilot, and OpenCode use `.agents/skills/`; mixed selections write both | Validated in Phase 4.1 and extended with `codewiki-obsidian` on 2026-05-03 and `codewiki-flow` on 2026-05-05 |
 | Hook/event strategy follows each vendor's documented runtime | Correctness depends on the host's actual event model, not a uniform abstraction | Canonicalized on 2026-04-13 |
 | Local tarball smoke is the blocking pre-publish gate | `codewiki@latest` can only verify the already-published registry package, not the candidate being released | Validated in Phase 8 |
 | Runtime dependency contract remains zero | Publish hardening did not require Commander, picocolors, or any other runtime package | Validated in Phase 8 |

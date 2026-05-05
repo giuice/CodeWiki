@@ -1,5 +1,5 @@
 ---
-description: Extract knowledge from recent code changes into wiki
+description: Extracts durable CodeWiki knowledge from recent code changes, git diffs, changed files, and session outcomes. Use when substantial coding work has landed, CODEWIKI_CHANGE_CONTEXT follow-up is deferred, a session is ending, or lessons/entities/issues/decisions from implementation should be proposed for human-approved wiki updates.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 

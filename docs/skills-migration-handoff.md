@@ -10,7 +10,7 @@ This file is no longer an urgent handoff for an unfinished migration. The migrat
 
 The skills-canon migration is complete through Phase 04.1.5:
 
-- `src/templates/skills/codewiki-<name>/SKILL.md` is the source of truth for the nine CodeWiki skills
+- `src/templates/skills/codewiki-<name>/SKILL.md` is the source of truth for the ten CodeWiki skills
 - Claude installs `.claude/skills/codewiki-<name>/SKILL.md`
 - Codex, Copilot, and OpenCode selections install `.agents/skills/codewiki-<name>/SKILL.md`
 - Mixed selections that include Claude Code write both trees
@@ -20,7 +20,7 @@ The skills-canon migration is complete through Phase 04.1.5:
 
 ## The canonical rule
 
-> **CodeWiki installs nine Skills, one per focused workflow.** Not a bundled mega-skill and not a flat command-file surface. Each workflow ships as its own `SKILL.md` so tools only load the prompt they need.
+> **CodeWiki installs ten Skills, one per focused workflow.** Not a bundled mega-skill and not a flat command-file surface. Each workflow ships as its own `SKILL.md` so tools only load the prompt they need.
 
 Canonical skill set:
 
@@ -33,6 +33,7 @@ Canonical skill set:
 - `codewiki-prd`
 - `codewiki-tasks`
 - `codewiki-process`
+- `codewiki-flow`
 
 `docs/skills/wiki.md` remains a file-format reference only. It does not define CodeWiki's packaging model.
 

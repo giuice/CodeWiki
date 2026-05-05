@@ -29,7 +29,8 @@ describe("ABS-02: breakdown.md ranks undocumented entities by backlink count", (
   test("codewiki-breakdown/SKILL.md references backlinks, undocumented gaps, and ranking", async () => {
     const content = await readSkill("breakdown");
     expect(content).toContain("wiki.path");
-    expect(content).toContain("Read `_backlinks.json` from the resolved wiki root.");
+    expect(content).toContain("Read `_backlinks.json` from the resolved wiki root");
+    expect(content).toContain("scan markdown files under the resolved wiki root for `[[wikilink]]` references");
     expect(content).toContain("Read `index.md` from the resolved wiki root.");
     expect(content.toLowerCase()).toContain("undocumented");
     expect(content.toLowerCase()).toContain("rank");

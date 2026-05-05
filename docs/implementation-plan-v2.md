@@ -14,8 +14,8 @@ CodeWiki v2 is an installer-only CLI. `codewiki init` scaffolds the wiki and cop
 
 The current codebase has already completed the skills-canon migration:
 
-- Claude installs the nine skills into `.claude/skills/codewiki-<name>/SKILL.md`
-- Codex, Copilot, and OpenCode selections install the same nine skills into `.agents/skills/codewiki-<name>/SKILL.md`
+- Claude installs the ten skills into `.claude/skills/codewiki-<name>/SKILL.md`
+- Codex, Copilot, and OpenCode selections install the same ten skills into `.agents/skills/codewiki-<name>/SKILL.md`
 - Mixed selections that include Claude write both trees
 - Pack and init regression coverage verify the canonical skill assets
 
@@ -168,7 +168,7 @@ The skills canon is in place. The remaining implementation work is now about the
 
 The current doc set should stay in sync with the implementation above:
 
-- `README.md` explains the installer as a nine-skill product with `.claude/skills` and `.agents/skills` as the live install surface
+- `README.md` explains the installer as a ten-skill product with `.claude/skills` and `.agents/skills` as the live install surface
 - `docs/codewiki-project-v2.md` describes the canonical architecture and separates shipped behavior from future adapter work
 - `docs/skills-migration-handoff.md` is now a reference explaining why the dual-tree skill layout exists
 

@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 const REQUIRED_TEMPLATE_FILES = [
   "dist/templates/skills/codewiki-absorb/SKILL.md",
   "dist/templates/skills/codewiki-breakdown/SKILL.md",
+  "dist/templates/skills/codewiki-flow/SKILL.md",
   "dist/templates/skills/codewiki-ingest/SKILL.md",
   "dist/templates/skills/codewiki-lint/SKILL.md",
   "dist/templates/skills/codewiki-obsidian/SKILL.md",

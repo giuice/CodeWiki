@@ -1,5 +1,5 @@
 ---
-description: Find undocumented entities referenced in wiki and propose new pages
+description: Finds important but undocumented CodeWiki entities, concepts, decisions, lessons, or issues by scanning wikilinks, backlinks, repeated mentions, and code-backed references. Use when the wiki has thin pages, missing high-signal pages, repeated unresolved links, or the user asks to expand the knowledge graph.
 allowed-tools: [Read, Glob, Grep, Bash]
 ---
 

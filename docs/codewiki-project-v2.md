@@ -5,9 +5,9 @@
 - **Architecture rewrite.** The CLI is now a scaffolder/installer only (like GSD). All intelligence lives in markdown prompts — **installed as Skills**, plus hooks — that the AI tool executes natively. The CLI runs zero application logic at runtime.
 - **Multi-tool support updated.** All four tools (Claude Code, Codex, Copilot, OpenCode) accept Skills as the install surface for CodeWiki's commands and accept hook scripts as the install surface for automation. Adapter strategy updated with accurate config formats.
 - **PRD/Tasks/Process prompts.** First-class **Skills** adapted from the original prompts in `docs/prompts/`, not thin CLI wrappers and not loose slash-command files.
-- **CLI commands removed.** `codewiki ingest`, `codewiki query`, `codewiki lint`, `codewiki prd`, `codewiki tasks`, `codewiki status` are no longer CLI commands that run TypeScript logic. They become **Skills** inside the AI tools — one skill per focused workflow, nine total.
+- **CLI commands removed.** `codewiki ingest`, `codewiki query`, `codewiki lint`, `codewiki prd`, `codewiki tasks`, `codewiki status` are no longer CLI commands that run TypeScript logic. They become **Skills** inside the AI tools — one skill per focused workflow, ten total.
 - **Section 7 (CLI Interface) rewritten.** The CLI has exactly one command: `init`.
-- **Install surface = Skills.** The v2 PRD replaces v1's "slash commands" language throughout. CodeWiki installs **nine Skills** (one per focused workflow), not loose slash-command markdown files. `docs/skills/wiki.md` is cited as a **format reference** only — CodeWiki does not bundle subcommands into a single skill the way `wiki.md` does; each CodeWiki workflow is its own skill so the tool loads only the prompt it needs (§12 decision 8).
+- **Install surface = Skills.** The v2 PRD replaces v1's "slash commands" language throughout. CodeWiki installs **ten Skills** (one per focused workflow), not loose slash-command markdown files. `docs/skills/wiki.md` is cited as a **format reference** only — CodeWiki does not bundle subcommands into a single skill the way `wiki.md` does; each CodeWiki workflow is its own skill so the tool loads only the prompt it needs (§12 decision 8).
 
 ---
 
@@ -75,7 +75,7 @@ Solo developers using AI coding agents on real projects. Developers who have exp
 │        └── post-tool: verification prompt   │
 │        └── session-end: summary asset       │
 │                                             │
-│  Skills (9, one per focused workflow)       │
+│  Skills (10, one per focused workflow)      │
 │     ├── codewiki-ingest                     │
 │     ├── codewiki-query                      │
 │     ├── codewiki-lint                       │
@@ -84,7 +84,8 @@ Solo developers using AI coding agents on real projects. Developers who have exp
 │     ├── codewiki-obsidian                   │
 │     ├── codewiki-prd                        │
 │     ├── codewiki-tasks                      │
-│     └── codewiki-process                    │
+│     ├── codewiki-process                    │
+│     └── codewiki-flow                       │
 │                                             │
 │  Agents ─── codewiki-wiki-updater           │
 │         └── codewiki-verifier               │
@@ -102,7 +103,7 @@ The exact files depend on the `--tool` flag. Example for Claude Code:
 project-root/
 ├── .claude/
 │   ├── settings.json                         # Tool-specific hook wiring
-│   ├── skills/                               # 9 Skills — one per focused workflow
+│   ├── skills/                               # 10 Skills — one per focused workflow
 │   │   ├── codewiki-ingest/SKILL.md          # /codewiki-ingest
 │   │   ├── codewiki-query/SKILL.md           # /codewiki-query
 │   │   ├── codewiki-lint/SKILL.md            # /codewiki-lint
@@ -111,7 +112,8 @@ project-root/
 │   │   ├── codewiki-obsidian/SKILL.md        # /codewiki-obsidian
 │   │   ├── codewiki-prd/SKILL.md             # /codewiki-prd
 │   │   ├── codewiki-tasks/SKILL.md           # /codewiki-tasks
-│   │   └── codewiki-process/SKILL.md         # /codewiki-process
+│   │   ├── codewiki-process/SKILL.md         # /codewiki-process
+│   │   └── codewiki-flow/SKILL.md            # /codewiki-flow
 │   └── agents/
 │       ├── codewiki-wiki-updater.md
 │       └── codewiki-verifier.md
@@ -154,7 +156,7 @@ project-root/
 └── (rest of project)
 ```
 
-Skills directories are verified for all four tools (research completed 2026-04-11). Claude Code reads `.claude/skills/<name>/SKILL.md` only — it does **not** honor `.agents/skills/`. OpenCode and Copilot read `.claude/skills/`, `.agents/skills/`, and their own paths. Codex reads `.agents/skills/` **only** — it does not honor `.claude/skills/`. CodeWiki therefore installs to **two trees** whenever the `--tool` selection crosses that boundary: `.claude/skills/codewiki-<name>/SKILL.md` (for Claude Code) and `.agents/skills/codewiki-<name>/SKILL.md` (for Codex, Copilot, OpenCode). Single-tool installs write only the relevant tree. The skill **file format** (one SKILL.md per focused workflow with YAML frontmatter — `name`, `description`, and `argument-hint` only when the skill requires positional input) is uniform across all four; only the on-disk directory varies, and when both trees are needed the 9 files are plain-copied into each (no symlinks, for Windows compatibility). Instruction files remain tool-specific: `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex/OpenCode, `.github/copilot-instructions.md` for Copilot.
+Skills directories are verified for all four tools (research completed 2026-04-11). Claude Code reads `.claude/skills/<name>/SKILL.md` only — it does **not** honor `.agents/skills/`. OpenCode and Copilot read `.claude/skills/`, `.agents/skills/`, and their own paths. Codex reads `.agents/skills/` **only** — it does not honor `.claude/skills/`. CodeWiki therefore installs to **two trees** whenever the `--tool` selection crosses that boundary: `.claude/skills/codewiki-<name>/SKILL.md` (for Claude Code) and `.agents/skills/codewiki-<name>/SKILL.md` (for Codex, Copilot, OpenCode). Single-tool installs write only the relevant tree. The skill **file format** (one SKILL.md per focused workflow with YAML frontmatter — `name`, `description`, and `argument-hint` only when the skill requires positional input) is uniform across all four; only the on-disk directory varies, and when both trees are needed the 10 files are plain-copied into each (no symlinks, for Windows compatibility). Instruction files remain tool-specific: `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex/OpenCode, `.github/copilot-instructions.md` for Copilot.
 
 ### 4.4 Wiki Page Types
 
@@ -345,9 +347,9 @@ Agent proposes fixes. Human approves. Rebuilds `wiki/_backlinks.json` after chan
 
 ### 6.1 What `init` Installs Per Tool
 
-CodeWiki's canonical adapter design uses three install surfaces: **Skills** (9 `SKILL.md` files, one per focused workflow), **hook handlers** (shared shell scripts dispatched by each tool's native event surface), and **supporting agents** (wiki-updater and verifier profiles in each tool's native format). The shared-skills installer writes `.agents/skills/codewiki-<name>/SKILL.md` for Codex, Copilot, and OpenCode selections, while each shipped adapter installs its hook, instruction, and agent surfaces where the host tool supports them. The table below shows the canonical per-tool layout the current code follows.
+CodeWiki's canonical adapter design uses three install surfaces: **Skills** (10 `SKILL.md` files, one per focused workflow), **hook handlers** (shared shell scripts dispatched by each tool's native event surface), and **supporting agents** (wiki-updater and verifier profiles in each tool's native format). The shared-skills installer writes `.agents/skills/codewiki-<name>/SKILL.md` for Codex, Copilot, and OpenCode selections, while each shipped adapter installs its hook, instruction, and agent surfaces where the host tool supports them. The table below shows the canonical per-tool layout the current code follows.
 
-| Tool | Hooks | Skills (9 total, one per focused workflow) | Instructions | Agents |
+| Tool | Hooks | Skills (10 total, one per focused workflow) | Instructions | Agents |
 |------|-------|-----------------------------------|--------------|--------|
 | **Claude Code** | `.claude/settings.json` JSON config → `PreToolUse` + `PostToolUse` matcher `Edit\|Write`. `PreCompact` candidate for `session-end.sh` (Phase 4.1 evaluation). `SessionEnd` dormant. | `.claude/skills/codewiki-<name>/SKILL.md` (Claude Code reads `.claude/` only, not `.agents/`) | Appends to `CLAUDE.md` | `.claude/agents/codewiki-*.md` |
 | **Codex** | `.codex/hooks.json` plus `.codex/config.toml` feature enablement. `UserPromptSubmit` injects prompt-level wiki context; `PreToolUse`/`PostToolUse` can match `apply_patch` via `Edit\|Write` aliases; `Stop` can force a continuation at turn completion. Codex-specific wrappers are required because stdout/JSON contracts differ by event. `session-end.sh` remains dormant for true teardown semantics. | `.agents/skills/codewiki-<name>/SKILL.md` (Codex reads `.agents/` only) | Appends to `AGENTS.md` | `.codex/agents/codewiki-*.toml` |
@@ -385,8 +387,8 @@ CodeWiki's canonical adapter design uses three install surfaces: **Skills** (9 `
 A full adapter in the v2 design installs:
 
 - **Hook scripts** — Shell scripts in `.codewiki/hooks/` (`pre-wiki-context.sh`, `post-verify.sh`, `session-end.sh`). Shared across tools. Claude Code and Copilot can point JSON hook config directly at shared scripts where their stdout contracts allow it. Codex must use thin event-specific wrappers for events whose stdout must be JSON (`PostToolUse`, `Stop`) or whose stdout is ignored (`PreToolUse`). For OpenCode, a TypeScript plugin file at `.opencode/plugins/codewiki.ts` subscribes to events and shells out to the scripts. `session-end.sh` ships on every tool but is only wired where the tool exposes a viable session-lifecycle event (see §5.2.4).
-- **Skills** — Nine SKILL.md files (one per focused workflow) installed to the **dual-tree canonical layout**: `.claude/skills/codewiki-<name>/SKILL.md` when Claude Code is selected, `.agents/skills/codewiki-<name>/SKILL.md` when Codex, Copilot, or OpenCode are selected. When both conditions apply, both trees get the same 9 files (plain copy, no symlinks). Single source of truth: `src/templates/skills/codewiki-<name>/SKILL.md`. Same prompt content everywhere; the adapter just decides where to copy.
-- **System instructions** — Appended to the tool's instruction file (CLAUDE.md, AGENTS.md, copilot-instructions.md). Tells the agent about the wiki, the verification loop, and how to invoke the nine skills.
+- **Skills** — Ten SKILL.md files (one per focused workflow) installed to the **dual-tree canonical layout**: `.claude/skills/codewiki-<name>/SKILL.md` when Claude Code is selected, `.agents/skills/codewiki-<name>/SKILL.md` when Codex, Copilot, or OpenCode are selected. When both conditions apply, both trees get the same 10 files (plain copy, no symlinks). Single source of truth: `src/templates/skills/codewiki-<name>/SKILL.md`. Same prompt content everywhere; the adapter just decides where to copy.
+- **System instructions** — Appended to the tool's instruction file (CLAUDE.md, AGENTS.md, copilot-instructions.md). Tells the agent about the wiki, the verification loop, and how to invoke the ten skills.
 - **Agents** (where supported) — Subagent definitions for wiki-updater and verifier workflows. Format is tool-specific: Claude Code and OpenCode use markdown agent manifests, Codex uses project-scoped `.toml` custom-agent files, and Copilot uses `.github/agents/*.agent.md` custom-agent profiles.
 
 ### 6.3 Tool Auto-Detection
@@ -431,7 +433,7 @@ The original v1 had `codewiki ingest`, `codewiki query`, `codewiki lint`, etc. a
 - It adds a middleware layer between the agent and the wiki, losing the AI's ability to reason about context.
 - It can't do the interactive parts (ask clarifying questions, propose wiki updates, wait for human approval) — those require the AI tool's conversation loop.
 
-The nine Skills are pure markdown prompts (one SKILL.md per focused workflow). The AI tool reads them and executes the workflow natively. The wiki is just markdown files the agent can read and write directly.
+The ten Skills are pure markdown prompts (one SKILL.md per focused workflow). The AI tool reads them and executes the workflow natively. The wiki is just markdown files the agent can read and write directly.
 
 ## 8. Page Templates
 
@@ -502,7 +504,7 @@ lint:
 
 7. **Shared hook scripts with tool wrappers where needed.** Hook scripts live in `.codewiki/hooks/` and remain the single source of portable behavior. Tool configs point to them directly only when the host hook event accepts the script's stdout contract. Codex events with JSON-only or ignored stdout use thin wrappers that translate shared script output into Codex's current event schema.
 
-8. **Install surface → Nine Skills, one per focused workflow (not a single bundled skill, not loose slash-command files).** CodeWiki ships exactly nine Skills — `codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process` — each as its own SKILL.md with YAML frontmatter. This is explicitly **not** the `docs/skills/wiki.md` model of "one skill with many subcommands under one SKILL.md"; CodeWiki cites `wiki.md` as a file-format reference only, not as a packaging model. Rationale: (a) **token efficiency** — the AI tool only loads the prompt it needs per invocation; a bundled skill pays the full token cost even for a single query; (b) **discoverability** — each skill's frontmatter `description` surfaces independently in the tool's skill index so the agent can pick the right workflow without reading an unrelated prompt; (c) **independent evolution** — a change to `absorb` doesn't force a re-review of the entire bundled prompt; (d) **portability** — the same per-workflow structure maps cleanly to any tool's skill directory once the directory path is confirmed per tool. This decision supersedes v1's "slash commands" language throughout the doc.
+8. **Install surface → Ten Skills, one per focused workflow (not a single bundled skill, not loose slash-command files).** CodeWiki ships exactly ten Skills — `codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`, `codewiki-flow` — each as its own SKILL.md with YAML frontmatter. This is explicitly **not** the `docs/skills/wiki.md` model of "one skill with many subcommands under one SKILL.md"; CodeWiki cites `wiki.md` as a file-format reference only, not as a packaging model. Rationale: (a) **token efficiency** — the AI tool only loads the prompt it needs per invocation; a bundled skill pays the full token cost even for a single query; (b) **discoverability** — each skill's frontmatter `description` surfaces independently in the tool's skill index so the agent can pick the right workflow without reading an unrelated prompt; (c) **independent evolution** — a change to `absorb` doesn't force a re-review of the entire bundled prompt; (d) **portability** — the same per-workflow structure maps cleanly to any tool's skill directory once the directory path is confirmed per tool. This decision supersedes v1's "slash commands" language throughout the doc.
 
 9. **Backlink index → JSON file, not computed on the fly.** `wiki/_backlinks.json` is a pre-computed reverse-link map maintained by absorb/ingest/lint. This avoids scanning all wiki pages on every query — the agent reads one file to find high-importance pages. Inspired by Farzaa's `_backlinks.json` pattern.
 

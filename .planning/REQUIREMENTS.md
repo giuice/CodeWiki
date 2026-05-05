@@ -25,7 +25,7 @@
 
 ### Prompt Files (Skills)
 
-> **Install surface canon (2026-05-03):** CodeWiki installs **nine Skills**, one per focused workflow (`ingest`, `query`, `lint`, `absorb`, `breakdown`, `obsidian`, `prd`, `tasks`, `process`). Each skill is its own `SKILL.md` with YAML frontmatter (`name`, `description`, and `argument-hint` only when the skill requires positional input), following `docs/skills/wiki.md` as a file-format reference only (not as a packaging model — CodeWiki does NOT bundle subcommands into one skill). See `docs/codewiki-project-v2.md` §12 Decision 8.
+> **Install surface canon (2026-05-03, updated 2026-05-05):** CodeWiki installs **ten Skills**, one per focused workflow (`ingest`, `query`, `lint`, `absorb`, `breakdown`, `obsidian`, `prd`, `tasks`, `process`, `flow`). Each skill is its own `SKILL.md` with YAML frontmatter (`name`, `description`, and `argument-hint` only when the skill requires positional input), following `docs/skills/wiki.md` as a file-format reference only (not as a packaging model — CodeWiki does NOT bundle subcommands into one skill). See `docs/codewiki-project-v2.md` §12 Decision 8.
 
 - [x] **CMD-01**: `codewiki-ingest` skill — instructs agent to digest a raw source into wiki
 - [x] **CMD-02**: `codewiki-query` skill — instructs agent to search wiki and synthesize answer
@@ -39,8 +39,8 @@
 ### Skills Migration
 
 - [x] **SM-01**: Source templates live under `src/templates/skills/codewiki-<name>/SKILL.md`; each migrated skill preserves the existing prompt behavior and exposes `name` + `description` frontmatter, with `argument-hint` present only for skills that take required positional input
-- [x] **SM-02**: Claude installs 9 skills to `.claude/skills/codewiki-<name>/SKILL.md`
-- [x] **SM-03**: When non-Claude tools are selected, the installer also writes the same 9 skills to `.agents/skills/codewiki-<name>/SKILL.md`; Claude-only installs do not create the `.agents/skills/` tree
+- [x] **SM-02**: Claude installs 10 skills to `.claude/skills/codewiki-<name>/SKILL.md`
+- [x] **SM-03**: When non-Claude tools are selected, the installer also writes the same 10 skills to `.agents/skills/codewiki-<name>/SKILL.md`; Claude-only installs do not create the `.agents/skills/` tree
 - [x] **SM-04**: Regression coverage asserts skill install paths in init tests and pack coverage for `dist/templates/skills/codewiki-ingest/SKILL.md`
 - [x] **SM-05**: Planning artifacts (`ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, and active phase contexts/plans) reflect the skills canon and parser-safe split structure
 - [x] **SM-06**: Project docs (README, implementation docs, handoff docs) reflect the skills canon and dual-tree install rules
@@ -68,7 +68,7 @@
 
 ### Claude Code Adapter
 
-- [x] **CC-01**: Installs 9 skills to `.claude/skills/codewiki-<name>/SKILL.md`
+- [x] **CC-01**: Installs 10 skills to `.claude/skills/codewiki-<name>/SKILL.md`
 - [x] **CC-02**: Installs 2 subagents to `.claude/agents/`
 - [x] **CC-03**: Deep-merges PreToolUse/PostToolUse hooks into `.claude/settings.json` without clobbering existing hooks
 - [x] **CC-04**: Appends CodeWiki instructions to `CLAUDE.md` using `<!-- codewiki:start/end -->` markers

@@ -100,7 +100,7 @@ Plans:
 **Depends on**: Phase 3.1
 **Requirements**: CLI-01, CLI-02, CLI-03, CLI-04, CLI-05, CLI-06, CLI-07, CC-01, CC-02, CC-03, CC-04, CC-05
 **Success Criteria** (what must be TRUE):
-  1. Running `npx codewiki init` in a project with `.claude/` present creates all wiki directories, installs 9 skills to `.claude/skills/codewiki-<name>/`, installs 2 agents to `.claude/agents/`, and prints a structured install report
+  1. Running `npx codewiki init` in a project with `.claude/` present creates all wiki directories, installs 10 skills to `.claude/skills/codewiki-<name>/`, installs 2 agents to `.claude/agents/`, and prints a structured install report
   2. Running `npx codewiki init --tool claude-code` on a project that also has `.codex/` installs only the Claude Code adapter (not Codex)
   3. Running `npx codewiki init` twice without `--force` produces no duplicate hook entries in `.claude/settings.json` and no duplicate `<!-- codewiki:start -->` blocks in `CLAUDE.md`
   4. Running `npx codewiki init --force` replaces existing CodeWiki marker sections in `CLAUDE.md` without touching content outside the markers
@@ -108,7 +108,7 @@ Plans:
 **Plans:** 3/3 plans complete
 Plans:
 - [x] 04-01-PLAN.md — Adapter infrastructure (types, base helpers, registry, sectioned reporter)
-- [x] 04-02-PLAN.md — Claude Code adapter (9 skills, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
+- [x] 04-02-PLAN.md — Claude Code adapter (10 skills, 2 agents, 3 hooks, settings.json merge, CLAUDE.md merge)
 - [x] 04-03-PLAN.md — Rewrite init.ts (detection, interactive fallback, scaffold, adapter orchestration)
 
 ### Phase 4.1: Skills Migration (INSERTED)
@@ -150,8 +150,8 @@ Plans:
 **Depends on**: Phase 4.1.1
 **Requirements**: SM-02, SM-03
 **Success Criteria** (what must be TRUE):
-  1. `npx codewiki init --tool claude-code` installs `.claude/skills/codewiki-<name>/SKILL.md` for all nine skills
-  2. Tool selections including Codex, Copilot, or OpenCode install the same nine skills into `.agents/skills/codewiki-<name>/SKILL.md`
+  1. `npx codewiki init --tool claude-code` installs `.claude/skills/codewiki-<name>/SKILL.md` for all ten skills
+  2. Tool selections including Codex, Copilot, or OpenCode install the same ten skills into `.agents/skills/codewiki-<name>/SKILL.md`
   3. Claude-only installs do not create a redundant `.agents/skills/` tree
   4. Hook wiring, agent installation, and instruction-file merging remain unchanged by the skill-path migration
 **Plans:** 3 plans
@@ -218,7 +218,7 @@ Plans:
 **Depends on**: Phase 5
 **Requirements**: OC-01, OC-02, OC-03, OC-04
 **Success Criteria** (what must be TRUE):
-  1. Running `npx codewiki init` on a project with OpenCode selected installs 9 skills to `.agents/skills/codewiki-<name>/SKILL.md` and 2 agents to `.opencode/agents/`
+  1. Running `npx codewiki init` on a project with OpenCode selected installs 10 skills to `.agents/skills/codewiki-<name>/SKILL.md` and 2 agents to `.opencode/agents/`
   2. The resulting `.opencode/plugins/codewiki.ts` dispatches `tool.execute.before` to `pre-wiki-context.sh`, `file.edited` to `post-verify.sh`, and `session.idle` to `session-end.sh`
   3. OpenCode documentation and adapter code treat `session.idle` as a turn-end or assistant-idle signal, not literal session teardown semantics
   4. Re-running `npx codewiki init` twice does not create duplicate plugin wiring, duplicate OpenCode agent files, or duplicate marker sections in `AGENTS.md`

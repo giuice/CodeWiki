@@ -1,5 +1,5 @@
 ---
-description: Generate a Product Requirements Document from a feature idea
+description: Drafts an implementation-ready Product Requirements Document from a feature idea using repository and wiki context. Use when the user wants to plan a new feature, clarify product intent, define scope before implementation, capture acceptance criteria, or start the CodeWiki PRD -> tasks -> process development workflow.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task]
 argument-hint: <feature-description>
 ---
@@ -8,8 +8,8 @@ argument-hint: <feature-description>
 
 <purpose>
 Turn a feature idea into a concrete Product Requirements Document that fits the current codebase.
-Use the existing repository and wiki as context, preserve the original clarifying-question workflow,
-and default to interactive mode and support `--fast` for one-pass drafting.
+Use the existing repository and wiki as context. Default to an interactive clarification flow, with
+`--fast` available for one-pass drafting when the user explicitly asks for speed.
 </purpose>
 
 <process>
@@ -23,13 +23,13 @@ and default to interactive mode and support `--fast` for one-pass drafting.
 - If `wiki.tasks_path` is missing, use `.codewiki/tasks/`.
 - Create the directory if it does not exist.
 
-## Step 5: Choose the interaction mode
-- If `` contains `--fast`, switch to fast mode.
+## Step 3: Choose the interaction mode
+- If `$ARGUMENTS` contains `--fast`, switch to fast mode.
 - Otherwise default to interactive mode.
 - In interactive mode, ask clarifying questions before writing the PRD. Use lettered or numbered
   options so the user can answer quickly.
 
-## Step 5: Research current state with subagents
+## Step 4: Research current state with subagents
 - Use `Task` to spawn parallel research agents:
   1. one agent reads architecture, schema, and project docs
   2. one agent searches the codebase for related features, patterns, and reusable modules
@@ -48,7 +48,7 @@ and default to interactive mode and support `--fast` for one-pass drafting.
   - edge cases
 - In fast mode, skip the clarifying questions and make reasonable assumptions explicit in the PRD.
 
-## Step 5: Draft the PRD
+## Step 6: Draft the PRD
 - Use this structure:
   1. Introduction / Overview
   2. Goals
@@ -61,12 +61,12 @@ and default to interactive mode and support `--fast` for one-pass drafting.
   9. Open Questions
 - Keep requirements explicit, unambiguous, and implementation-ready without junior-developer framing.
 
-## Step 6: Save the PRD
+## Step 7: Save the PRD
 - Save the document as `[task-directory]/[n]-prd-[feature-name].md`.
 - Use a zero-padded 4-digit sequence such as `0001-prd-example-feature.md`.
 - If a filename collision exists, increment the sequence rather than overwriting.
 
-## Step 7: Boundaries
+## Step 8: Boundaries
 - Do not start implementing the feature from this command.
 - Do not create commits automatically; the user controls git operations.
 </process>

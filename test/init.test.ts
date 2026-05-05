@@ -9,7 +9,18 @@ function countOccurrences(value: string, pattern: string): number {
   return value.split(pattern).length - 1;
 }
 
-const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "obsidian", "prd", "process", "query", "tasks"] as const;
+const CANONICAL_SKILLS = [
+  "absorb",
+  "breakdown",
+  "flow",
+  "ingest",
+  "lint",
+  "obsidian",
+  "prd",
+  "process",
+  "query",
+  "tasks"
+] as const;
 
 function assertInstalledSkillTree(cwd: string, baseDir: string): void {
   for (const skill of CANONICAL_SKILLS) {

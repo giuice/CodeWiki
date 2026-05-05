@@ -1,5 +1,5 @@
 ---
-description: Check wiki for contradictions, orphans, stale content, and drift
+description: Audits CodeWiki health for contradictions, broken wikilinks, orphan pages, stale code claims, source drift, frontmatter/tag problems, oversized pages, and log/index issues. Use when wiki drift is suspected, contested knowledge needs review, a periodic health check is due, or large batches of wiki changes need validation.
 allowed-tools: [Read, Glob, Grep, Bash]
 ---
 

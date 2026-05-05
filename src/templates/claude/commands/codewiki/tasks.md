@@ -1,5 +1,5 @@
 ---
-description: Generate implementation tasks from a PRD
+description: Converts a CodeWiki PRD into parent tasks, actionable sub-tasks, and relevant files for implementation. Use when codewiki-prd has produced a PRD, a PRD exists but no task list exists, the user asks to break down work, or codewiki-process needs an execution-ready task list.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task]
 argument-hint: <prd-file-path>
 ---
@@ -8,7 +8,8 @@ argument-hint: <prd-file-path>
 
 <purpose>
 Convert a PRD into an implementation task list that reflects both the requested behavior and the
-current codebase. Preserve the original two-phase interaction model while also defaulting to interactive mode with `--fast` available for one-pass generation.
+current codebase. Default to the two-phase parent-task then sub-task interaction model, with
+`--fast` available for one-pass generation when the user explicitly asks for speed.
 </purpose>
 
 <process>
@@ -17,17 +18,20 @@ current codebase. Preserve the original two-phase interaction model while also d
 - Use `wiki.tasks_path` as the PRD/task directory when present.
 - If `wiki.tasks_path` is missing, use `.codewiki/tasks/`.
 
-## Step 5: Resolve the PRD
+## Step 2: Resolve the PRD
 - Treat `$ARGUMENTS` as the PRD path.
+- Ignore mode flags such as `--fast` when resolving the path.
 - If the path is relative and does not exist, also try resolving it under the task directory.
 - If no path was provided, search the task directory for `*-prd-*.md`.
+- If exactly one PRD exists, use it.
+- If multiple PRDs exist, prefer the most recently modified PRD and tell the user which one you chose. If that choice is ambiguous or risky, ask the user which PRD file to use.
 - Read the PRD in full before generating tasks.
 
-## Step 5: Choose the interaction mode
-- If `` contains `--fast`, switch to fast mode.
+## Step 3: Choose the interaction mode
+- If `$ARGUMENTS` contains `--fast`, switch to fast mode.
 - Otherwise default to interactive mode.
 
-## Step 5: Analyze the current codebase with subagents
+## Step 4: Analyze the current codebase with subagents
 - Use `Task` for a two-agent split:
   1. an analyze agent reads the PRD, project config, and existing feature patterns
   2. a generate agent turns that analysis into the task breakdown
@@ -38,23 +42,23 @@ current codebase. Preserve the original two-phase interaction model while also d
 - Base them on the PRD, existing architecture, reusable code, and likely test coverage needs.
 - Keep the task count practical and implementation-oriented.
 
-## Step 5: Preserve the interactive gate
+## Step 6: Preserve the interactive gate
 - In interactive mode, stop after the parent tasks and tell the user:
   "I have generated the high-level tasks based on the PRD. Ready to generate the sub-tasks?
   Respond with 'Go' to proceed."
 - Wait for "Go" before expanding the task list.
 - In fast mode, skip the pause and generate parent tasks plus sub-tasks in one pass.
 
-## Step 6: Generate sub-tasks and relevant files
+## Step 7: Generate sub-tasks and relevant files
 - Break each parent task into smaller actionable sub-tasks.
 - Add a `Relevant Files` section with expected implementation and test files.
 - Note reusable utilities, patterns, and constraints that matter to execution.
 
-## Step 7: Save the task list
+## Step 8: Save the task list
 - Save the file to `[task-directory]/tasks-[prd-file-name].md`.
 - Keep the output in Markdown and preserve task numbering.
 
-## Step 8: Boundaries
+## Step 9: Boundaries
 - Do not create commits automatically; the user controls git operations.
 - Keep the final task list aligned to the PRD instead of speculative stretch work.
 </process>
