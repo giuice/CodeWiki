@@ -40,17 +40,17 @@ flowchart TD
 
   subgraph Plan["<b>3. PLANEJAR A MUDANÇA</b>"]
     direction LR
-    P1["codewiki-prd<br/>Rascunha o PRD da feature"] --> P2["codewiki-tasks<br/>Gera tarefas-pai + subtarefas"]
+    P1["codewiki-prd<br/>Rascunha o PRD da feature"] --> P2["codewiki-tasks<br/>Gera fases + tarefas"]
   end
 
   Plan --> Build
 
   subgraph Build["<b>4. EXECUTAR TAREFAS</b>"]
     direction TB
-    B1["codewiki-process<br/>Escolhe uma subtarefa"] --> B2["hook pre-wiki-context<br/>injeta contexto relevante da wiki"]
+    B1["codewiki-process<br/>Escolhe uma tarefa"] --> B2["hook pre-wiki-context<br/>pode injetar contexto curto"]
     B2 --> B3["Agente edita código<br/>e roda verificação"]
-    B3 --> B4["hook post-verify emite<br/>CODEWIKI_CHANGE_CONTEXT"]
-    B4 --> B5["wiki-updater propõe<br/>lições, entidades, problemas"]
+    B3 --> B4["hook post-verify registra<br/>pendência de absorb"]
+    B4 --> B5["limite de fase ou absorb explícito<br/>aciona wiki-updater"]
     B5 --> B6{"Aprovar escritas na wiki?"}
     B6 -- "Sim" --> B7["Atualizar páginas da wiki,<br/>backlinks, log"]
     B6 -- "Não" --> B8["Descartar proposta da wiki"]
@@ -62,7 +62,7 @@ flowchart TD
 
   subgraph Compound["<b>5. ACUMULAR CONHECIMENTO</b>"]
     direction LR
-    C1["resumo session-end<br/>expõe mudanças da sessão"] --> C2["codewiki-absorb<br/>extrai conhecimento durável dos diffs"]
+    C1["fase concluída ou absorb explícito<br/>lê estado pendente"] --> C2["codewiki-absorb<br/>extrai conhecimento durável dos diffs"]
     C2 --> C3["codewiki-breakdown<br/>preenche páginas referenciadas, mas ausentes"]
   end
 
@@ -87,9 +87,9 @@ flowchart TD
 
 1. **Setup**: Rode `npx @giuice/codewiki init` uma vez. Ele cria a wiki e instala os assets de integração atualmente disponíveis para o conjunto de ferramentas selecionado.
 2. **Alimentar conhecimento**: Coloque documentos existentes em `wiki/raw/` e rode `codewiki-ingest` para digeri-los em páginas da wiki. O agente propõe; você aprova.
-3. **Planejar uma feature**: Rode `codewiki-prd` com uma ideia de feature. O agente rascunha o PRD, então `codewiki-tasks` transforma isso em uma decomposição de tarefas.
-4. **Construir**: Rode `codewiki-process`. O agente trabalha pelas tarefas uma subtarefa por vez. `pre-wiki-context.sh` injeta contexto relevante da wiki antes das edições, e `post-verify.sh` emite contexto estruturado de mudanças para que o fluxo wiki-updater possa propor atualizações direcionadas na wiki.
-5. **Acumular**: Depois de uma sessão de código relevante, use `codewiki-absorb` para extrair lições, atualizações de entidades e problemas a partir dos diffs recentes. Depois rode `codewiki-breakdown` periodicamente para criar páginas importantes ausentes a partir de referências repetidas.
+3. **Planejar uma feature**: Rode `codewiki-prd` com uma ideia de feature. O agente rascunha o PRD, então `codewiki-tasks` transforma isso em fases com tarefas executáveis.
+4. **Construir**: Rode `codewiki-process`. O agente trabalha uma tarefa por vez dentro da fase atual. Hooks registram pendências de absorb em `.codewiki/state/`; qualquer contexto visível vindo de hook é opcional e depende do host.
+5. **Acumular**: Em uma fase concluída ou pedido explícito de absorb, use `codewiki-absorb` para extrair lições, atualizações de entidades e problemas a partir dos diffs recentes e estado pendente. Depois rode `codewiki-breakdown` periodicamente para criar páginas importantes ausentes a partir de referências repetidas.
 6. **Manter**: Use `codewiki-query` antes de começar trabalhos parecidos, e rode `codewiki-lint` regularmente para encontrar contradições, páginas órfãs, claims obsoletas, artigos inchados e links cruzados ausentes.
 
 ### Ordem Operacional Recomendada
@@ -97,9 +97,9 @@ flowchart TD
 1. Rode `npx @giuice/codewiki init` uma vez por repositório.
 2. Coloque material-fonte existente em `wiki/raw/` e rode `codewiki-ingest` até a wiki refletir o estado atual do projeto.
 3. Para trabalho novo, rode `codewiki-prd` e depois `codewiki-tasks` antes da implementação.
-4. Execute o trabalho por `codewiki-process` para que a lista de tarefas, verificação, commits e propostas de wiki via hooks fiquem alinhados.
-5. Revise toda proposta de wiki produzida pelo fluxo post-verify. Nada deve ser escrito em `wiki/` sem aprovação explícita.
-6. Ao fim de uma sessão substancial, rode `codewiki-absorb` se o resumo da sessão ainda não tiver exposto a proposta correta.
+4. Execute o trabalho por `codewiki-process` para que o plano de fases, verificação, commits e estado pendente de absorb fiquem alinhados.
+5. Revise toda proposta de wiki produzida por absorb ou wiki-updater. Nada deve ser escrito em `wiki/` sem aprovação explícita.
+6. Em uma fase concluída ou ponto explícito de handoff, rode `codewiki-absorb` se o estado pendente ou os diffs recentes contiverem conhecimento durável.
 7. Use `codewiki-breakdown`, `codewiki-lint` e `codewiki-query` como o loop contínuo de manutenção entre features.
 
 ## Arquitetura
@@ -151,10 +151,12 @@ project-root/
 │   │   ├── issue.md
 │   │   ├── query.md
 │   │   └── source-summary.md
-│   └── hooks/                        # Scripts de hook compartilhados
+│   ├── hooks/                        # Scripts de hook compartilhados
 │       ├── pre-wiki-context.sh
 │       ├── post-verify.sh
 │       └── session-end.sh
+│   ├── state/                        # Diagnóstico de hooks e pendências de absorb
+│   └── tasks/                        # PRDs e planos de fases
 ├── wiki/
 │   ├── SCHEMA.md
 │   ├── raw/                         # Documentos-fonte imutáveis curados por humanos
@@ -284,9 +286,9 @@ CodeWiki inclui um `SKILL.md` por workflow lógico. A UI de invocação muda por
 | `codewiki-breakdown` | Encontrar entidades importantes ainda não documentadas por contagem de backlinks/referências e propor novas páginas |
 | `codewiki-obsidian` | Configurar e auditar a wiki como vault compatível com Obsidian, com assets, wikilinks e frontmatter estáveis |
 | `codewiki-prd` | Rascunhar um PRD por perguntas de esclarecimento e salvar em `.codewiki/tasks/` |
-| `codewiki-tasks` | Gerar uma decomposição de tarefas a partir de um PRD com estrutura de checklist |
-| `codewiki-process` | Trabalhar pelas tarefas uma subtarefa por vez, com verificação e higiene limpa de commits |
-| `codewiki-flow` | Escolher a skill CodeWiki correta para setup, ingestão, consulta, feature work, follow-up de contexto de mudança, absorção, breakdown e lint |
+| `codewiki-tasks` | Gerar fases e tarefas executáveis a partir de um PRD com estrutura de checklist |
+| `codewiki-process` | Trabalhar uma tarefa por vez dentro das fases, com verificação e higiene limpa de commits |
+| `codewiki-flow` | Escolher a skill CodeWiki correta para setup, ingestão, consulta, feature work, pendências de absorb, absorção, breakdown e lint |
 
 ## Hooks
 
@@ -294,11 +296,11 @@ Scripts shell compartilhados ficam em `.codewiki/hooks/`:
 
 | Hook | Objetivo |
 | --- | --- |
-| `pre-wiki-context.sh` | Lê `wiki/index.md`, encontra páginas relevantes ao trabalho prestes a acontecer e expõe contexto para o agente |
-| `post-verify.sh` | Emite contexto estruturado de mudanças para que a ferramenta possa rodar o fluxo wiki-updater após trabalho verificado |
-| `session-end.sh` | Produz um resumo leve da sessão que pode alimentar uma passada de absorb |
+| `pre-wiki-context.sh` | Emite contexto curto da wiki só para prompts wiki-relevantes; a entrega pelo host é consultiva |
+| `post-verify.sh` | Registra sinais pequenos de absorb pendente em `.codewiki/state/pending-absorb.jsonl` |
+| `session-end.sh` | Registra estado de mudanças não commitadas sem imprimir resumo recorrente |
 
-Cada adapter mapeia esses scripts compartilhados para o modelo de integração da ferramenta hospedeira.
+Cada adapter mapeia esses scripts compartilhados para o modelo de integração da ferramenta hospedeira. O processamento de saída de hooks varia por host e runtime, então CodeWiki trata `.codewiki/state/` como o handoff confiável.
 
 ## Agentes
 
@@ -337,7 +339,7 @@ A wiki em si é independente de ferramenta. O instalador mantém o conteúdo dos
 - Atualizados os workflows de ingest, query, lint, absorb e breakdown para que agentes possam pular fontes sem mudança, expor claims fracas ou contestadas, salvar respostas substanciais de query após aprovação e executar checks mais programáticos de saúde da wiki.
 - Atualizados os agentes verifier e wiki-updater para checar frontmatter, drift de tags, confidence, claims contestadas, hashes de fontes, regras de ciclo de vida de páginas e manutenção obrigatória de index/log/backlinks.
 - Adicionada cobertura de testes para o scaffold expandido, skills geradas, mirrors de comandos Claude e templates de agentes multi-ferramenta.
-- Adicionada `codewiki-flow` como a décima skill do CodeWiki, com roteamento de ciclo de vida entre ingestão, consulta, planejamento, execução de tarefas, absorção da wiki, breakdown, lint e follow-up de contexto de mudança via hook.
+- Adicionada `codewiki-flow` como a décima skill do CodeWiki, com roteamento de ciclo de vida entre ingestão, consulta, planejamento, execução de tarefas, absorção da wiki, breakdown, lint e pendências de absorb.
 - Adicionada `codewiki-obsidian`, com orientação para vault Obsidian sobre `raw/assets/`, wikilinks, frontmatter compatível com Dataview, navegação pelo grafo e migração segura de vaults existentes.
 - Alteradas as seções de instruções gerenciadas e os assets copiados dos adapters para serem atualizados em reinstalações sem exigir `--force`, então instalações existentes recebem instruções, skills, hooks e agentes CodeWiki atualizados enquanto arquivos protegidos do scaffold e texto de usuário fora dos marcadores são preservados.
 

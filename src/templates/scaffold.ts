@@ -10,6 +10,7 @@ export function scaffoldDirectories(_tools: readonly SupportedTool[]): string[] 
   return [
     ".codewiki/templates",
     ".codewiki/hooks",
+    ".codewiki/state",
     ".codewiki/tasks",
     "wiki/raw/articles",
     "wiki/raw/papers",

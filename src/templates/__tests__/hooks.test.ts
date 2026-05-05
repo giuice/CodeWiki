@@ -1,10 +1,14 @@
 import { readFile } from "node:fs/promises";
 import { execSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 import { describe, expect, test } from "vitest";
 
 const HOOKS_DIR = path.resolve("src/templates/hooks");
+const LEGACY_CHANGE_CONTEXT = ["CODEWIKI", "CHANGE", "CONTEXT"].join("_");
+const LEGACY_END_CHANGE_CONTEXT = ["END", "CODEWIKI", "CHANGE", "CONTEXT"].join("_");
 
 async function readHook(name: string): Promise<string> {
   return readFile(path.join(HOOKS_DIR, name), "utf8");
@@ -46,28 +50,39 @@ describe("HOOK-02: post-verify.sh exits 0 with empty/malformed JSON", () => {
     expect(exitCode).toBe("EXIT:0");
   });
 
-  test("script contains structured change context output pattern", async () => {
+  test("script records pending absorb state instead of printing change context", async () => {
     const content = await readHook("post-verify.sh");
-    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
-    expect(content).toContain("END_CODEWIKI_CHANGE_CONTEXT");
-    expect(content).toContain("codewiki-wiki-updater");
-    expect(content).toContain("Required next step for the host agent");
-    expect(content).toContain("codewiki-verifier");
-    expect(content).toContain("codewiki-absorb");
+    expect(content).toContain("pending-absorb.jsonl");
+    expect(content).toContain("hooks-debug.jsonl");
+    expect(content).not.toContain(LEGACY_CHANGE_CONTEXT);
+    expect(content).not.toContain(LEGACY_END_CHANGE_CONTEXT);
   });
 
-  test("script emits topic candidates even before a matching entity page exists", () => {
+  test("script writes topic candidates to pending-absorb.jsonl silently", () => {
+    const cwd = mkdtempSync(path.join(os.tmpdir(), "codewiki-hook-"));
     const output = execSync(
       `printf '%s' '{"file":"src/features/stable-master-pins.ts"}' | sh "${path.join(HOOKS_DIR, "post-verify.sh")}" 2>/dev/null`,
-      { encoding: "utf8", timeout: 5000 }
+      { cwd, encoding: "utf8", timeout: 5000 }
     );
+    const pending = readFileSync(path.join(cwd, ".codewiki/state/pending-absorb.jsonl"), "utf8");
 
-    expect(output).toContain("CODEWIKI_CHANGE_CONTEXT");
-    expect(output).toContain("Potential new topic candidates:");
-    expect(output).toContain("stable-master-pins");
-    expect(output).toContain("Required next step for the host agent");
-    expect(output).toContain("codewiki-wiki-updater");
-    expect(output).toContain("codewiki-verifier");
+    expect(output).toBe("");
+    expect(pending).toContain("wiki-relevant file change");
+    expect(pending).toContain("stable-master-pins");
+  });
+
+  test("script writes structured debug audit fields", () => {
+    const cwd = mkdtempSync(path.join(os.tmpdir(), "codewiki-hook-"));
+    execSync(
+      `printf '%s' '{"file":"src/features/stable-master-pins.ts"}' | CODEWIKI_HOOK_DEBUG=1 sh "${path.join(HOOKS_DIR, "post-verify.sh")}" 2>/dev/null`,
+      { cwd, encoding: "utf8", timeout: 5000 }
+    );
+    const debug = readFileSync(path.join(cwd, ".codewiki/state/hooks-debug.jsonl"), "utf8");
+
+    expect(debug).toContain('"stdin_payload":"true"');
+    expect(debug).toContain('"stdout_produced":false');
+    expect(debug).toContain('"wrapper_json":"unknown"');
+    expect(debug).toContain('"observable_context":"state"');
   });
 });
 

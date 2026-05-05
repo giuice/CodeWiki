@@ -39,13 +39,14 @@ describe("scaffoldProject", () => {
     await expect(existsAt(root, "wiki/_backlinks.json")).resolves.toBe(true);
   });
 
-  test("creates all wiki content directories plus wiki raw and codewiki tasks", async () => {
+  test("creates all wiki content directories plus wiki raw, codewiki state, and codewiki tasks", async () => {
     const root = await makeTempRoot();
 
     await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
 
     for (const relativePath of [
       ".codewiki/hooks",
+      ".codewiki/state",
       ".codewiki/tasks",
       "wiki/raw/articles",
       "wiki/raw/papers",
@@ -117,12 +118,18 @@ describe("scaffoldProject", () => {
 
     const created = await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
     expect(created.find((entry) => entry.path === ".codewiki/tasks")?.action).toBe("created");
+    expect(created.find((entry) => entry.path === ".codewiki/state")?.action).toBe("created");
     expect(created.find((entry) => entry.path === ".codewiki/config.yml")?.action).toBe("created");
 
     const skipped = await scaffoldProject({ force: false, projectName: "demo", root, tools: ["claude-code"] });
     expect(skipped.find((entry) => entry.path === ".codewiki/tasks")).toEqual({
       action: "skipped",
       path: ".codewiki/tasks",
+      reason: "exists"
+    });
+    expect(skipped.find((entry) => entry.path === ".codewiki/state")).toEqual({
+      action: "skipped",
+      path: ".codewiki/state",
       reason: "exists"
     });
     expect(skipped.find((entry) => entry.path === ".codewiki/config.yml")).toEqual({

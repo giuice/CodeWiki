@@ -1,6 +1,6 @@
 ---
 name: codewiki-flow
-description: Routes the current request to the right CodeWiki skill based on user intent and repository state. Use when the user asks what to do next, wants the recommended workflow, resumes a session, starts a feature, reacts to hook-provided change context, or needs help choosing between CodeWiki skills.
+description: Routes the current request to the right CodeWiki skill based on user intent and repository state. Use when the user asks what to do next, wants the recommended workflow, resumes a session, starts a feature, reacts to pending absorb state, or needs help choosing between CodeWiki skills.
 allowed-tools: [Read, Glob, Grep, Bash]
 ---
 
@@ -28,7 +28,7 @@ duplicating the detailed procedures that belong in the focused skills.
 - Question about project knowledge, history, decisions, entities, issues, or lessons: use `codewiki-query`.
 - New feature, larger change, or unclear product request before implementation: use `codewiki-prd`.
 - Existing PRD that needs executable work: use `codewiki-tasks`.
-- Existing task list with incomplete sub-tasks or a request to continue implementation: use `codewiki-process`.
+- Existing phase plan with incomplete tasks or a request to continue implementation: use `codewiki-process`.
 - Substantial code changes that should become durable wiki knowledge: use `codewiki-absorb`.
 - Repeated references, missing pages, or thin important concepts: use `codewiki-breakdown`.
 - Suspected contradictions, stale claims, broken links, drift, or wiki health work: use `codewiki-lint`.
@@ -38,9 +38,9 @@ duplicating the detailed procedures that belong in the focused skills.
 - For a fresh repository, initialize CodeWiki, ingest existing raw sources, then use `codewiki-query`
   to confirm the wiki has enough context.
 - For feature work, run `codewiki-prd`, then `codewiki-tasks`, then `codewiki-process`.
-- During implementation, treat host-visible `CODEWIKI_CHANGE_CONTEXT` as a follow-up signal:
+- During implementation, treat `.codewiki/state/pending-absorb.jsonl` as the durable hook signal:
   invoke `codewiki-wiki-updater` for durable wiki-relevant changes, or explicitly defer the same
-  work to `codewiki-absorb` at session end.
+  work to `codewiki-absorb` at the next completed phase or explicit user request.
 - After a non-trivial wiki update proposal, invoke `codewiki-verifier` for read-only review before
   applying approved wiki edits.
 - Between features, use `codewiki-query`, `codewiki-lint`, and `codewiki-breakdown` to keep the wiki

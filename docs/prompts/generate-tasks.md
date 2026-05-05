@@ -1,8 +1,8 @@
-# Rule: Generating a Task List from a PRD
+# Rule: Generating a Phase Plan from a PRD
 
 ## Goal
 
-To guide an AI assistant in creating a detailed, step-by-step task list in Markdown format based on an existing Product Requirements Document (PRD). The task list should guide a developer through implementation.
+To guide an AI assistant in creating a detailed, step-by-step phase plan in Markdown format based on an existing Product Requirements Document (PRD). The phase plan should guide a developer through implementation.
 
 ## Output
 
@@ -18,16 +18,16 @@ To guide an AI assistant in creating a detailed, step-by-step task list in Markd
     * **Review Configuration:** Analyze `package.json`, `tsconfig.json`, or equivalent to understand dependencies and versions.
     * **Search for Patterns:** Look for existing similar features in the codebase. (e.g., "If creating a new API route, read an existing API route first to match the coding style.")
     * **Check Reusability:** Explicitly list any existing components or utility functions that can be reused to avoid duplicate code.
-4.  **Phase 1: Generate Parent Tasks:** Based on the PRD analysis and current state assessment, create the file and generate the main, high-level tasks required to implement the feature. Use your judgement on how many high-level tasks to use. It's likely to be about five tasks. Present these tasks to the user in the specified format (without sub-tasks yet). Inform the user: "I have generated the high-level tasks based on the PRD. Ready to generate the sub-tasks? Respond with 'Go' to proceed."
+4.  **Phase 1: Generate Phases:** Based on the PRD analysis and current state assessment, create the file and generate the main, high-level phases required to implement the feature. Use your judgement on how many phases to use. It is likely to be about five phases. Present these phases to the user in the specified format (without tasks yet). Inform the user: "I have generated the high-level phases based on the PRD. Ready to generate the tasks? Respond with 'Go' to proceed."
 5.  **Wait for Confirmation:** Pause and wait for the user to respond with "Go".
-6.  **Phase 2: Generate Sub-Tasks:** Once the user confirms, break down each parent task into smaller, actionable sub-tasks necessary to complete the parent task. Ensure sub-tasks logically follow from the parent task, cover the implementation details implied by the PRD, and consider existing codebase patterns where relevant without being constrained by them.
+6.  **Phase 2: Generate Tasks:** Once the user confirms, break down each phase into smaller, actionable tasks necessary to complete the phase. Ensure tasks logically follow from the phase, cover the implementation details implied by the PRD, and consider existing codebase patterns where relevant without being constrained by them.
 7.  **Identify Relevant Files:** Based on the tasks and PRD, identify potential files that will need to be created or modified. List these under the `Relevant Files` section, including corresponding test files if applicable.
-8.  **Generate Final Output:** Combine the parent tasks, sub-tasks, relevant files, and notes into the final Markdown structure.
-9.  **Save Task List:** Save the generated document in the `/tasks/` directory with the filename `tasks-[prd-file-name].md`, where `[prd-file-name]` matches the base name of the input PRD file (e.g., if the input was `0001-prd-user-profile-editing.md`, the output is `tasks-0001-prd-user-profile-editing.md`).
+8.  **Generate Final Output:** Combine the phases, tasks, relevant files, and notes into the final Markdown structure.
+9.  **Save Phase Plan:** Save the generated document in the `/tasks/` directory with the filename `tasks-[prd-file-name].md`, where `[prd-file-name]` matches the base name of the input PRD file (e.g., if the input was `0001-prd-user-profile-editing.md`, the output is `tasks-0001-prd-user-profile-editing.md`).
 
 ## Output Format
 
-The generated task list _must_ follow this structure:
+The generated phase plan _must_ follow this structure:
 
 ```markdown
 ## Relevant Files
@@ -44,20 +44,20 @@ The generated task list _must_ follow this structure:
 - Unit tests should typically be placed alongside the code files they are testing (e.g., `MyComponent.tsx` and `MyComponent.test.tsx` in the same directory).
 - Use `npx jest [optional/path/to/test/file]` to run tests. Running without a path executes all tests found by the Jest configuration.
 
-## Tasks
+## Phases
 
-- [ ] 1.0 Parent Task Title
-  - [ ] 1.1 [Sub-task description 1.1]
-  - [ ] 1.2 [Sub-task description 1.2]
-- [ ] 2.0 Parent Task Title
-  - [ ] 2.1 [Sub-task description 2.1]
-- [ ] 3.0 Parent Task Title (may not require sub-tasks if purely structural or configuration)
+- [ ] 1.0 Phase Title
+  - [ ] 1.1 [Task description 1.1]
+  - [ ] 1.2 [Task description 1.2]
+- [ ] 2.0 Phase Title
+  - [ ] 2.1 [Task description 2.1]
+- [ ] 3.0 Phase Title (may not require tasks if purely structural or configuration)
 ```
 
 ## Interaction Model
 
-The process explicitly requires a pause after generating parent tasks to get user confirmation ("Go") before proceeding to generate the detailed sub-tasks. This ensures the high-level plan aligns with user expectations before diving into details.
+The process explicitly requires a pause after generating phases to get user confirmation ("Go") before proceeding to generate the detailed tasks. This ensures the high-level plan aligns with user expectations before diving into details.
 
 ## Target Audience
 
-Assume the primary reader of the task list is a **junior developer** who will implement the feature with awareness of the existing codebase context.
+Assume the primary reader of the phase plan is a **junior developer** who will implement the feature with awareness of the existing codebase context.

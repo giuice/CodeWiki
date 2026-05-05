@@ -76,11 +76,11 @@ describe("OC-04: OpenCode instructions template stays concise and practical", ()
     expect(content).toContain("not query-time RAG");
     expect(content).toContain("New external source in `wiki/raw/`");
     expect(content).toContain("After a substantial coding session");
-    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain(".codewiki/state/pending-absorb.jsonl");
     expect(content).toContain("invoke `codewiki-wiki-updater`");
     expect(content).toContain("invoke `codewiki-verifier`");
-    expect(content).toContain("Hooks provide context and change signals");
-    expect(content).toContain("discovery mechanism for invoking `codewiki-wiki-updater`");
+    expect(content).toContain("Hooks provide optional context and persistent change signals");
+    expect(content).toContain("record pending absorb state");
     expect(content).toContain("### Schema Discipline");
     expect(content).toContain("confidence");
     expect(content).toContain("contested");

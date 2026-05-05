@@ -37,9 +37,9 @@ The current codebase has already completed the skills-canon migration:
 | Tool selection | Skills written | Hooks/instructions/agents written today |
 | --- | --- | --- |
 | `claude-code` | `.claude/skills/codewiki-<name>/SKILL.md` | Claude hook wiring, Claude agents, `CLAUDE.md` |
-| `codex` | `.agents/skills/codewiki-<name>/SKILL.md` | Not yet; planned future adapter work |
+| `codex` | `.agents/skills/codewiki-<name>/SKILL.md` | Codex hooks (`.codex/hooks.json`), wrappers, `.codex/config.toml`, `.codex/agents/`, and `AGENTS.md` |
 | `copilot` | `.agents/skills/codewiki-<name>/SKILL.md` | Copilot hooks, `.github/agents/`, and `.github/copilot-instructions.md` |
-| `opencode` | `.agents/skills/codewiki-<name>/SKILL.md` | Not yet; planned future adapter work |
+| `opencode` | `.agents/skills/codewiki-<name>/SKILL.md` | OpenCode plugin (`.opencode/plugins/codewiki.ts`), `.opencode/agents/`, and `AGENTS.md` |
 | `claude-code` plus any non-Claude tool | Both trees above | Claude adapter today, shared non-Claude skills today |
 
 ### Shared assets that always matter
@@ -145,18 +145,18 @@ npm test
 
 The skills canon is in place. The remaining implementation work is now about the non-Claude adapters, not about where skills live.
 
-### Phase 6: OpenCode adapter
+### Phase 6: OpenCode adapter — Complete (shipped in v0.2.x)
 
-- Add OpenCode-specific hook/plugin packaging
-- Add OpenCode instruction-file integration
-- Add OpenCode agent packaging
+- ✅ OpenCode-specific hook/plugin packaging
+- ✅ OpenCode instruction-file integration (`AGENTS.md`)
+- ✅ OpenCode agent packaging (`.opencode/agents/`)
 
-### Phase 7: Codex and Copilot adapters
+### Phase 7: Codex and Copilot adapters — Complete (shipped in v0.2.x)
 
-- Add Codex-specific hook configuration, `.codex/config.toml` feature enablement, wrapper scripts, and instruction-file integration
-- For Codex, use the current official hook model: `UserPromptSubmit` for prompt-level context, `PreToolUse` on `Edit|Write|apply_patch` for guardrails only, `PostToolUse` on `Edit|Write|apply_patch` through a JSON-emitting wrapper, and `Stop` through a loop-safe JSON-emitting wrapper
-- Add Copilot-specific hook configuration and instruction-file integration
-- Package any tool-specific agent surfaces that remain worth shipping
+- ✅ Codex-specific hook configuration (`.codex/hooks.json`), `.codex/config.toml` feature enablement, wrapper scripts, and instruction-file integration (`AGENTS.md`)
+- ✅ Codex official hook model: `UserPromptSubmit` for prompt-level context, `PreToolUse` on `Edit|Write|apply_patch` for guardrails only, `PostToolUse` on `Edit|Write|apply_patch` through a JSON-emitting wrapper, and `Stop` through a loop-safe JSON-emitting wrapper
+- ✅ Copilot-specific hook configuration and instruction-file integration (`.github/copilot-instructions.md`)
+- ✅ Copilot custom-agent profiles (`.github/agents/`)
 
 ### Phase 8: npm publish hardening
 

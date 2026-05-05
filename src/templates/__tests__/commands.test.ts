@@ -199,7 +199,7 @@ describe("CMD-03D: codewiki-flow preserves lifecycle routing", () => {
     expect(content).toContain("codewiki-absorb");
     expect(content).toContain("codewiki-breakdown");
     expect(content).toContain("codewiki-lint");
-    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain(".codewiki/state/pending-absorb.jsonl");
     expect(content).toContain("Do not write wiki files from this routing skill");
   });
 });
@@ -248,6 +248,9 @@ describe("CMD-05: codewiki-tasks preserves task generation workflow checks", () 
   test("codewiki-tasks preserves Go gate and uses Task for multi-agent", async () => {
     const content = await readSkill("tasks");
     expect(content).toMatch(/["']?Go["']?/);
+    expect(content).toContain("Generate phases");
+    expect(content).toContain("Generate tasks and relevant files");
+    expect(content).toContain("phase plan");
     const fm = extractFrontmatter(content)!;
     expect(fm).toContain("Task");
   });
@@ -270,16 +273,17 @@ describe("CMD-06: codewiki-process preserves process workflow checks", () => {
     expect(content.toLowerCase()).not.toContain("mentorship");
   });
 
-  test("codewiki-process preserves one sub-task pattern and uses Task", async () => {
+  test("codewiki-process preserves one task pattern and uses Task", async () => {
     const content = await readSkill("process");
-    expect(content.toLowerCase()).toMatch(/one sub[- ]?task/);
+    expect(content.toLowerCase()).toContain("one task");
+    expect(content).toContain("earliest incomplete phase");
     const fm = extractFrontmatter(content)!;
     expect(fm).toContain("Task");
   });
 
-  test("codewiki-process handles change context with conditional updater and verifier flow", async () => {
+  test("codewiki-process handles pending absorb state with conditional updater and verifier flow", async () => {
     const content = await readSkill("process");
-    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain(".codewiki/state/pending-absorb.jsonl");
     expect(content).toContain("codewiki-wiki-updater");
     expect(content).toContain("codewiki-verifier");
     expect(content).toContain("codewiki-absorb");
@@ -287,7 +291,7 @@ describe("CMD-06: codewiki-process preserves process workflow checks", () => {
     expect(content).toContain("If the change created durable wiki-relevant knowledge");
     expect(content).toContain("In `--fast` mode, collect or defer wiki follow-ups");
     expect(content).toContain("Never write to `wiki/` without explicit approval");
-    expect(content).toContain("Do not treat hook output as proof that verification passed");
+    expect(content).toContain("host runtimes differ");
   });
 });
 

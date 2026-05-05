@@ -3,10 +3,10 @@
 Use this prompt with a separate reviewer agent to audit the new GitHub Copilot custom-agent install surface and the related CodeWiki hook behavior.
 
 ```text
-You are auditing a CodeWiki change that adds GitHub Copilot custom-agent support and improves post-verify wiki-update signaling.
+You are auditing a CodeWiki change that adds GitHub Copilot custom-agent support and improves post-verify pending absorb signaling.
 
 Audit goal:
-Verify that `codewiki init --tool copilot` installs the same conceptual CodeWiki support surface as the other agent-capable tools: shared skills, Copilot hooks, Copilot instructions, and two supporting custom agents (`codewiki-wiki-updater` and `codewiki-verifier`). Also verify that the post-verify hook can surface new-topic candidates before a wiki entity page already exists.
+Verify that `codewiki init --tool copilot` installs the same conceptual CodeWiki support surface as the other agent-capable tools: shared skills, Copilot hooks, Copilot instructions, and two supporting custom agents (`codewiki-wiki-updater` and `codewiki-verifier`). Also verify that the post-verify hook records new-topic candidates in `.codewiki/state/pending-absorb.jsonl` before a wiki entity page already exists.
 
 Primary questions:
 1. Does the Copilot adapter create `.github/agents/` and copy both custom agent profiles into it?
@@ -18,7 +18,7 @@ Primary questions:
 5. Does the pack test require the Copilot agent templates in the generated tarball?
 6. Does the init integration test assert that `codewiki init --tool copilot` creates both `.github/agents/` files?
 7. Does `post-verify.sh` still exit 0 in all cases and remain POSIX sh compatible?
-8. Does `post-verify.sh` now emit `Potential new topic candidates` and point the host agent toward `codewiki-wiki-updater` when changed files do not yet match existing `wiki/entities/*.md` pages?
+8. Does `post-verify.sh` now write pending topic candidates to `.codewiki/state/pending-absorb.jsonl` without relying on Copilot `additionalContext` delivery?
 9. Are README and product docs aligned with the intended product behavior: Copilot is not a second-class exception and installs supporting agents too?
 10. Are there any stale statements saying Copilot has only a shared skill-driven flow, no agents, or optional/runtime-specific agent packaging?
 
@@ -43,10 +43,10 @@ Files to inspect:
 Suggested verification commands:
 - `rtk npm test`
 - `rtk rg -n "Shared skill-driven flow|Optional / runtime-specific|Copilot.*no agents|Claude Code, Codex, and OpenCode install|Claude Code, Codex e OpenCode instalam" README.md README.pt-BR.md docs src test .planning`
-- `rtk rg -n "\.github/agents|codewiki-wiki-updater.agent.md|codewiki-verifier.agent.md" src test package.json README.md docs`
+- `rtk rg -n "\.github/agents|codewiki-wiki-updater.agent.md|codewiki-verifier.agent.md|pending-absorb.jsonl" src test package.json README.md docs`
 
 Expected outcome:
-Return PASS only if Copilot agents are installed, packaged, tested, and documented as first-class CodeWiki support agents, and if the post-verify hook can surface new topic candidates without requiring a pre-existing entity page.
+Return PASS only if Copilot agents are installed, packaged, tested, and documented as first-class CodeWiki support agents, and if the post-verify hook records new topic candidates without requiring a pre-existing entity page or guaranteed Copilot context delivery.
 
 Report format:
 - Verdict: PASS or FAIL

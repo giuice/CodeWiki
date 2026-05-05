@@ -1,6 +1,6 @@
 ---
 name: codewiki-absorb
-description: Extracts durable CodeWiki knowledge from recent code changes, git diffs, changed files, and session outcomes. Use when substantial coding work has landed, CODEWIKI_CHANGE_CONTEXT follow-up is deferred, a session is ending, or lessons/entities/issues/decisions from implementation should be proposed for human-approved wiki updates.
+description: Extracts durable CodeWiki knowledge from recent code changes, git diffs, changed files, and phase outcomes. Use when a phase is complete, pending absorb state exists, substantial coding work has landed, or lessons/entities/issues/decisions from implementation should be proposed for human-approved wiki updates.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 
@@ -19,7 +19,8 @@ wiki updates, and only then write approved wiki files. If any later heuristic co
 order, follow the earlier item.
 
 ## Step 1: Gather recent changes
-- Run `git diff HEAD~1` to inspect the latest session of work.
+- Read `.codewiki/state/pending-absorb.jsonl` when it exists.
+- Run `git diff` and `git diff --cached` to inspect current uncommitted work.
 - If the working tree has uncommitted changes, also check `git diff --cached` and plain `git diff`.
 - List the changed files and summarize what changed semantically, not line-by-line.
 

@@ -42,10 +42,11 @@ describe("CODEX-02: Codex hooks and feature templates follow the current event c
     expect(preToolUse).toContain("plain stdout");
     expect(preToolUse).toContain("PreToolUse");
     expect(postToolUse).toContain("post-verify.sh");
-    expect(postToolUse).toContain("hookEventName");
+    expect(postToolUse).toContain("CODEWIKI_HOOK_DEBUG");
     expect(postToolUse).toContain("PostToolUse");
     expect(stop).toContain("session-end.sh");
     expect(stop).toContain("stop_hook_active");
+    expect(stop).toContain("CODEWIKI_HOOK_DEBUG");
     expect(stop).toContain('"decision":"block"');
   });
 });
@@ -88,11 +89,11 @@ describe("CODEX-02 and CODEX-03: Codex agents and instructions preserve CodeWiki
     expect(content).toContain("not query-time RAG");
     expect(content).toContain("New external source in `wiki/raw/`");
     expect(content).toContain("After a substantial coding session");
-    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain(".codewiki/state/pending-absorb.jsonl");
     expect(content).toContain("invoke `codewiki-wiki-updater`");
     expect(content).toContain("invoke `codewiki-verifier`");
-    expect(content).toContain("Hooks provide context and change signals");
-    expect(content).toContain("discovery mechanism for invoking `codewiki-wiki-updater`");
+    expect(content).toContain("Hooks provide optional context and persistent change signals");
+    expect(content).toContain("visible hook context is debug-only");
     expect(content).toContain("### Schema Discipline");
     expect(content).toContain("confidence");
     expect(content).toContain("contested");

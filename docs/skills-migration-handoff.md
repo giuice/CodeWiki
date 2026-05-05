@@ -67,14 +67,22 @@ The project deliberately does not add third or fourth duplicated skill trees in 
 - Tarball coverage proving canonical skill assets are packaged under `dist/templates/skills/`
 - Planning and product docs aligned to the skills canon
 
-### Still future work
+### Shipped adapters
 
-- Codex-specific hook and instruction integration
-- Copilot-specific hook and instruction integration
-- OpenCode-specific hook/plugin, instruction, and agent integration
-- Copilot custom-agent profiles under `.github/agents/`
+| Tool | What is installed today |
+| --- | --- |
+| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md`, hook wiring, `.claude/agents/`, and `CLAUDE.md` |
+| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md`, `.codex/hooks.json`, wrapper scripts, `.codex/config.toml`, `.codex/agents/`, and `AGENTS.md` |
+| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md`, Copilot hooks, `.github/agents/`, and `.github/copilot-instructions.md` |
+| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md`, `.opencode/plugins/codewiki.ts`, `.opencode/agents/`, and `AGENTS.md` |
 
-Those roadmap items are adapter-completion work, not another install-surface migration.
+All four adapters create their full surface during `codewiki init`. Regression tests in `test/init.test.ts` and `test/pack.test.ts` lock this behavior.
+
+### v2+ runtime verification
+
+The only remaining unverified surface is live runtime behavior in **Copilot cloud** versus VS Code versus CLI versus SDK, where `additionalContext` delivery from `preToolUse`/`postToolUse` wrappers is host-dependent. This is tracked as runtime observation, not installer gap.
+
+If Copilot cloud behavior diverges from local VS Code, future adapter patches may narrow the default policy or add host-detection logic. No new install surfaces are required.
 
 ## Historical milestones
 
@@ -93,7 +101,7 @@ Those roadmap items are adapter-completion work, not another install-surface mig
 - Start from `src/templates/skills/codewiki-<name>/SKILL.md` whenever you change prompt behavior.
 - Treat `.claude/skills/` and `.agents/skills/` as the live install surfaces unless a future adapter phase proves a broader canonical layout.
 - Keep README, `docs/codewiki-project-v2.md`, `docs/implementation-plan-v2.md`, and `.planning/` artifacts aligned whenever the shipped installer surface changes.
-- Preserve the distinction between "shared non-Claude skills ship today" and "full non-Claude adapters remain future work."
+- The old distinction between "shared skills now / full adapters later" is historical context only. All four adapters are now shipped.
 
 ## Historical note
 
