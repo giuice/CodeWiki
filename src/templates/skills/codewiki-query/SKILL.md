@@ -9,7 +9,9 @@ allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 
 <purpose>
 Answer a question by reading the local wiki first, then synthesizing a grounded response from the
-matched wiki pages. Treat the wiki as the primary knowledge layer between the user and raw sources.
+matched wiki pages. Treat the wiki as the primary knowledge layer between the user and the raw
+project sources stored for CodeWiki, such as notes, articles, transcripts, specs, and other source
+documents.
 </purpose>
 
 <process>
@@ -19,12 +21,14 @@ matched wiki pages. Treat the wiki as the primary knowledge layer between the us
 
 ## Step 2: Resolve and orient in the wiki
 - Read `.codewiki/config.yml` if it exists.
-- Use `wiki.path` as the wiki root when present; otherwise use `wiki/`.
-- Read `SCHEMA.md` from the resolved wiki root when it exists.
+- If `.codewiki/config.yml` declares `wiki.path`, use it as the wiki root.
+- If `wiki.path` is not declared, use `wiki/` as the wiki root.
 - Read `index.md` from the resolved wiki root before anything else.
+- Read `SCHEMA.md` from the resolved wiki root when it exists.
 - Read recent entries from `log.md` in the resolved wiki root.
-- Use the index to identify candidate entity, decision, lesson, issue, and source pages.
-- Read `_backlinks.json` from the resolved wiki root to identify high-importance pages. Pages with many backlinks are more likely to contain authoritative answers.
+- Read `_backlinks.json` from the resolved wiki root when it exists.
+- Use `index.md` to identify candidate entity, decision, lesson, issue, and source pages.
+- Use `_backlinks.json` to identify higher-importance pages when multiple candidates look relevant. Pages with many backlinks are more likely to contain authoritative answers.
 
 ## Step 3: Search for relevant pages
 - Use `Grep` under the resolved wiki root for keywords, aliases, file names, and adjacent concepts from the question.

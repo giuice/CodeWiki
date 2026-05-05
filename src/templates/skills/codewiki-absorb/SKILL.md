@@ -9,10 +9,15 @@ allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 <purpose>
 Read recent code changes, cross-reference them against the local wiki, and propose updates that
 capture durable project knowledge. This is code-focused absorption: reason from git diffs and
-changed files, not from raw documents. Preserve the human approval boundary at all times.
+changed files, not from raw documents. Do not create, update, or rewrite wiki files unless the
+user explicitly approves the proposed updates in the current conversation.
 </purpose>
 
 <process>
+Follow this priority order throughout: first inspect recent code changes accurately, then propose
+wiki updates, and only then write approved wiki files. If any later heuristic conflicts with that
+order, follow the earlier item.
+
 ## Step 1: Gather recent changes
 - Run `git diff HEAD~1` to inspect the latest session of work.
 - If the working tree has uncommitted changes, also check `git diff --cached` and plain `git diff`.

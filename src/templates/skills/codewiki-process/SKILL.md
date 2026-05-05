@@ -9,28 +9,33 @@ allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task]
 
 <purpose>
 Execute a task list in a controlled way that keeps progress visible, preserves the "why" behind each
-change, and works one sub-task at a time by default. Use `--fast` only when the user explicitly
-asks to continue through all remaining sub-tasks without pausing.
+change, and works one sub-task at a time by default. Use `--fast` only when the user includes the
+`--fast` flag in their input to continue through all remaining sub-tasks without pausing.
 </purpose>
 
 <process>
 ## Step 1: Resolve the task directory
 - Read `.codewiki/config.yml` if it exists.
-- Use `wiki.tasks_path` as the PRD/task directory when present.
-- If `wiki.tasks_path` is missing, use `.codewiki/tasks/`.
+- If `.codewiki/config.yml` declares `wiki.tasks_path`, use it as the PRD/task directory.
+- If `wiki.tasks_path` is not declared, use `.codewiki/tasks/`.
 
 ## Step 2: Resolve the task list
-- Treat `$ARGUMENTS` as the task list path.
-- Ignore mode flags such as `--fast` when resolving the path.
-- If the path is relative and does not exist, also try resolving it under the task directory.
-- If the path is missing, search the task directory for `tasks-*.md`.
-- Prefer a task list with incomplete `- [ ]` sub-tasks. If there is exactly one such file, use it.
-- If multiple task lists have incomplete sub-tasks, prefer the most recently modified one and tell the user which one you chose. If that choice is ambiguous or risky, ask the user which task file to process.
+- Treat the non-flag portion of `$ARGUMENTS` as the task list path.
+- Treat `--fast` as a mode flag, not as part of the task list path.
+- If a task list path was provided and it exists, use it.
+- If a task list path was provided, is relative, and does not exist yet, try resolving it under the task directory.
+- If no task list path was provided, search the task directory for `tasks-*.md`.
+- If no task files are found, notify the user and stop until they provide a valid task file path.
+- If exactly one task file with incomplete `- [ ]` sub-tasks exists, use it.
+- If multiple task files with incomplete `- [ ]` sub-tasks exist and one file is clearly the most recently modified, use it and tell the user which file you chose.
+- If multiple task files with incomplete `- [ ]` sub-tasks share the same most-recent modification time, ask the user which task file to process.
+- If no task file has incomplete `- [ ]` sub-tasks and exactly one task file exists, use it.
+- If no task file has incomplete `- [ ]` sub-tasks and multiple task files exist, ask the user which task file to process.
 - Read the task file fully before starting work.
 
 ## Step 3: Choose the interaction mode
 - If `$ARGUMENTS` contains `--fast`, switch to fast mode.
-- Otherwise default to interactive mode.
+- If `$ARGUMENTS` does not contain `--fast`, use interactive mode.
 
 ## Step 4: Find the next actionable work
 - Identify the next incomplete sub-task in the list.
@@ -76,6 +81,6 @@ asks to continue through all remaining sub-tasks without pausing.
   that should be captured, and whether wiki follow-up was proposed or deferred.
 
 ## Step 11: Boundaries
-- Do not create commits automatically; the user controls git operations.
+- Do not create commits automatically for code changes or wiki changes; the user controls git operations.
 - Do not silently skip failing checks or unresolved blockers.
 </process>

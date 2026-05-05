@@ -15,9 +15,11 @@ remains discoverable through schema, index, log, and backlinks.
 <process>
 ## Step 1: Resolve and orient in the vault
 - Read `.codewiki/config.yml` if it exists.
-- Use `wiki.path` as the wiki root when present; otherwise use `wiki/`.
+- If `.codewiki/config.yml` declares `wiki.path`, use it as the wiki root.
+- If `wiki.path` is not declared, use `wiki/` as the wiki root.
 - Read `SCHEMA.md`, `index.md`, recent `log.md`, and `_backlinks.json` from the resolved wiki root before proposing changes.
-- Confirm the vault root is the wiki root itself, not the repository root, unless the user explicitly wants Obsidian to show project files too.
+- Confirm the vault root is the wiki root itself, not the repository root, unless the user specifies in writing that Obsidian should show project files too.
+- Treat raw-source immutability, schema correctness, and approval-gated edits as mandatory. Treat plugin and convenience recommendations as optional.
 
 ## Step 2: Check Obsidian-compatible structure
 - Confirm the resolved wiki root contains `raw/assets/`, `raw/articles/`, `raw/papers/`, `raw/transcripts/`, and `raw/specs/`.

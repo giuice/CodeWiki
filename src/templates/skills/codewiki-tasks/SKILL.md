@@ -9,28 +9,31 @@ allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task]
 
 <purpose>
 Convert a PRD into an implementation task list that reflects both the requested behavior and the
-current codebase. Default to the two-phase parent-task then sub-task interaction model, with
-`--fast` available for one-pass generation when the user explicitly asks for speed.
+current codebase. Default to the two-phase parent-task then sub-task interaction model unless the
+user includes the `--fast` flag in their input to request one-pass generation.
 </purpose>
 
 <process>
 ## Step 1: Resolve the task directory
 - Read `.codewiki/config.yml` if it exists.
-- Use `wiki.tasks_path` as the PRD/task directory when present.
-- If `wiki.tasks_path` is missing, use `.codewiki/tasks/`.
+- If `.codewiki/config.yml` declares `wiki.tasks_path`, use it as the PRD/task directory.
+- If `wiki.tasks_path` is not declared, use `.codewiki/tasks/`.
 
 ## Step 2: Resolve the PRD
-- Treat `$ARGUMENTS` as the PRD path.
-- Ignore mode flags such as `--fast` when resolving the path.
-- If the path is relative and does not exist, also try resolving it under the task directory.
-- If no path was provided, search the task directory for `*-prd-*.md`.
+- Treat the non-flag portion of `$ARGUMENTS` as the PRD path.
+- Ignore `--fast` only when determining the PRD path. Continue to use `--fast` later when choosing the interaction mode.
+- If a PRD path was provided and it exists, use it.
+- If a PRD path was provided, is relative, and does not exist yet, try resolving it under the task directory.
+- If no PRD path was provided, search the task directory for `*-prd-*.md`.
+- If no PRD files are found, tell the user that no PRD was found and ask for a valid PRD path before continuing.
 - If exactly one PRD exists, use it.
-- If multiple PRDs exist, prefer the most recently modified PRD and tell the user which one you chose. If that choice is ambiguous or risky, ask the user which PRD file to use.
+- If multiple PRDs exist and one file is clearly the most recently modified, use it and tell the user which file you chose.
+- If multiple PRDs share the same most-recent modification time, or if their filenames suggest competing feature scopes, ask the user which PRD file to use.
 - Read the PRD in full before generating tasks.
 
 ## Step 3: Choose the interaction mode
 - If `$ARGUMENTS` contains `--fast`, switch to fast mode.
-- Otherwise default to interactive mode.
+- If `$ARGUMENTS` does not contain `--fast`, use interactive mode.
 
 ## Step 4: Analyze the current codebase with subagents
 - Use `Task` for a two-agent split:
