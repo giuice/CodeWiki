@@ -66,3 +66,19 @@ test("planning docs canon keeps state, conventions, and active context parser-sa
   assert.doesNotMatch(phaseContext, /\*\*04\.1a\b/);
   assert.doesNotMatch(phaseContext, /\*\*04\.1b\b/);
 });
+
+test("product docs do not contain stale adapter future-work claims", () => {
+  const implPlan = readWorkspaceFile("docs/implementation-plan-v2.md");
+  const migrationHandoff = readWorkspaceFile("docs/skills-migration-handoff.md");
+
+  assert.doesNotMatch(
+    implPlan,
+    /Not yet; planned future adapter work/,
+    "implementation-plan-v2.md should not claim Codex/OpenCode are future work"
+  );
+  assert.doesNotMatch(
+    migrationHandoff,
+    /full non-Claude adapters remain future work/,
+    "skills-migration-handoff.md should not claim adapters are future work"
+  );
+});
