@@ -1,6 +1,6 @@
 ---
 name: codewiki-prd
-description: Generate a Product Requirements Document from a feature idea
+description: Drafts an implementation-ready Product Requirements Document from a feature idea using repository and wiki context. Use when the user wants to plan a new feature, clarify product intent, define scope before implementation, capture acceptance criteria, or start the CodeWiki PRD -> tasks -> process development workflow.
 argument-hint: <feature-description>
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task]
 ---

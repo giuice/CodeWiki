@@ -1,6 +1,6 @@
 ---
 name: codewiki-obsidian
-description: Configure and audit CodeWiki as an Obsidian-compatible markdown vault. Use when setting up Obsidian, managing attachments, wikilinks, Dataview/frontmatter, graph readability, or vault sync for a CodeWiki wiki.
+description: Configures and audits CodeWiki as an Obsidian-compatible markdown vault while preserving CodeWiki schema, raw-source immutability, wikilinks, attachments, Dataview-ready frontmatter, graph readability, and vault sync safety. Use when setting up Obsidian, managing assets, migrating an existing vault, or reviewing Obsidian navigation quality.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 

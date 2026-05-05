@@ -1,6 +1,6 @@
 ---
 name: codewiki-process
-description: Execute tasks from a task list one sub-task at a time
+description: Executes CodeWiki task lists one sub-task at a time with focused implementation, task-list updates, verification, and conditional wiki follow-up. Use when the user asks to implement or continue tasks, process a task file, finish the next unchecked item, run verified development work, or handle CODEWIKI_CHANGE_CONTEXT during the build loop.
 argument-hint: <task-file-path>
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task]
 ---
@@ -53,12 +53,29 @@ asks to continue through all remaining sub-tasks without pausing.
   go-ahead before continuing.
 - In fast mode, continue through all remaining sub-tasks without pausing between them.
 
-## Step 8: Verification and finish
+## Step 8: Verification
 - Run the most relevant existing tests or checks after meaningful implementation steps.
-- When the task list is complete, summarize finished work, remaining manual checks, and any new
-  tasks that should be captured.
+- Do not treat hook output as proof that verification passed; it is only a change signal.
 
-## Step 9: Boundaries
+## Step 9: Handle CodeWiki change context
+- After meaningful verification, inspect any host-visible `CODEWIKI_CHANGE_CONTEXT` surfaced by
+  hooks or adapter context.
+- If the change created durable wiki-relevant knowledge, invoke `codewiki-wiki-updater` to propose
+  approval-gated wiki updates.
+- If the change is wiki-relevant but should be batched, explicitly defer the same work to
+  `codewiki-absorb` at session end.
+- After `codewiki-wiki-updater` proposes a non-trivial wiki change, invoke `codewiki-verifier` for
+  read-only contradiction, reference, frontmatter, index, log, and backlink review before applying
+  approved wiki edits.
+- In `--fast` mode, collect or defer wiki follow-ups instead of forcing an approval pause after every
+  sub-task.
+- Never write to `wiki/` without explicit approval in the current conversation.
+
+## Step 10: Finish
+- When the task list is complete, summarize finished work, remaining manual checks, any new tasks
+  that should be captured, and whether wiki follow-up was proposed or deferred.
+
+## Step 11: Boundaries
 - Do not create commits automatically; the user controls git operations.
 - Do not silently skip failing checks or unresolved blockers.
 </process>

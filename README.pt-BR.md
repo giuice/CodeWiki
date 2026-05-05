@@ -4,7 +4,7 @@
 
 CodeWiki é um framework que transforma um repositório em um sistema de conhecimento persistente, mantido por LLMs, para ferramentas de programação com agentes de IA.
 
-Rode `npx @giuice/codewiki init` uma vez e a CLI cria a wiki junto com os assets de integração disponíveis hoje para as ferramentas: nove Skills, scripts de hook compartilhados e definições de agentes. Os nomes lógicos das skills permanecem estáveis entre ferramentas (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`), enquanto o instalador grava esses arquivos nas árvores canônicas de skills:
+Rode `npx @giuice/codewiki init` uma vez e a CLI cria a wiki junto com os assets de integração disponíveis hoje para as ferramentas: dez Skills, scripts de hook compartilhados e definições de agentes. Os nomes lógicos das skills permanecem estáveis entre ferramentas (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`, `codewiki-flow`), enquanto o instalador grava esses arquivos nas árvores canônicas de skills:
 
 - Seleções de Claude Code escrevem `.claude/skills/codewiki-<name>/SKILL.md`
 - Seleções de Codex, Copilot e OpenCode escrevem `.agents/skills/codewiki-<name>/SKILL.md`
@@ -19,6 +19,8 @@ A regra central:
 > O agente propõe; o humano aprova; só conhecimento aprovado entra em `wiki/`.
 
 Os nomes canônicos das skills são `codewiki-*`. Ferramentas diferentes podem expor essas skills por um seletor de skills, uma paleta de comandos ou uma invocação parecida com slash command, mas o artefato instalado é sempre um arquivo `SKILL.md` por skill lógica.
+
+Use `codewiki-flow` quando quiser que o agente escolha o próximo workflow CodeWiki a partir do estado do repositório em vez de nomear uma skill específica.
 
 ### O Fluxo Completo do Desenvolvedor
 
@@ -121,7 +123,7 @@ flowchart TB
 
   subgraph ToolIntegration[Camada de integração: instalada pelo init]
     H1[Hooks<br/>pre-wiki-context.sh · post-verify.sh · session-end.sh]
-    SK[Skills<br/>ingest · query · lint · absorb · breakdown · prd · tasks · process]
+    SK[Skills<br/>flow · ingest · query · lint · absorb · breakdown · prd · tasks · process]
     AG[Agents<br/>wiki-updater · verifier]
     SI[Instruções de sistema<br/>CLAUDE.md / AGENTS.md / copilot-instructions.md]
   end
@@ -196,14 +198,15 @@ Exemplo de superfície instalada para Claude Code:
 │   ├── codewiki-obsidian/SKILL.md
 │   ├── codewiki-prd/SKILL.md
 │   ├── codewiki-tasks/SKILL.md
-│   └── codewiki-process/SKILL.md
+│   ├── codewiki-process/SKILL.md
+│   └── codewiki-flow/SKILL.md
 └── agents/
     ├── codewiki-wiki-updater.md
     └── codewiki-verifier.md
 CLAUDE.md                             # Instruções CodeWiki anexadas
 ```
 
-A superfície compartilhada de skills para ferramentas não-Claude é o mesmo conjunto de nove diretórios sob `.agents/skills/`.
+A superfície compartilhada de skills para ferramentas não-Claude é o mesmo conjunto de dez diretórios sob `.agents/skills/`.
 
 ## Instalação
 
@@ -250,6 +253,7 @@ npx @giuice/codewiki init --name "Meu Projeto" --tool claude-code,codex
 #    codewiki-lint
 #    codewiki-obsidian
 #    codewiki-query "o que sabemos sobre auth middleware?"
+#    codewiki-flow
 
 # 3. Scripts de hook compartilhados são instalados em .codewiki/hooks/
 #    Cada adapter os mapeia para o modelo de hook ou plugin da ferramenta hospedeira
@@ -263,7 +267,7 @@ npx @giuice/codewiki init --name "Meu Projeto" --tool claude-code,codex
 
 | Comando | O que faz |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Cria `.codewiki/`, `.codewiki/tasks/` e `wiki/`, instala as nove Skills nas árvores canônicas de skills, instala assets de hook compartilhados e aplica os adapters disponíveis. Reexecutar atualiza seções de instrução gerenciadas pelo CodeWiki e assets copiados dos adapters que mudaram, como skills, hooks e agentes, preservando conteúdo de usuário não relacionado. Use `--force` para substituir arquivos protegidos do scaffold. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Cria `.codewiki/`, `.codewiki/tasks/` e `wiki/`, instala as dez Skills nas árvores canônicas de skills, instala assets de hook compartilhados e aplica os adapters disponíveis. Reexecutar atualiza seções de instrução gerenciadas pelo CodeWiki e assets copiados dos adapters que mudaram, como skills, hooks e agentes, preservando conteúdo de usuário não relacionado. Use `--force` para substituir arquivos protegidos do scaffold. |
 
 Esse é o único comando da CLI. Toda a outra inteligência vive nos arquivos Skill instalados e nos scripts compartilhados que a sua ferramenta de IA executa nativamente.
 
@@ -282,6 +286,7 @@ CodeWiki inclui um `SKILL.md` por workflow lógico. A UI de invocação muda por
 | `codewiki-prd` | Rascunhar um PRD por perguntas de esclarecimento e salvar em `.codewiki/tasks/` |
 | `codewiki-tasks` | Gerar uma decomposição de tarefas a partir de um PRD com estrutura de checklist |
 | `codewiki-process` | Trabalhar pelas tarefas uma subtarefa por vez, com verificação e higiene limpa de commits |
+| `codewiki-flow` | Escolher a skill CodeWiki correta para setup, ingestão, consulta, feature work, follow-up de contexto de mudança, absorção, breakdown e lint |
 
 ## Hooks
 
@@ -332,7 +337,8 @@ A wiki em si é independente de ferramenta. O instalador mantém o conteúdo dos
 - Atualizados os workflows de ingest, query, lint, absorb e breakdown para que agentes possam pular fontes sem mudança, expor claims fracas ou contestadas, salvar respostas substanciais de query após aprovação e executar checks mais programáticos de saúde da wiki.
 - Atualizados os agentes verifier e wiki-updater para checar frontmatter, drift de tags, confidence, claims contestadas, hashes de fontes, regras de ciclo de vida de páginas e manutenção obrigatória de index/log/backlinks.
 - Adicionada cobertura de testes para o scaffold expandido, skills geradas, mirrors de comandos Claude e templates de agentes multi-ferramenta.
-- Adicionada `codewiki-obsidian` como a nona skill do CodeWiki, com orientação para vault Obsidian sobre `raw/assets/`, wikilinks, frontmatter compatível com Dataview, navegação pelo grafo e migração segura de vaults existentes.
+- Adicionada `codewiki-flow` como a décima skill do CodeWiki, com roteamento de ciclo de vida entre ingestão, consulta, planejamento, execução de tarefas, absorção da wiki, breakdown, lint e follow-up de contexto de mudança via hook.
+- Adicionada `codewiki-obsidian`, com orientação para vault Obsidian sobre `raw/assets/`, wikilinks, frontmatter compatível com Dataview, navegação pelo grafo e migração segura de vaults existentes.
 - Alteradas as seções de instruções gerenciadas e os assets copiados dos adapters para serem atualizados em reinstalações sem exigir `--force`, então instalações existentes recebem instruções, skills, hooks e agentes CodeWiki atualizados enquanto arquivos protegidos do scaffold e texto de usuário fora dos marcadores são preservados.
 
 ## Desenvolvimento

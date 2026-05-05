@@ -9,6 +9,7 @@ CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdo
 - At session start for wiki work: read `.codewiki/config.yml`, `wiki/SCHEMA.md`, `wiki/index.md`, and recent `wiki/log.md` before ingest/query/lint/absorb.
 - New external source in `wiki/raw/` or user asks to process docs: use `codewiki-ingest`. Raw sources are immutable; wiki edits are proposed for review.
 - User asks how the project works, why a decision was made, or where knowledge lives: use `codewiki-query` and cite wiki pages rather than inventing answers.
+- User asks what to do next, resumes a session, starts a feature, or needs routing across CodeWiki workflows: use `codewiki-flow` to choose the next focused skill.
 - New feature or larger change: use `codewiki-prd`, then `codewiki-tasks`, then `codewiki-process` to work one sub-task at a time.
 - After a substantial coding session: run `codewiki-absorb` deliberately to capture durable lessons, entities, decisions, and issues from recent changes.
 - Periodically or when drift is suspected: run `codewiki-lint` and `codewiki-breakdown` to find contradictions, stale claims, orphan pages, and missing high-signal pages.
@@ -30,7 +31,7 @@ CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdo
 
 - `codewiki-ingest`, `codewiki-query`, `codewiki-lint`
 - `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`
-- `codewiki-prd`, `codewiki-tasks`, `codewiki-process`
+- `codewiki-prd`, `codewiki-tasks`, `codewiki-process`, `codewiki-flow`
 
 ### Approval Boundary
 

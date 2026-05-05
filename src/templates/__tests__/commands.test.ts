@@ -5,7 +5,18 @@ import { describe, expect, test } from "vitest";
 
 const SKILLS_DIR = path.resolve("src/templates/skills");
 const CLAUDE_COMMANDS_DIR = path.resolve("src/templates/claude/commands/codewiki");
-const CANONICAL_SKILLS = ["absorb", "breakdown", "ingest", "lint", "obsidian", "prd", "process", "query", "tasks"];
+const CANONICAL_SKILLS = [
+  "absorb",
+  "breakdown",
+  "flow",
+  "ingest",
+  "lint",
+  "obsidian",
+  "prd",
+  "process",
+  "query",
+  "tasks"
+];
 const ARGUMENT_HINT_SKILLS = new Set(["ingest", "query", "prd", "process", "tasks"]);
 
 async function readSkill(name: string): Promise<string> {
@@ -30,6 +41,7 @@ describe("SM-04: canonical skill files expose the CodeWiki skill frontmatter con
       expect(fm).not.toBeNull();
       expect(fm).toMatch(new RegExp(`^name: codewiki-${skill}$`, "m"));
       expect(fm).toMatch(/^description:/m);
+      expect(fm).toMatch(/Use when/);
       expect(content).toContain("<purpose>");
       expect(content).toContain("<process>");
     });
@@ -170,6 +182,28 @@ describe("CMD-03C: codewiki-obsidian preserves vault guidance", () => {
   });
 });
 
+describe("CMD-03D: codewiki-flow preserves lifecycle orchestration", () => {
+  test("codewiki-flow routes to focused skills without writing wiki files", async () => {
+    const content = await readSkill("flow");
+    const fm = extractFrontmatter(content);
+
+    expect(fm).not.toBeNull();
+    expect(fm).toMatch(/^name: codewiki-flow$/m);
+    expect(fm).toContain("Use when");
+    expect(content).toContain("orchestration skill");
+    expect(content).toContain("codewiki-ingest");
+    expect(content).toContain("codewiki-query");
+    expect(content).toContain("codewiki-prd");
+    expect(content).toContain("codewiki-tasks");
+    expect(content).toContain("codewiki-process");
+    expect(content).toContain("codewiki-absorb");
+    expect(content).toContain("codewiki-breakdown");
+    expect(content).toContain("codewiki-lint");
+    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain("Do not write wiki files from this orchestration skill");
+  });
+});
+
 describe("CMD-04: codewiki-prd preserves task-driven PRD workflow checks", () => {
   test("codewiki-prd exists with description, purpose, process, and --fast", async () => {
     const content = await readSkill("prd");
@@ -242,6 +276,19 @@ describe("CMD-06: codewiki-process preserves process workflow checks", () => {
     const fm = extractFrontmatter(content)!;
     expect(fm).toContain("Task");
   });
+
+  test("codewiki-process handles change context with conditional updater and verifier flow", async () => {
+    const content = await readSkill("process");
+    expect(content).toContain("CODEWIKI_CHANGE_CONTEXT");
+    expect(content).toContain("codewiki-wiki-updater");
+    expect(content).toContain("codewiki-verifier");
+    expect(content).toContain("codewiki-absorb");
+    expect(content).toContain("After meaningful verification");
+    expect(content).toContain("If the change created durable wiki-relevant knowledge");
+    expect(content).toContain("In `--fast` mode, collect or defer wiki follow-ups");
+    expect(content).toContain("Never write to `wiki/` without explicit approval");
+    expect(content).toContain("Do not treat hook output as proof that verification passed");
+  });
 });
 
 describe("CMD-07: All canonical skill files have name and description in YAML frontmatter", () => {
@@ -252,6 +299,7 @@ describe("CMD-07: All canonical skill files have name and description in YAML fr
       expect(fm).not.toBeNull();
       expect(fm).toMatch(new RegExp(`^name: codewiki-${skill}$`, "m"));
       expect(fm).toMatch(/^description:/m);
+      expect(fm).toMatch(/Use when/);
     });
   }
 });

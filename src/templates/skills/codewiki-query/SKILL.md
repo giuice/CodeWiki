@@ -1,6 +1,6 @@
 ---
 name: codewiki-query
-description: Search wiki and synthesize an answer from wiki pages
+description: Searches the local CodeWiki and synthesizes grounded answers with citations to wiki pages. Use when the user asks how the project works, why a decision was made, where knowledge lives, what is known about an entity/issue/lesson/source, or whether a substantial answer should be filed back into the wiki.
 argument-hint: <question>
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---

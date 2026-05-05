@@ -1,6 +1,6 @@
 ---
 name: codewiki-tasks
-description: Generate implementation tasks from a PRD
+description: Converts a CodeWiki PRD into parent tasks, actionable sub-tasks, and relevant files for implementation. Use when codewiki-prd has produced a PRD, a PRD exists but no task list exists, the user asks to break down work, or codewiki-process needs an execution-ready task list.
 argument-hint: <prd-file-path>
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task]
 ---

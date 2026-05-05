@@ -1,6 +1,6 @@
 ---
 name: codewiki-ingest
-description: Digest a raw source document into wiki pages
+description: Digests raw source documents into human-approved CodeWiki pages with summaries, entities, decisions, links, index updates, log entries, and source drift checks. Use when new material appears under wiki/raw, the user asks to process docs, ingest articles/papers/transcripts/specs, bulk-import sources, or update the wiki from immutable raw evidence.
 argument-hint: <source-file-path>
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---

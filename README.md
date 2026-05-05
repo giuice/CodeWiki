@@ -4,7 +4,7 @@
 
 CodeWiki is a framework that turns a repository into a persistent, LLM-maintained knowledge system for AI coding tools.
 
-Run `npx @giuice/codewiki init` once and the CLI scaffolds the wiki plus the tool-facing integration assets that exist today: nine Skills, shared hook scripts, and agent definitions. The logical skill names stay stable across tools (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`), while the installer writes them into the canonical skill trees:
+Run `npx @giuice/codewiki init` once and the CLI scaffolds the wiki plus the tool-facing integration assets that exist today: ten Skills, shared hook scripts, and agent definitions. The logical skill names stay stable across tools (`codewiki-ingest`, `codewiki-query`, `codewiki-lint`, `codewiki-absorb`, `codewiki-breakdown`, `codewiki-obsidian`, `codewiki-prd`, `codewiki-tasks`, `codewiki-process`, `codewiki-flow`), while the installer writes them into the canonical skill trees:
 
 - Claude Code selections write `.claude/skills/codewiki-<name>/SKILL.md`
 - Codex, Copilot, and OpenCode selections write `.agents/skills/codewiki-<name>/SKILL.md`
@@ -19,6 +19,8 @@ The core rule:
 > The agent proposes; the human approves; only approved knowledge enters `wiki/`.
 
 The canonical skill names are `codewiki-*`. Different tools may surface them through a skill picker, a command palette, or slash-style invocation, but the installed artifact is always one `SKILL.md` file per logical skill.
+
+Use `codewiki-flow` when you want the agent to choose the next CodeWiki workflow from repository state instead of naming a specific skill.
 
 ### The full developer workflow
 
@@ -121,7 +123,7 @@ flowchart TB
 
   subgraph ToolIntegration[Tool integration layer: installed by init]
     H1[Hooks<br/>pre-wiki-context.sh · post-verify.sh · session-end.sh]
-    SK[Skills<br/>ingest · query · lint · absorb · breakdown · prd · tasks · process]
+    SK[Skills<br/>flow · ingest · query · lint · absorb · breakdown · prd · tasks · process]
     AG[Agents<br/>wiki-updater · verifier]
     SI[System Instructions<br/>CLAUDE.md / AGENTS.md / copilot-instructions.md]
   end
@@ -196,14 +198,15 @@ Example Claude Code install surface:
 │   ├── codewiki-obsidian/SKILL.md
 │   ├── codewiki-prd/SKILL.md
 │   ├── codewiki-tasks/SKILL.md
-│   └── codewiki-process/SKILL.md
+│   ├── codewiki-process/SKILL.md
+│   └── codewiki-flow/SKILL.md
 └── agents/
     ├── codewiki-wiki-updater.md
     └── codewiki-verifier.md
 CLAUDE.md                             # Appended CodeWiki instructions
 ```
 
-The shared non-Claude skill install surface is the same nine directories under `.agents/skills/`.
+The shared non-Claude skill install surface is the same ten directories under `.agents/skills/`.
 
 ## Install
 
@@ -250,6 +253,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 #    codewiki-lint
 #    codewiki-obsidian
 #    codewiki-query "what do we know about auth middleware?"
+#    codewiki-flow
 
 # 3. Shared hook scripts are installed into .codewiki/hooks/
 #    Each adapter maps them to its host tool's hook or plugin model
@@ -263,7 +267,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 
 | Command | What it does |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs the nine Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running updates CodeWiki-managed instruction sections and changed copied adapter assets such as skills, hooks, and agents while preserving unrelated user content. Use `--force` to replace protected scaffold files. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs the ten Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running updates CodeWiki-managed instruction sections and changed copied adapter assets such as skills, hooks, and agents while preserving unrelated user content. Use `--force` to replace protected scaffold files. |
 
 This is the only CLI command. All other intelligence lives in the installed Skill files and shared scripts that your AI tool executes natively.
 
@@ -282,6 +286,7 @@ CodeWiki ships one `SKILL.md` per logical workflow. The invocation UI differs by
 | `codewiki-prd` | Draft a PRD through clarifying questions and save it under `.codewiki/tasks/` |
 | `codewiki-tasks` | Generate a task breakdown from a PRD with checklist structure |
 | `codewiki-process` | Work through tasks one sub-task at a time with verification and clean commit hygiene |
+| `codewiki-flow` | Choose the right CodeWiki skill for setup, ingest, query, feature work, hook change-context follow-up, absorb, breakdown, and lint |
 
 ## Hooks
 
@@ -332,7 +337,8 @@ The wiki itself is tool-agnostic. The installer keeps the prompt content portabl
 - Updated ingest, query, lint, absorb, and breakdown workflows so agents can skip unchanged sources, surface weak or contested claims, file substantial query answers after approval, and run more programmatic wiki health checks.
 - Updated verifier and wiki-updater agents to check frontmatter, tag drift, confidence, contested claims, source hashes, page lifecycle rules, and required index/log/backlink maintenance.
 - Added test coverage for the expanded scaffold, generated skills, Claude command mirrors, and multi-tool agent templates.
-- Added `codewiki-obsidian` as the ninth CodeWiki skill, with Obsidian vault guidance for `raw/assets/`, wikilinks, Dataview-ready frontmatter, graph navigation, and existing-vault migration safety.
+- Added `codewiki-flow` as the tenth CodeWiki skill, with lifecycle routing across ingest, query, planning, task execution, wiki absorption, breakdown, lint, and hook change-context follow-up.
+- Added `codewiki-obsidian`, with Obsidian vault guidance for `raw/assets/`, wikilinks, Dataview-ready frontmatter, graph navigation, and existing-vault migration safety.
 - Changed managed instruction sections and copied adapter assets to update on reinstall without requiring `--force`, so existing installs receive refreshed CodeWiki guidance, skills, hooks, and agents while protected scaffold files and user-owned text outside markers are preserved.
 
 ## Development
