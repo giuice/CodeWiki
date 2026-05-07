@@ -9,6 +9,8 @@ Guidelines for managing phase plans in markdown files to track progress on compl
 
 ## Task Implementation
 - **One task at a time:** Do **NOT** start the next task until you ask the user for permission and they say "yes" or "y"
+- **Task context:** Before editing, read every file listed in the task's `read_first`. If an older task lacks `read_first`, infer the smallest useful file set from `Relevant Files`, the PRD context, and the task text.
+- **Completion contract:** Use the task's `acceptance_criteria` as the pass/fail contract. If an older task lacks criteria, add concrete criteria before implementation unless the change is trivial.
 - **Completion protocol:**  
   1. When you finish a **task**, immediately mark it as completed by changing `[ ]` to `[x]`.
   2. If **all** tasks underneath a phase are now `[x]`, follow this sequence:
@@ -38,6 +40,10 @@ Guidelines for managing phase plans in markdown files to track progress on compl
    - List every file created or modified.
    - Give each file a one‑line description of its purpose.
 
+3. **Maintain task execution fields:**
+   - Keep `read_first` accurate when newly discovered files become required context.
+   - Keep `acceptance_criteria` objective and checkable.
+
 ## AI Instructions
 
 When working with phase plans, the AI must:
@@ -49,7 +55,8 @@ When working with phase plans, the AI must:
 3. Add newly discovered tasks.
 4. Keep "Relevant Files" accurate and up to date.
 5. Before starting work, check which task is next.
-6. After implementing a task, update the file and then pause for user approval.
+6. Before editing, read the task's `read_first` files and verify against `acceptance_criteria`.
+7. After implementing a task, update the file and then pause for user approval.
 
 **Session State:** Always end your response by stating:
    * "Completed: [Task X]"

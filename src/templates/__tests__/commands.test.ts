@@ -250,6 +250,10 @@ describe("CMD-05: codewiki-tasks preserves task generation workflow checks", () 
     expect(content).toMatch(/["']?Go["']?/);
     expect(content).toContain("Generate phases");
     expect(content).toContain("Generate tasks and relevant files");
+    expect(content).toContain("read_first");
+    expect(content).toContain("acceptance_criteria");
+    expect(content).toContain("Anti-thin validation pass");
+    expect(content).toContain("Do not save an anemic task list");
     expect(content).toContain("phase plan");
     const fm = extractFrontmatter(content)!;
     expect(fm).toContain("Task");
@@ -277,6 +281,9 @@ describe("CMD-06: codewiki-process preserves process workflow checks", () => {
     const content = await readSkill("process");
     expect(content.toLowerCase()).toContain("one task");
     expect(content).toContain("earliest incomplete phase");
+    expect(content).toContain("read_first");
+    expect(content).toContain("acceptance_criteria");
+    expect(content).toContain("completion contract");
     const fm = extractFrontmatter(content)!;
     expect(fm).toContain("Task");
   });
