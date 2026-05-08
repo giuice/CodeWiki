@@ -139,8 +139,8 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
   const result = mustRun(cwd, ["init", "--name", "demo", "--tool", "claude-code"]);
   assert.match(result.stdout, /CodeWiki initialized for demo\./);
   assert.match(result.stdout, /Wiki scaffold:/);
+  assert.match(result.stdout, /Shared hooks:/);
   assert.match(result.stdout, /claude-code adapter:/);
-  assert.match(result.stdout, /session-end\.sh .*not wired to Claude lifecycle/);
 
   const files = new Set(listRecursive(cwd));
   for (const rel of [
@@ -303,6 +303,7 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
     ".codex/hooks.json",
     ".codex/config.toml",
     ".codex/hooks/user-prompt-submit.sh",
+    ".codex/hooks/pre-tool-use.sh",
     ".codex/hooks/post-tool-use.sh",
     ".codex/hooks/stop.sh",
     ".codex/agents/codewiki-wiki-updater.toml",
@@ -313,20 +314,20 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
   }
 
   const firstHooks = JSON.parse(readFileSync(path.join(cwd, ".codex/hooks.json"), "utf8")) as {
-    hooks: { PreToolUse: Array<{ matcher?: string; hooks?: Array<{ command?: string }> }> };
+    hooks: { PreToolUse?: Array<{ matcher?: string; hooks?: Array<{ command?: string }> }> };
   };
   assert.equal(
-    firstHooks.hooks.PreToolUse.some((entry) =>
+    firstHooks.hooks.PreToolUse?.some((entry) =>
       entry.hooks?.some((hook) => hook.command === "echo user-codex-hook")
     ),
     true
   );
   assert.equal(
-    firstHooks.hooks.PreToolUse.some((entry) => entry.matcher === "Edit|Write|apply_patch"),
-    true
+    firstHooks.hooks.PreToolUse?.some((entry) => entry.matcher === "Edit|Write|apply_patch") ?? false,
+    false
   );
   assert.equal(countHookCommands(firstHooks, ".codex/hooks/user-prompt-submit.sh"), 1);
-  assert.equal(countHookCommands(firstHooks, ".codex/hooks/pre-tool-use.sh"), 1);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/pre-tool-use.sh"), 0);
   assert.equal(countHookCommands(firstHooks, ".codex/hooks/post-tool-use.sh"), 1);
   assert.equal(countHookCommands(firstHooks, ".codex/hooks/stop.sh"), 1);
 
@@ -346,7 +347,7 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
 
   const secondHooks = JSON.parse(readFileSync(path.join(cwd, ".codex/hooks.json"), "utf8"));
   assert.equal(countHookCommands(secondHooks, ".codex/hooks/user-prompt-submit.sh"), 1);
-  assert.equal(countHookCommands(secondHooks, ".codex/hooks/pre-tool-use.sh"), 1);
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/pre-tool-use.sh"), 0);
   assert.equal(countHookCommands(secondHooks, ".codex/hooks/post-tool-use.sh"), 1);
   assert.equal(countHookCommands(secondHooks, ".codex/hooks/stop.sh"), 1);
 });
@@ -571,7 +572,7 @@ test("init preserves existing Claude settings and instructions without duplicati
   writeFileSync(path.join(cwd, "CLAUDE.md"), "# Existing Instructions\n");
 
   const first = mustRun(cwd, ["init", "--tool", "claude-code"]);
-  assert.match(first.stdout, /session-end\.sh .*not wired to Claude lifecycle/);
+  assert.match(first.stdout, /Shared hooks:/);
 
   const firstSettings = JSON.parse(readFileSync(path.join(cwd, ".claude/settings.json"), "utf8")) as {
     theme: string;

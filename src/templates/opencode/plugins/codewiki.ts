@@ -9,29 +9,43 @@ function toJson(value: unknown): string {
   }
 }
 
-async function runHook(root: string, hookName: string, payload?: unknown): Promise<string> {
+async function runHook(root: string, hookName: string, eventName: string, payload?: unknown): Promise<string> {
   const hookPath = path.join(root, ".codewiki", "hooks", hookName);
 
   try {
     return await new Promise<string>((resolve) => {
-      const child = spawn("bash", [hookPath], {
+      const child = spawn("sh", [hookPath], {
         cwd: root,
         env: {
           ...process.env,
           CODEWIKI_HOOK_HOST: "opencode",
-          CODEWIKI_HOOK_EVENT: hookName
+          CODEWIKI_HOOK_EVENT: eventName
         },
         stdio: ["pipe", "pipe", "ignore"]
       });
 
       let stdout = "";
+      let settled = false;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+
+      const finish = (value: string) => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        resolve(value);
+      };
+
+      timer = setTimeout(() => {
+        child.kill();
+        finish("");
+      }, 5000);
 
       child.stdout.on("data", (chunk: Buffer) => {
         stdout += chunk.toString("utf8");
       });
 
-      child.on("error", () => resolve(""));
-      child.on("close", () => resolve(stdout.trim()));
+      child.on("error", () => finish(""));
+      child.on("close", () => finish(stdout.trim()));
 
       if (payload === undefined) {
         child.stdin.end();
@@ -61,16 +75,16 @@ export const CodeWikiPlugin = async ({
 
   return {
     "tool.execute.before": async (input: unknown, output: unknown) => {
-      return hookContext(await runHook(root, "pre-wiki-context.sh", { input, output }));
+      return hookContext(await runHook(root, "pre-wiki-context.sh", "tool.execute.before", { input, output }));
     },
 
     "file.edited": async (input: unknown, output: unknown) => {
-      return hookContext(await runHook(root, "post-verify.sh", { input, output }));
+      return hookContext(await runHook(root, "post-verify.sh", "file.edited", { input, output }));
     },
 
     // `session.idle` is treated as assistant-idle / turn-end, not teardown.
     "session.idle": async (input: unknown) => {
-      return hookContext(await runHook(root, "session-end.sh", input));
+      return hookContext(await runHook(root, "session-end.sh", "session.idle", input));
     }
   };
 };

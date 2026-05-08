@@ -2,14 +2,14 @@
 
 ## Goal
 
-To guide an AI assistant in creating a detailed Product Requirements Document (PRD) in Markdown format, based on an initial user prompt. The PRD should be clear, actionable, and suitable for a junior developer to understand and implement the feature.
+To guide an AI assistant in creating a detailed Product Requirements Document (PRD) in Markdown format, based on an initial user prompt. The PRD should be clear, actionable, and implementation-ready without over-specifying the implementation.
 
 ## Process
 
 1.  **Receive Initial Prompt:** The user provides a brief description or request for a new feature or functionality. The AI must also request to read any existing architecture docs or schema files (@schema.prisma, @README.md, etc.) to ensure the PRD fits the current tech stack.
 2.  **Ask Clarifying Questions:** Before writing the PRD, the AI *must* ask clarifying questions to gather sufficient detail. The goal is to understand the "what" and "why" of the feature, not necessarily the "how" (which the developer will figure out). Make sure to provide options in letter/number lists so I can respond easily with my selections.
 3.  **Generate PRD:** Based on the initial prompt and the user's answers to the clarifying questions, generate a PRD using the structure outlined below.
-4.  **Save PRD:** Save the generated document as `[n]-prd-[feature-name].md` inside the `/tasks` directory. (Where `n` is a zero-padded 4-digit sequence starting from 0001, e.g., `0001-prd-user-authentication.md`, `0002-prd-dashboard.md`, etc.)
+4.  **Save PRD:** Save the generated document as `[n]-prd-[feature-name].md` inside the configured task directory. Read `.codewiki/config.yml` first; if `wiki.tasks_path` is not declared, use `.codewiki/tasks/`. Use a zero-padded 4-digit sequence starting from 0001, e.g. `0001-prd-user-authentication.md`, `0002-prd-dashboard.md`.
 
 ## Clarifying Questions (Examples)
 
@@ -41,12 +41,12 @@ The generated PRD should include the following sections:
 
 ## Target Audience
 
-Assume the primary reader of the PRD is a **junior developer**. Therefore, requirements should be explicit, unambiguous, and avoid jargon where possible. Provide enough detail for them to understand the feature's purpose and core logic.
+Assume the primary reader is an implementation agent or developer who needs explicit, unambiguous requirements and enough context to plan the work safely.
 
 ## Output
 
 *   **Format:** Markdown (`.md`)
-*   **Location:** `/tasks/`
+*   **Location:** configured `wiki.tasks_path`, defaulting to `.codewiki/tasks/`
 *   **Filename:** `[n]-prd-[feature-name].md`
 
 ## Final instructions
@@ -54,3 +54,4 @@ Assume the primary reader of the PRD is a **junior developer**. Therefore, requi
 1. Do NOT start implementing the PRD
 2. Make sure to ask the user clarifying questions
 3. Take the user's answers to the clarifying questions and improve the PRD
+4. Do not create commits automatically; the user controls git operations

@@ -22,6 +22,8 @@ Os nomes canônicos das skills são `codewiki-*`. Ferramentas diferentes podem e
 
 Use `codewiki-flow` quando quiser que o agente escolha o próximo workflow CodeWiki a partir do estado do repositório em vez de nomear uma skill específica.
 
+O fluxo abaixo é a fonte da verdade operacional do CodeWiki. Quando o comportamento de hooks, roteamento de agentes ou responsabilidades das skills mudar, atualize este fluxo e a seção Hooks na mesma mudança para manter todos os adapters com a mesma semântica.
+
 ### O Fluxo Completo do Desenvolvedor
 
 ```mermaid
@@ -49,13 +51,14 @@ flowchart TD
     direction TB
     B1["codewiki-process<br/>Escolhe uma tarefa"] --> B2["hook pre-wiki-context<br/>pode injetar contexto curto"]
     B2 --> B3["Agente edita código<br/>e roda verificação"]
-    B3 --> B4["hook post-verify registra<br/>pendência de absorb"]
-    B4 --> B5["limite de fase ou absorb explícito<br/>aciona wiki-updater"]
-    B5 --> B6{"Aprovar escritas na wiki?"}
-    B6 -- "Sim" --> B7["Atualizar páginas da wiki,<br/>backlinks, log"]
-    B6 -- "Não" --> B8["Descartar proposta da wiki"]
-    B7 --> B1
+    B3 --> B4["hooks post-verify/session-end<br/>registram estado normalizado"]
+    B4 --> B5["limite de fase ou absorb explícito<br/>skill lê estado pendente"]
+    B5 --> B6["absorb ou wiki-updater<br/>propõe updates da wiki"]
+    B6 --> B7{"Aprovar escritas na wiki?"}
+    B7 -- "Sim" --> B8["Atualizar páginas da wiki,<br/>backlinks, log"]
+    B7 -- "Não" --> B9["Descartar proposta da wiki"]
     B8 --> B1
+    B9 --> B1
   end
 
   Build --> Compound
@@ -88,7 +91,7 @@ flowchart TD
 1. **Setup**: Rode `npx @giuice/codewiki init` uma vez. Ele cria a wiki e instala os assets de integração atualmente disponíveis para o conjunto de ferramentas selecionado.
 2. **Alimentar conhecimento**: Coloque documentos existentes em `wiki/raw/` e rode `codewiki-ingest` para digeri-los em páginas da wiki. O agente propõe; você aprova.
 3. **Planejar uma feature**: Rode `codewiki-prd` com uma ideia de feature. O agente rascunha o PRD, então `codewiki-tasks` transforma isso em fases com tarefas executáveis.
-4. **Construir**: Rode `codewiki-process`. O agente trabalha uma tarefa por vez dentro da fase atual. Hooks registram pendências de absorb em `.codewiki/state/`; qualquer contexto visível vindo de hook é opcional e depende do host.
+4. **Construir**: Rode `codewiki-process`. O agente trabalha uma tarefa por vez dentro da fase atual. Hooks são sensores silenciosos: eles podem injetar uma dica curta no início do prompt, mas o trabalho confiável deles é registrar pendências de absorb qualificadas por host em `.codewiki/state/`.
 5. **Acumular**: Em uma fase concluída ou pedido explícito de absorb, use `codewiki-absorb` para extrair lições, atualizações de entidades e problemas a partir dos diffs recentes e estado pendente. Depois rode `codewiki-breakdown` periodicamente para criar páginas importantes ausentes a partir de referências repetidas.
 6. **Manter**: Use `codewiki-query` antes de começar trabalhos parecidos, e rode `codewiki-lint` regularmente para encontrar contradições, páginas órfãs, claims obsoletas, artigos inchados e links cruzados ausentes.
 
@@ -97,7 +100,7 @@ flowchart TD
 1. Rode `npx @giuice/codewiki init` uma vez por repositório.
 2. Coloque material-fonte existente em `wiki/raw/` e rode `codewiki-ingest` até a wiki refletir o estado atual do projeto.
 3. Para trabalho novo, rode `codewiki-prd` e depois `codewiki-tasks` antes da implementação.
-4. Execute o trabalho por `codewiki-process` para que o plano de fases, verificação, commits e estado pendente de absorb fiquem alinhados.
+4. Execute o trabalho por `codewiki-process` para que o plano de fases, verificação e estado pendente de absorb fiquem alinhados. Skills CodeWiki não criam commits automaticamente; o usuário controla o git.
 5. Revise toda proposta de wiki produzida por absorb ou wiki-updater. Nada deve ser escrito em `wiki/` sem aprovação explícita.
 6. Em uma fase concluída ou ponto explícito de handoff, rode `codewiki-absorb` se o estado pendente ou os diffs recentes contiverem conhecimento durável.
 7. Use `codewiki-breakdown`, `codewiki-lint` e `codewiki-query` como o loop contínuo de manutenção entre features.
@@ -269,7 +272,7 @@ npx @giuice/codewiki init --name "Meu Projeto" --tool claude-code,codex
 
 | Comando | O que faz |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Cria `.codewiki/`, `.codewiki/tasks/` e `wiki/`, instala as dez Skills nas árvores canônicas de skills, instala assets de hook compartilhados e aplica os adapters disponíveis. Reexecutar atualiza seções de instrução gerenciadas pelo CodeWiki e assets copiados dos adapters que mudaram, como skills, hooks e agentes, preservando conteúdo de usuário não relacionado. Use `--force` para substituir arquivos protegidos do scaffold. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Cria `.codewiki/`, `.codewiki/tasks/` e `wiki/`, instala hooks compartilhados executáveis em `.codewiki/hooks/`, instala as dez Skills nas árvores canônicas de skills e aplica os adapters disponíveis. O relatório separa `Wiki scaffold`, `Shared hooks` e cada seção de adapter. Reexecutar atualiza seções de instrução gerenciadas pelo CodeWiki e assets copiados dos adapters que mudaram, como skills, hooks e agentes, preservando conteúdo de usuário não relacionado. Use `--force` para substituir arquivos protegidos do scaffold. |
 
 Esse é o único comando da CLI. Toda a outra inteligência vive nos arquivos Skill instalados e nos scripts compartilhados que a sua ferramenta de IA executa nativamente.
 
@@ -287,20 +290,32 @@ CodeWiki inclui um `SKILL.md` por workflow lógico. A UI de invocação muda por
 | `codewiki-obsidian` | Configurar e auditar a wiki como vault compatível com Obsidian, com assets, wikilinks e frontmatter estáveis |
 | `codewiki-prd` | Rascunhar um PRD por perguntas de esclarecimento e salvar em `.codewiki/tasks/` |
 | `codewiki-tasks` | Gerar fases e tarefas executáveis a partir de um PRD com estrutura de checklist |
-| `codewiki-process` | Trabalhar uma tarefa por vez dentro das fases, com verificação e higiene limpa de commits |
+| `codewiki-process` | Trabalhar uma tarefa por vez dentro das fases, com verificação, atualização do plano e higiene limpa de git |
 | `codewiki-flow` | Escolher a skill CodeWiki correta para setup, ingestão, consulta, feature work, pendências de absorb, absorção, breakdown e lint |
 
 ## Hooks
 
 Scripts shell compartilhados ficam em `.codewiki/hooks/`:
 
+Hooks são normalizados como sensores, não como motores de workflow. Entre Claude Code, Codex, Copilot e OpenCode, o contrato CodeWiki é o mesmo quando os nomes de eventos do host mudam:
+
+- stdout fica silencioso por padrão; contexto visível é curto, consultivo e dependente do host.
+- scripts de hook compartilhados são instalados para todo caminho de adapter suportado durante `codewiki init`.
+- sinais duráveis são gravados em `.codewiki/state/pending-absorb.jsonl`.
+- eventos de absorb pendente incluem campos práticos de roteamento como `timestamp`, `source`, `host`, `event`, `reason`, `files` e `topic_candidates`; entradas pós-edição incluem `payload_hash`, enquanto entradas de ciclo de vida incluem `diff_stat` e `diff_hash`.
+- sinais duplicados são suprimidos por host, evento, arquivos e hash; o hash de ciclo de vida ignora `.codewiki/state/**` para o hook não se reativar por causa do próprio estado quando esses arquivos estão versionados.
+- traces de debug são gravados em `.codewiki/state/hooks-debug.jsonl` só quando `CODEWIKI_HOOK_DEBUG=1`.
+- contexto de prompt é filtrado para intenção explícita de workflow CodeWiki/wiki e deduplicado em `.codewiki/state/`; `CODEWIKI_HOOK_CONTEXT_BYPASS=1` é um bypass diagnóstico opt-in.
+- wrappers executam scripts compartilhados com POSIX `sh` e definem `CODEWIKI_HOOK_HOST` / `CODEWIKI_HOOK_EVENT` antes do dispatch; o plugin OpenCode também limita a execução do hook com timeout curto.
+- o follow-up com updater/verifier é invocado por skills como `codewiki-process`, `codewiki-absorb` ou `codewiki-flow`, não diretamente por hooks.
+
 | Hook | Objetivo |
 | --- | --- |
-| `pre-wiki-context.sh` | Emite contexto curto da wiki só para prompts wiki-relevantes; a entrega pelo host é consultiva |
+| `pre-wiki-context.sh` | Emite contexto curto da wiki só para prompts explicitamente wiki-relevantes, com dedupe por contexto; a entrega pelo host é consultiva |
 | `post-verify.sh` | Registra sinais pequenos de absorb pendente em `.codewiki/state/pending-absorb.jsonl` |
 | `session-end.sh` | Registra estado de mudanças não commitadas sem imprimir resumo recorrente |
 
-Cada adapter mapeia esses scripts compartilhados para o modelo de integração da ferramenta hospedeira. O processamento de saída de hooks varia por host e runtime, então CodeWiki trata `.codewiki/state/` como o handoff confiável.
+Cada adapter mapeia esses scripts compartilhados para o modelo de integração da ferramenta hospedeira. O processamento de saída de hooks varia por host e runtime, então CodeWiki trata `.codewiki/state/` como o handoff confiável. Qualquer mudança na semântica dos hooks deve ser refletida no fluxo completo do desenvolvedor acima.
 
 ## Agentes
 
@@ -317,10 +332,10 @@ Claude Code, Codex, Copilot e OpenCode instalam dois agentes auxiliares:
 
 | Ferramenta | Skills | Estratégia de hook ou integração | Agentes | Instruções |
 | --- | --- | --- | --- | --- |
-| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` conecta hooks shell compartilhados | `.claude/agents/` | Anexa em `CLAUDE.md` |
-| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` mais `.codex/config.toml`; usa `UserPromptSubmit`, `PreToolUse`/`PostToolUse` para eventos de edit/write, e wrappers de Stop | `.codex/agents/` | Anexa em `AGENTS.md` |
-| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; usa `preToolUse`, `postToolUse` e `agentStop` para acompanhamento pós-turno | `.github/agents/` | Anexa em `.github/copilot-instructions.md` |
-| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` despacha eventos de plugin para hooks compartilhados | `.opencode/agents/` | Anexa em `AGENTS.md` |
+| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` conecta `PreToolUse` e `PostToolUse` aos hooks compartilhados; nenhum hook de ciclo de vida é conectado por padrão | `.claude/agents/` | Anexa em `CLAUDE.md` |
+| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` mais `.codex/config.toml`; conecta `UserPromptSubmit`, `PostToolUse` e `Stop` loop-safe. O wrapper `PreToolUse` é instalado, mas não é padrão | `.codex/agents/` | Anexa em `AGENTS.md` |
+| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; conecta `preToolUse`, `postToolUse`, `agentStop` e `sessionEnd` cleanup-only ao contrato normalizado de sensores | `.github/agents/` | Anexa em `.github/copilot-instructions.md` |
+| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` despacha `tool.execute.before`, `file.edited` e `session.idle` para hooks compartilhados com `sh` e processo filho limitado | `.opencode/agents/` | Anexa em `AGENTS.md` |
 
 Regra das duas árvores:
 
@@ -333,6 +348,9 @@ A wiki em si é independente de ferramenta. O instalador mantém o conteúdo dos
 ## Changelog
 
 ### Unreleased
+
+- Documentados hooks como sensores silenciosos normalizados e definido o fluxo do README como fonte da verdade operacional para comportamento de hooks, skills e agentes.
+- Documentado o schema atual dos hooks, normalização de host/evento, dedupe de ciclo de vida, relatório de instalação dos hooks compartilhados e wiring padrão de hooks do Codex.
 
 - Adicionada uma estrutura padrão de wiki mais forte: templates de página `concept`, `comparison` e `query` agora são instalados junto com os templates existentes de entidade, decisão, lição, issue e resumo de fonte.
 - Expandido o `wiki/SCHEMA.md` com proveniência de fontes raw, checks de drift por `sha256`, campos obrigatórios de qualidade das páginas, taxonomia de tags, thresholds de criação de páginas, política de archive, metadados do index e entradas de log padronizadas.

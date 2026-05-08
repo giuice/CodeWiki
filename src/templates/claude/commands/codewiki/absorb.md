@@ -14,6 +14,7 @@ changed files, not from raw documents. Preserve the human approval boundary at a
 <process>
 ## Step 1: Gather recent changes
 - Read `.codewiki/state/pending-absorb.jsonl` when it exists.
+- Treat pending entries as hook-recorded state only; hooks do not run updater, verifier, absorb, or write wiki files directly.
 - Run `git diff` and `git diff --cached` to inspect current uncommitted work.
 - List the changed files and summarize what changed semantically, not line-by-line.
 

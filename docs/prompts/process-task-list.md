@@ -1,64 +1,65 @@
-# Phase Plan Management
+# Phase Plan Processing
 
-Guidelines for managing phase plans in markdown files to track progress on completing a PRD
+Guidelines for processing CodeWiki phase plans in markdown files. This document is a lineage reference for `codewiki-process`; the live packaged prompt is `src/templates/skills/codewiki-process/SKILL.md`.
 
-## Junior Developer Mentorship   
-* **Explain "Why":** When writing complex logic or choosing a specific library, briefly explain the reasoning to the user (e.g., "I'm using `zod` here because strict validation prevents runtime errors later").
-* **Safety First:** Never delete existing database data or complex logic without explicit user confirmation.
-* **Docs:** If a task involves a new pattern, suggest adding a comment or a small update to the README.
+## Core Rule
 
-## Task Implementation
-- **One task at a time:** Do **NOT** start the next task until you ask the user for permission and they say "yes" or "y"
-- **Task context:** Before editing, read every file listed in the task's `read_first`. If an older task lacks `read_first`, infer the smallest useful file set from `Relevant Files`, the PRD context, and the task text.
-- **Completion contract:** Use the task's `acceptance_criteria` as the pass/fail contract. If an older task lacks criteria, add concrete criteria before implementation unless the change is trivial.
-- **Completion protocol:**  
-  1. When you finish a **task**, immediately mark it as completed by changing `[ ]` to `[x]`.
-  2. If **all** tasks underneath a phase are now `[x]`, follow this sequence:
-    - **First**: Run or Create a full test suite (`pytest`, `npm test`, `bin/rails test`, `vitest`, `playwright`, etc.)
-    - **Only if all tests pass**: Stage changes (`git add .`)
-    - **Clean up**: Remove any temporary files and temporary code before committing
-    - **Commit**: Use a descriptive commit message that:
-      - Uses conventional commit format (`feat:`, `fix:`, `refactor:`, etc.)
-      - Summarizes what was accomplished in the phase
-      - Lists key changes and additions
-      - References the task number and PRD context
-      - **Formats the message as a single-line command using `-m` flags**, e.g.:
+Work one task at a time by default. Use `--fast` only when the user explicitly asks to continue through all remaining tasks without pausing.
 
-        ```
-        git commit -m "feat: add payment validation logic" -m "- Validates card type and expiry" -m "- Adds unit tests for edge cases" -m "Related to T123 in PRD"
-        ```
-  3. Once all the tasks are marked completed and changes have been committed, mark the **phase** as completed.
-- Stop after each task and wait for the user's go-ahead.
+## Task Directory
+
+- Read `.codewiki/config.yml` if it exists.
+- If `wiki.tasks_path` is declared, use it as the PRD/task directory.
+- If `wiki.tasks_path` is not declared, use `.codewiki/tasks/`.
+
+## Phase Plan Resolution
+
+- Treat the non-flag portion of the request as the phase plan path.
+- Treat `--fast` as a mode flag, not as part of the path.
+- If a relative path does not exist, try resolving it under the task directory.
+- If no phase plan path is provided, search the task directory for `tasks-*.md`.
+- Prefer a phase plan with incomplete tasks. If multiple candidates are plausible, choose the most recently modified one when that is clear and tell the user; otherwise ask.
+- Read the selected phase plan fully before starting work.
+
+## Task Execution
+
+- Identify the next incomplete task under the earliest incomplete phase.
+- Before editing, read every file listed in that task's `read_first`.
+- If a task lacks `read_first`, infer the smallest useful file set from `Relevant Files`, the PRD context, and the task text before making changes.
+- Use the task's `acceptance_criteria` as the completion contract.
+- If a non-trivial task lacks `acceptance_criteria`, add concrete criteria before implementation.
+- Read existing code patterns and explain the reason for non-obvious implementation choices.
+- Use focused subagents only when they help keep the current task narrow and reviewable.
 
 ## Phase Plan Maintenance
 
-1. **Update the phase plan as you work:**
-   - Mark completed tasks (`[x]`) per the protocol above.
-   - Add new tasks as they emerge.
+- Mark completed tasks from `[ ]` to `[x]` after verification.
+- Mark a phase `[x]` only after all tasks underneath it are complete.
+- Keep the `Relevant Files` section accurate.
+- Add newly discovered follow-up tasks when needed.
 
-2. **Maintain the "Relevant Files" section:**
-   - List every file created or modified.
-   - Give each file a one‑line description of its purpose.
+## Verification
 
-3. **Maintain task execution fields:**
-   - Keep `read_first` accurate when newly discovered files become required context.
-   - Keep `acceptance_criteria` objective and checkable.
+- Verify the task against each `acceptance_criteria` item before marking it complete.
+- Run the most relevant existing tests or checks after meaningful implementation steps.
+- Do not treat hook output as proof that verification passed; hook output is only a change signal.
 
-## AI Instructions
+## Pending Absorb State
 
-When working with phase plans, the AI must:
+- After meaningful verification, inspect `.codewiki/state/pending-absorb.jsonl` when it exists.
+- Treat pending entries as hook-recorded state only. Hooks do not run updater, verifier, absorb, or any other workflow directly.
+- Treat hook-provided context as optional because host runtimes differ on whether hook output reaches the agent.
+- If the change created durable wiki-relevant knowledge, invoke `codewiki-wiki-updater` to propose approval-gated wiki updates.
+- If the change is wiki-relevant but should be batched, explicitly defer it to `codewiki-absorb` at the next completed phase or explicit absorb request.
+- After a non-trivial wiki update proposal, invoke `codewiki-verifier` for read-only contradiction, reference, frontmatter, index, log, and backlink review before applying approved wiki edits.
+- Never write to `wiki/` without explicit approval in the current conversation.
 
-1. Regularly update the phase plan file after finishing any significant work.
-2. Follow the completion protocol:
-   - Mark each finished **task** `[x]`.
-   - Mark the **phase** `[x]` once **all** its tasks are `[x]`.
-3. Add newly discovered tasks.
-4. Keep "Relevant Files" accurate and up to date.
-5. Before starting work, check which task is next.
-6. Before editing, read the task's `read_first` files and verify against `acceptance_criteria`.
-7. After implementing a task, update the file and then pause for user approval.
+## Interaction Model
 
-**Session State:** Always end your response by stating:
-   * "Completed: [Task X]"
-   * "Next Up: [Task Y]"
-   * "Awaiting your command to proceed."
+- In interactive mode, execute one task, summarize what changed and why, then wait for the user's go-ahead.
+- In `--fast` mode, continue through all remaining tasks without pausing between them and collect or defer wiki follow-ups instead of forcing approval after every task.
+
+## Boundaries
+
+- Do not create commits automatically for code changes or wiki changes; the user controls git operations.
+- Do not silently skip failing checks or unresolved blockers.

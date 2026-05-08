@@ -7,6 +7,7 @@ import { resolveAdapters } from "../lib/adapters/index.js";
 import { detectTools } from "../lib/detect.js";
 import { formatBrandBanner, formatSectionedReport, type ReportSection } from "../lib/reporter.js";
 import { scaffoldProject } from "../lib/scaffold.js";
+import { installSharedHooks } from "../lib/shared-hooks.js";
 
 export interface InitOptions {
   root?: string;
@@ -130,8 +131,12 @@ export async function initCommand({ root = process.cwd(), args }: InitOptions): 
   const templateDir = path.resolve(meta.dirname, "..", "templates");
 
   const scaffoldEntries = await scaffoldProject({ root, projectName, tools, force });
+  const sharedHookEntries = await installSharedHooks({ root, force, templateDir });
   const { adapters, unsupported } = await resolveAdapters(tools);
-  const sections: ReportSection[] = [{ title: "Wiki scaffold", entries: scaffoldEntries }];
+  const sections: ReportSection[] = [
+    { title: "Wiki scaffold", entries: scaffoldEntries },
+    { title: "Shared hooks", entries: sharedHookEntries }
+  ];
 
   for (const adapter of adapters) {
     const adapterEntries = await adapter.install({ root, projectName, force, templateDir });

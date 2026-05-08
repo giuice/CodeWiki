@@ -25,8 +25,23 @@ describe("OC-03: OpenCode plugin template stays a thin shared-hook dispatcher", 
     expect(content).toContain("post-verify.sh");
     expect(content).toContain("session-end.sh");
     expect(content).toContain("codewikiContext");
+    expect(content).toContain('spawn("sh"');
+    expect(content).toContain('CODEWIKI_HOOK_HOST: "opencode"');
+    expect(content).toContain("CODEWIKI_HOOK_EVENT");
+    expect(content).toContain('"tool.execute.before"');
+    expect(content).toContain('"file.edited"');
+    expect(content).toContain('"session.idle"');
+    expect(content).toContain("setTimeout");
     expect(content).toContain('stdio: ["pipe", "pipe", "ignore"]');
     expect(content).toContain("not teardown");
+    expect(content).not.toContain('spawn("bash"');
+    expect(content).not.toContain("codewiki-wiki-updater");
+    expect(content).not.toContain("codewiki-verifier");
+    expect(content).not.toContain("codewiki-process");
+    expect(content).not.toContain("codewiki-absorb");
+    expect(content).not.toContain("pending-absorb-dedupe");
+    expect(content).not.toContain("payload_hash");
+    expect(content).not.toContain("diff_hash");
   });
 });
 
@@ -81,6 +96,7 @@ describe("OC-04: OpenCode instructions template stays concise and practical", ()
     expect(content).toContain("invoke `codewiki-verifier`");
     expect(content).toContain("Hooks provide optional context and persistent change signals");
     expect(content).toContain("record pending absorb state");
+    expect(content).toContain("deduped idle or turn-end state signal");
     expect(content).toContain("### Schema Discipline");
     expect(content).toContain("confidence");
     expect(content).toContain("contested");

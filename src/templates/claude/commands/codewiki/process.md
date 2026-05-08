@@ -64,6 +64,7 @@ asks to continue through all remaining tasks without pausing.
 
 ## Step 9: Handle CodeWiki pending absorb state
 - After meaningful verification, inspect `.codewiki/state/pending-absorb.jsonl` when it exists.
+- Treat pending entries as hook-recorded state only; hooks do not run updater, verifier, absorb, or any other workflow directly.
 - Treat hook-provided context as optional because host runtimes differ on whether hook output
   reaches the agent.
 - If the change created durable wiki-relevant knowledge, invoke `codewiki-wiki-updater` to propose
