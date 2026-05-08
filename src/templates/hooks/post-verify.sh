@@ -29,6 +29,30 @@ _cwiki_hash_stdin() {
     fi
 }
 
+_cwiki_material_payload() {
+    if command -v jq >/dev/null 2>&1; then
+        printf '%s' "$_cwiki_payload" | jq -cS '
+            def scrub:
+                if type == "object" then
+                    with_entries(
+                        select((.key | test("^(callId|call_id|toolCallId|tool_call_id|requestId|request_id|invocationId|invocation_id|sessionId|session_id|timestamp|durationMs|duration_ms)$"; "i")) | not)
+                        | .value |= scrub
+                    )
+                elif type == "array" then
+                    map(scrub)
+                else
+                    .
+                end;
+            scrub
+        ' 2>/dev/null
+        return
+    fi
+
+    printf '%s' "$_cwiki_payload" |
+        grep -oE '"(diff|patch|changes|content|oldString|newString|old_string|new_string|before|after|output|result)"[ 	]*:[ 	]*"([^"\\]|\\.)*"' 2>/dev/null |
+        sort
+}
+
 _cwiki_log_debug() {
     [ "${CODEWIKI_HOOK_DEBUG:-}" = "1" ] || return 0
     mkdir -p "$_cwiki_state_dir" 2>/dev/null || return 0
@@ -94,7 +118,9 @@ mkdir -p "$_cwiki_state_dir" 2>/dev/null || exit 0
 
 _cwiki_ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date '+%Y-%m-%dT%H:%M:%S%z')
 _cwiki_normalized_files=$(printf '%s\n' "$_cwiki_files" | grep -E '(^|/)[A-Za-z0-9._/-]+\.[A-Za-z0-9]+$' | sort -u | sed -n '1,20p') || _cwiki_normalized_files=""
-_cwiki_payload_hash=$(printf '%s\n' "$_cwiki_normalized_files" | _cwiki_hash_stdin) || _cwiki_payload_hash="unknown"
+_cwiki_material=$(_cwiki_material_payload) || _cwiki_material=""
+[ -n "$_cwiki_material" ] || _cwiki_material="$_cwiki_normalized_files"
+_cwiki_payload_hash=$(printf '%s\n' "$_cwiki_material" | _cwiki_hash_stdin) || _cwiki_payload_hash="unknown"
 _cwiki_files_json=$(printf '%s\n' "$_cwiki_normalized_files" | sed '/^$/d' | _cwiki_json_escape)
 _cwiki_matched_json=$(printf '%b' "$_cwiki_matched" | sed '/^$/d' | _cwiki_json_escape)
 _cwiki_candidates_json=$(printf '%s\n' "$_cwiki_candidates" | sed '/^$/d' | _cwiki_json_escape)

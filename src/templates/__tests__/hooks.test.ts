@@ -227,6 +227,27 @@ describe("HOOK-02: post-verify.sh exits 0 with empty/malformed JSON", () => {
     expect(events[0]?.files).toEqual(expect.stringContaining("stable-master-pins.ts"));
   });
 
+  test("script records a new event when the same file has a different material payload", () => {
+    const cwd = mkdtempSync(path.join(os.tmpdir(), "codewiki-hook-"));
+    const firstPayload = '{"file":"src/features/stable-master-pins.ts","diff":"before"}';
+    const secondPayload = '{"file":"src/features/stable-master-pins.ts","diff":"after"}';
+
+    execSync(
+      `printf '%s' '${firstPayload}' | CODEWIKI_HOOK_HOST=codex CODEWIKI_HOOK_EVENT=PostToolUse sh "${path.join(HOOKS_DIR, "post-verify.sh")}" 2>/dev/null`,
+      { cwd, encoding: "utf8", timeout: 5000 }
+    );
+    execSync(
+      `printf '%s' '${secondPayload}' | CODEWIKI_HOOK_HOST=codex CODEWIKI_HOOK_EVENT=PostToolUse sh "${path.join(HOOKS_DIR, "post-verify.sh")}" 2>/dev/null`,
+      { cwd, encoding: "utf8", timeout: 5000 }
+    );
+    const events = readPendingEvents(cwd);
+
+    expect(events).toHaveLength(2);
+    expect(events[0]?.files).toEqual(expect.stringContaining("stable-master-pins.ts"));
+    expect(events[1]?.files).toEqual(expect.stringContaining("stable-master-pins.ts"));
+    expect(events[0]?.payload_hash).not.toBe(events[1]?.payload_hash);
+  });
+
   test("script records a new event for a different file set", () => {
     const cwd = mkdtempSync(path.join(os.tmpdir(), "codewiki-hook-"));
     execSync(
