@@ -231,6 +231,8 @@ npx @giuice/codewiki init --tool opencode
 npx @giuice/codewiki init --tool claude-code,codex
 ```
 
+Para conferir a versão publicada do pacote, use `npm exec --yes --package=@giuice/codewiki -- codewiki --version`. `npm --yes @giuice/codewiki --version` imprime a versão do cliente npm, não a versão do CodeWiki.
+
 ### A Partir do Código-Fonte
 
 ```bash
