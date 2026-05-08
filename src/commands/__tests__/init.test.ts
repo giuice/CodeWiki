@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, rm, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -7,11 +7,32 @@ import { afterEach, expect, test, vi } from "vitest";
 
 const tempRoots: string[] = [];
 const originalIsTTY = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
+const SHARED_HOOK_FILES = ["pre-wiki-context.sh", "post-verify.sh", "session-end.sh"] as const;
 
 async function makeTempRoot(): Promise<string> {
   const root = await mkdtemp(path.join(tmpdir(), "codewiki-init-"));
   tempRoots.push(root);
   return root;
+}
+
+async function listFiles(root: string, relativeDir = "."): Promise<string[]> {
+  const dir = path.join(root, relativeDir);
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const relativePath = path.join(relativeDir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await listFiles(root, relativePath)));
+      continue;
+    }
+
+    if (entry.isFile()) {
+      files.push(relativePath.split(path.sep).join("/").replace(/^\.\//, ""));
+    }
+  }
+
+  return files;
 }
 
 afterEach(async () => {
@@ -131,4 +152,29 @@ test("--tool all installs every supported adapter", async () => {
   expect(output).toContain("codex adapter:");
   expect(output).toContain("copilot adapter:");
   expect(output).toContain("opencode adapter:");
+});
+
+test.each(["codex", "copilot", "opencode"] as const)("--tool %s installs shared CodeWiki hooks", async (tool) => {
+  const root = await makeTempRoot();
+  const { initCommand } = await import("../init.js");
+
+  const output = await initCommand({ root, args: ["--name", `${tool}-demo`, "--tool", tool] });
+
+  expect(output).toContain("Shared hooks:");
+  for (const filename of SHARED_HOOK_FILES) {
+    await expect(stat(path.join(root, ".codewiki", "hooks", filename))).resolves.toBeDefined();
+  }
+});
+
+test("--tool all installs one filesystem copy of each shared CodeWiki hook", async () => {
+  const root = await makeTempRoot();
+  const { initCommand } = await import("../init.js");
+
+  await initCommand({ root, args: ["--name", "all-demo", "--tool", "all"] });
+
+  const files = await listFiles(root);
+  for (const filename of SHARED_HOOK_FILES) {
+    expect(files.filter((file) => path.basename(file) === filename)).toHaveLength(1);
+    expect(files).toContain(`.codewiki/hooks/${filename}`);
+  }
 });

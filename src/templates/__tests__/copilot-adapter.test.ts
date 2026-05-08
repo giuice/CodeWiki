@@ -9,7 +9,7 @@ async function readTemplate(relativePath: string): Promise<string> {
   return readFile(path.join(COPILOT_DIR, relativePath), "utf8");
 }
 
-describe("COP-01: Copilot hook templates use agentStop for post-turn follow-up", () => {
+describe("COP-01: Copilot hook templates use agentStop as a post-turn state sensor", () => {
   test("hook config wires CodeWiki wrappers and cleanup-only sessionEnd", async () => {
     const content = await readTemplate("hooks/codewiki-hooks.json");
     const config = JSON.parse(content) as { version: number; hooks: Record<string, unknown> };
@@ -24,6 +24,9 @@ describe("COP-01: Copilot hook templates use agentStop for post-turn follow-up",
     expect(content).toContain(".github/hooks/codewiki/post-tool-use.sh");
     expect(content).toContain(".github/hooks/codewiki/agent-stop.sh");
     expect(content).toContain("session-end.sh >/dev/null 2>&1 || true");
+    expect(content).toContain("CODEWIKI_HOOK_HOST=copilot");
+    expect(content).toContain("CODEWIKI_HOOK_EVENT=sessionEnd");
+    expect(content).toContain("sh .codewiki/hooks/session-end.sh");
   });
 
   test("wrappers dispatch through shared hooks and preserve Copilot JSON contracts", async () => {
@@ -36,14 +39,26 @@ describe("COP-01: Copilot hook templates use agentStop for post-turn follow-up",
     expect(agentStop).toContain("#!/bin/sh");
     expect(preToolUse).toContain("pre-wiki-context.sh");
     expect(postToolUse).toContain("post-verify.sh");
+    expect(postToolUse).toContain("CODEWIKI_HOOK_HOST=copilot");
     expect(postToolUse).toContain("additionalContext");
     expect(postToolUse).toContain("CODEWIKI_HOOK_DEBUG");
     expect(agentStop).toContain("session-end.sh");
+    expect(agentStop).toContain("CODEWIKI_HOOK_HOST=copilot");
     expect(agentStop).toContain("agentStop");
     expect(agentStop).toContain("sessionEnd");
     expect(agentStop).toContain("CODEWIKI_HOOK_DEBUG");
     expect(agentStop).toContain('"decision":"block"');
     expect(agentStop).toContain('"decision":"allow"');
+
+    for (const content of [postToolUse, agentStop]) {
+      expect(content).not.toContain("codewiki-wiki-updater");
+      expect(content).not.toContain("codewiki-verifier");
+      expect(content).not.toContain("codewiki-process");
+      expect(content).not.toContain("codewiki-absorb");
+      expect(content).not.toContain("pending-absorb-dedupe");
+      expect(content).not.toContain("payload_hash");
+      expect(content).not.toContain("diff_hash");
+    }
   });
 });
 
@@ -58,6 +73,7 @@ describe("COP-02 and COP-03: Copilot instructions preserve shared skill and wiki
     expect(content).toContain("agentStop");
     expect(content).toContain("sessionEnd");
     expect(content).toContain("cleanup-only");
+    expect(content).toContain("protected by shared dedupe");
     expect(content).toContain("wiki/_backlinks.json");
     expect(content).toContain("wiki/SCHEMA.md");
     expect(content).toContain("wiki/raw/");

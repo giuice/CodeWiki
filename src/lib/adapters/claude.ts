@@ -5,7 +5,7 @@ import { ensureDir, ensureInsideRoot, exists, readTextIfExists, relativePath } f
 import type { SupportedTool } from "../../core/types.js";
 import { deduplicateHookEntries, deepMerge, mergeMarkerSection } from "../merge.js";
 import type { ReportEntry } from "../reporter.js";
-import { chmodExecutable, copyTemplateDir } from "./base.js";
+import { copyTemplateDir } from "./base.js";
 import type { AdapterInstallOptions, ToolAdapter } from "./types.js";
 
 interface ClaudeHookCommand {
@@ -25,12 +25,12 @@ interface ClaudeSettings extends Record<string, unknown> {
 
 const PRE_TOOL_HOOK: ClaudeHookMatcher = {
   matcher: "Write|Edit",
-  hooks: [{ type: "command", command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PreToolUse bash .codewiki/hooks/pre-wiki-context.sh", timeout: 10 }]
+  hooks: [{ type: "command", command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PreToolUse sh .codewiki/hooks/pre-wiki-context.sh", timeout: 10 }]
 };
 
 const POST_TOOL_HOOK: ClaudeHookMatcher = {
   matcher: "Write|Edit",
-  hooks: [{ type: "command", command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PostToolUse bash .codewiki/hooks/post-verify.sh", timeout: 10 }]
+  hooks: [{ type: "command", command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PostToolUse sh .codewiki/hooks/post-verify.sh", timeout: 10 }]
 };
 
 const CLAUDE_SETTINGS_PATCH: ClaudeSettings = {
@@ -43,10 +43,8 @@ const CLAUDE_SETTINGS_PATCH: ClaudeSettings = {
 const HOOK_EVENT_NAMES = ["PreToolUse", "PostToolUse"] as const;
 const CLAUDE_SKILLS_DIR = ".claude/skills";
 const CLAUDE_AGENTS_DIR = ".claude/agents";
-const CODEWIKI_HOOKS_DIR = ".codewiki/hooks";
 const CLAUDE_SETTINGS_FILE = ".claude/settings.json";
 const CLAUDE_INSTRUCTIONS_FILE = "CLAUDE.md";
-const SESSION_END_HOOK_PATH = `${CODEWIKI_HOOKS_DIR}/session-end.sh`;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -64,14 +62,6 @@ function toFailure(pathname: string, error: unknown): ReportEntry {
   };
 }
 
-function withReason(entry: ReportEntry, reason: string): ReportEntry {
-  if (!entry.reason) {
-    return { ...entry, reason };
-  }
-
-  return { ...entry, reason: `${entry.reason}; ${reason}` };
-}
-
 export class ClaudeCodeAdapter implements ToolAdapter {
   tool: SupportedTool = "claude-code";
 
@@ -80,8 +70,7 @@ export class ClaudeCodeAdapter implements ToolAdapter {
 
     await Promise.all([
       ensureDir(options.root, CLAUDE_SKILLS_DIR),
-      ensureDir(options.root, CLAUDE_AGENTS_DIR),
-      ensureDir(options.root, CODEWIKI_HOOKS_DIR)
+      ensureDir(options.root, CLAUDE_AGENTS_DIR)
     ]);
 
     report.push(
@@ -100,13 +89,6 @@ export class ClaudeCodeAdapter implements ToolAdapter {
       ))
     );
 
-    const hookEntries = await this.copyAssetDirectory(
-      path.join(options.templateDir, "hooks"),
-      ensureInsideRoot(options.root, CODEWIKI_HOOKS_DIR),
-      options
-    );
-    report.push(...(await this.applyHookPermissions(options, hookEntries)));
-
     report.push(await this.mergeSettings(options));
     report.push(await this.mergeInstructions(options));
 
@@ -119,34 +101,6 @@ export class ClaudeCodeAdapter implements ToolAdapter {
     options: AdapterInstallOptions
   ): Promise<ReportEntry[]> {
     return copyTemplateDir(sourceDir, targetDir, options.force, options.root);
-  }
-
-  private async applyHookPermissions(
-    options: AdapterInstallOptions,
-    hookEntries: ReportEntry[]
-  ): Promise<ReportEntry[]> {
-    const updatedEntries = [...hookEntries];
-
-    for (const [index, entry] of updatedEntries.entries()) {
-      if (!entry.path.endsWith(".sh") || entry.action === "failed") {
-        continue;
-      }
-
-      if (entry.action !== "skipped") {
-        try {
-          await chmodExecutable(ensureInsideRoot(options.root, entry.path));
-        } catch (error) {
-          updatedEntries[index] = toFailure(entry.path, error);
-          continue;
-        }
-      }
-
-      if (entry.path === SESSION_END_HOOK_PATH) {
-        updatedEntries[index] = withReason(entry, "not wired to Claude lifecycle");
-      }
-    }
-
-    return updatedEntries;
   }
 
   private async mergeSettings(options: AdapterInstallOptions): Promise<ReportEntry> {

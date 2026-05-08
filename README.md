@@ -22,6 +22,8 @@ The canonical skill names are `codewiki-*`. Different tools may surface them thr
 
 Use `codewiki-flow` when you want the agent to choose the next CodeWiki workflow from repository state instead of naming a specific skill.
 
+The workflow below is the operational source of truth for CodeWiki. When hook behavior, agent routing, or skill responsibilities change, update this workflow and the Hooks section in the same change so all tool adapters keep the same semantics.
+
 ### The full developer workflow
 
 ```mermaid
@@ -49,13 +51,14 @@ flowchart TD
     direction TB
     B1["codewiki-process<br/>Pick one task"] --> B2["pre-wiki-context hook<br/>may inject short wiki context"]
     B2 --> B3["Agent edits code<br/>and runs verification"]
-    B3 --> B4["post-verify hook records<br/>pending absorb state"]
-    B4 --> B5["phase boundary or explicit absorb<br/>drives wiki-updater"]
-    B5 --> B6{"Approve wiki writes?"}
-    B6 -- "Yes" --> B7["Update wiki pages,<br/>backlinks, log"]
-    B6 -- "No" --> B8["Discard wiki proposal"]
-    B7 --> B1
+    B3 --> B4["post-verify/session-end hooks<br/>record normalized state"]
+    B4 --> B5["phase boundary or explicit absorb<br/>skill reads pending state"]
+    B5 --> B6["absorb or wiki-updater<br/>proposes wiki updates"]
+    B6 --> B7{"Approve wiki writes?"}
+    B7 -- "Yes" --> B8["Update wiki pages,<br/>backlinks, log"]
+    B7 -- "No" --> B9["Discard wiki proposal"]
     B8 --> B1
+    B9 --> B1
   end
 
   Build --> Compound
@@ -88,7 +91,7 @@ flowchart TD
 1. **Setup**: Run `npx @giuice/codewiki init` once. It scaffolds the wiki and installs the currently shipped integration assets for the selected tool set.
 2. **Feed knowledge**: Drop existing docs into `wiki/raw/` and run `codewiki-ingest` to digest them into wiki pages. The agent proposes; you approve.
 3. **Plan a feature**: Run `codewiki-prd` with a feature idea. The agent drafts the PRD, then `codewiki-tasks` turns it into phases with executable tasks.
-4. **Build**: Run `codewiki-process`. The agent works through one task at a time inside the current phase. Hooks record pending absorb state in `.codewiki/state/`; any visible hook context is optional and host-dependent.
+4. **Build**: Run `codewiki-process`. The agent works through one task at a time inside the current phase. Hooks are silent sensors: they may inject a short prompt-time hint, but their reliable job is to record host-qualified pending absorb state in `.codewiki/state/`.
 5. **Compound**: At a completed phase or explicit absorb request, use `codewiki-absorb` to extract lessons, entity updates, and issues from recent diffs and pending state. Then run `codewiki-breakdown` periodically to create missing high-signal pages from repeated references.
 6. **Maintain**: Use `codewiki-query` before starting similar work, and run `codewiki-lint` regularly to catch contradictions, orphan pages, stale claims, bloated articles, and missing cross-links.
 
@@ -97,7 +100,7 @@ flowchart TD
 1. Run `npx @giuice/codewiki init` once per repository.
 2. Put existing source material in `wiki/raw/` and run `codewiki-ingest` until the wiki reflects the project's current state.
 3. For new work, run `codewiki-prd` and then `codewiki-tasks` before implementation.
-4. Execute the work through `codewiki-process` so the phase plan, verification, commits, and pending absorb state stay aligned.
+4. Execute the work through `codewiki-process` so the phase plan, verification, and pending absorb state stay aligned. CodeWiki skills do not create commits automatically; the user controls git.
 5. Review every wiki proposal produced by absorb or wiki-updater. Nothing should be written to `wiki/` without explicit approval.
 6. At a completed phase or explicit handoff point, run `codewiki-absorb` if pending state or recent diffs contain durable knowledge.
 7. Use `codewiki-breakdown`, `codewiki-lint`, and `codewiki-query` as the ongoing maintenance loop between features.
@@ -260,7 +263,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 # 3. Shared hook scripts are installed into .codewiki/hooks/
 #    Each adapter maps them to its host tool's hook or plugin model
 
-# 4. Claude, Codex, and OpenCode install supporting agents:
+# 4. Claude, Codex, Copilot, and OpenCode install supporting agents:
 #    codewiki-wiki-updater
 #    codewiki-verifier
 ```
@@ -269,7 +272,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 
 | Command | What it does |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs the ten Skills into the canonical skill trees, installs shared hook assets, and applies the shipped tool adapters. Re-running updates CodeWiki-managed instruction sections and changed copied adapter assets such as skills, hooks, and agents while preserving unrelated user content. Use `--force` to replace protected scaffold files. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs executable shared hook assets under `.codewiki/hooks/`, installs the ten Skills into the canonical skill trees, and applies the shipped tool adapters. The report separates `Wiki scaffold`, `Shared hooks`, and each adapter section. Re-running updates CodeWiki-managed instruction sections and changed copied adapter assets such as skills, hooks, and agents while preserving unrelated user content. Use `--force` to replace protected scaffold files. |
 
 This is the only CLI command. All other intelligence lives in the installed Skill files and shared scripts that your AI tool executes natively.
 
@@ -287,20 +290,32 @@ CodeWiki ships one `SKILL.md` per logical workflow. The invocation UI differs by
 | `codewiki-obsidian` | Configure and audit the wiki as an Obsidian-compatible vault with stable assets, wikilinks, and frontmatter |
 | `codewiki-prd` | Draft a PRD through clarifying questions and save it under `.codewiki/tasks/` |
 | `codewiki-tasks` | Generate phases and executable tasks from a PRD with checklist structure |
-| `codewiki-process` | Work through tasks one task at a time with verification and clean commit hygiene |
+| `codewiki-process` | Work through tasks one task at a time with verification, plan updates, and clean git hygiene |
 | `codewiki-flow` | Choose the right CodeWiki skill for setup, ingest, query, feature work, pending absorb follow-up, absorb, breakdown, and lint |
 
 ## Hooks
 
 Shared shell scripts live in `.codewiki/hooks/`:
 
+Hooks are normalized as sensors, not workflow engines. Across Claude Code, Codex, Copilot, and OpenCode, the CodeWiki contract is the same even when the host event names differ:
+
+- stdout is quiet by default; visible context is short, advisory, and host-dependent.
+- shared hook scripts are installed for every supported adapter path during `codewiki init`.
+- durable signals are written to `.codewiki/state/pending-absorb.jsonl`.
+- pending absorb events include practical routing fields such as `timestamp`, `source`, `host`, `event`, `reason`, `files`, and `topic_candidates`; post-edit entries include `payload_hash`, while lifecycle entries include `diff_stat` and `diff_hash`.
+- duplicate signals are suppressed by host, event, files, and hash; lifecycle hashing ignores `.codewiki/state/**` so the hook does not re-trigger itself when state files are tracked.
+- debug traces are written to `.codewiki/state/hooks-debug.jsonl` only when `CODEWIKI_HOOK_DEBUG=1`.
+- prompt context is filtered to explicit CodeWiki/wiki workflow intent and deduped under `.codewiki/state/`; `CODEWIKI_HOOK_CONTEXT_BYPASS=1` is an opt-in diagnostic bypass.
+- wrappers launch the shared scripts with POSIX `sh` and set `CODEWIKI_HOOK_HOST` / `CODEWIKI_HOOK_EVENT` before dispatch; the OpenCode plugin also bounds hook execution with a short timeout.
+- updater/verifier follow-up is invoked by skills such as `codewiki-process`, `codewiki-absorb`, or `codewiki-flow`, not directly by hooks.
+
 | Hook | Purpose |
 | --- | --- |
-| `pre-wiki-context.sh` | Emits short wiki context only for wiki-relevant prompts; host delivery is advisory |
+| `pre-wiki-context.sh` | Emits short wiki context only for explicit wiki-relevant prompts, with per-context dedupe; host delivery is advisory |
 | `post-verify.sh` | Records small pending absorb signals in `.codewiki/state/pending-absorb.jsonl` |
 | `session-end.sh` | Records current uncommitted-change state without printing a recurring summary |
 
-Each adapter maps those shared scripts to the host tool's integration model. Hook output processing differs across hosts and runtimes, so CodeWiki treats `.codewiki/state/` as the reliable handoff.
+Each adapter maps those shared scripts to the host tool's integration model. Hook output processing differs across hosts and runtimes, so CodeWiki treats `.codewiki/state/` as the reliable handoff. Any change to hook semantics must be reflected in the full developer workflow above.
 
 ## Agents
 
@@ -317,10 +332,10 @@ Claude Code, Codex, Copilot, and OpenCode install two supporting agents:
 
 | Tool | Skills | Hook or integration strategy | Agents | Instructions |
 | --- | --- | --- | --- | --- |
-| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` wires shared shell hooks | `.claude/agents/` | Appends to `CLAUDE.md` |
-| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` plus `.codex/config.toml`; uses `UserPromptSubmit`, `PreToolUse`/`PostToolUse` for edit/write events, and Stop wrappers | `.codex/agents/` | Appends to `AGENTS.md` |
-| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; uses `preToolUse`, `postToolUse`, and `agentStop` for post-turn follow-up | `.github/agents/` | Appends to `.github/copilot-instructions.md` |
-| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` dispatches plugin events to shared hooks | `.opencode/agents/` | Appends to `AGENTS.md` |
+| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` wires `PreToolUse` and `PostToolUse` to shared shell hooks; no lifecycle hook is wired by default | `.claude/agents/` | Appends to `CLAUDE.md` |
+| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` plus `.codex/config.toml`; wires `UserPromptSubmit`, `PostToolUse`, and loop-safe `Stop`. `PreToolUse` wrapper ships but is not default | `.codex/agents/` | Appends to `AGENTS.md` |
+| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; wires `preToolUse`, `postToolUse`, `agentStop`, and cleanup-only `sessionEnd` to the normalized sensor contract | `.github/agents/` | Appends to `.github/copilot-instructions.md` |
+| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` dispatches `tool.execute.before`, `file.edited`, and `session.idle` to shared hooks with `sh` and a bounded child process | `.opencode/agents/` | Appends to `AGENTS.md` |
 
 Dual-tree rule:
 
@@ -333,6 +348,9 @@ The wiki itself is tool-agnostic. The installer keeps the prompt content portabl
 ## Changelog
 
 ### Unreleased
+
+- Documented hooks as normalized silent sensors and made the README workflow the operational source of truth for hook/skill/agent behavior.
+- Documented the current hook schema, host/event normalization, lifecycle dedupe, shared-hook install report, and default Codex hook wiring.
 
 - Added stronger default wiki structure: `concept`, `comparison`, and `query` page templates now ship with the scaffold alongside the existing entity, decision, lesson, issue, and source-summary templates.
 - Expanded `wiki/SCHEMA.md` with raw source provenance, `sha256` drift checks, required page quality fields, tag taxonomy, page creation thresholds, archive policy, index metadata, and standardized log entries.

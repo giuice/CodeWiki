@@ -37,6 +37,8 @@ duplicating their detailed procedures.
 - During implementation, treat `.codewiki/state/pending-absorb.jsonl` as the durable hook signal:
   invoke `codewiki-wiki-updater` for durable wiki-relevant changes, or explicitly defer the same
   work to `codewiki-absorb` at the next completed phase or explicit user request.
+- Treat hooks as state sensors only; they do not directly run updater, verifier, absorb, or any
+  focused CodeWiki workflow.
 - After a non-trivial wiki update proposal, invoke `codewiki-verifier` for read-only review before
   applying approved wiki edits.
 - Between features, use `codewiki-query`, `codewiki-lint`, and `codewiki-breakdown` to keep the wiki

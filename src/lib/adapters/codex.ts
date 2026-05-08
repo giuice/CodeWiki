@@ -18,7 +18,7 @@ const CODEX_AGENTS_DIR = ".codex/agents";
 const CODEX_HOOKS_FILE = ".codex/hooks.json";
 const CODEX_CONFIG_FILE = ".codex/config.toml";
 const CODEX_INSTRUCTIONS_FILE = "AGENTS.md";
-const CODEX_HOOK_EVENT_NAMES = ["UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop"] as const;
+const CODEX_HOOK_EVENT_NAMES = ["UserPromptSubmit", "PostToolUse", "Stop"] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);

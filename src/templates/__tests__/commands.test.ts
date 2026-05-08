@@ -200,6 +200,7 @@ describe("CMD-03D: codewiki-flow preserves lifecycle routing", () => {
     expect(content).toContain("codewiki-breakdown");
     expect(content).toContain("codewiki-lint");
     expect(content).toContain(".codewiki/state/pending-absorb.jsonl");
+    expect(content).toContain("Treat hooks as state sensors only");
     expect(content).toContain("Do not write wiki files from this routing skill");
   });
 });
@@ -296,9 +297,22 @@ describe("CMD-06: codewiki-process preserves process workflow checks", () => {
     expect(content).toContain("codewiki-absorb");
     expect(content).toContain("After meaningful verification");
     expect(content).toContain("If the change created durable wiki-relevant knowledge");
+    expect(content).toContain("hooks do not run updater, verifier, absorb");
     expect(content).toContain("In `--fast` mode, collect or defer wiki follow-ups");
     expect(content).toContain("Never write to `wiki/` without explicit approval");
     expect(content).toContain("host runtimes differ");
+  });
+});
+
+describe("CMD-06B: Claude command mirrors align with state-first hook follow-up", () => {
+  test("process, absorb, and flow mirrors do not imply hooks run updater or verifier directly", async () => {
+    const process = await readClaudeCommand("process");
+    const absorb = await readClaudeCommand("absorb");
+    const flow = await readClaudeCommand("flow");
+
+    expect(process).toContain("hooks do not run updater, verifier, absorb");
+    expect(absorb).toContain("hooks do not run updater, verifier, absorb");
+    expect(flow).toContain("Treat hooks as state sensors only");
   });
 });
 

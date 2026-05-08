@@ -98,5 +98,6 @@ describe("CLAUDE instructions connect pending absorb state to supporting agents"
     expect(content).toContain("invoke `codewiki-wiki-updater`");
     expect(content).toContain("invoke `codewiki-verifier`");
     expect(content).toContain("Hook output is advisory");
+    expect(content).toContain("pending signals are deduped in shared state");
   });
 });
