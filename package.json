@@ -1,6 +1,6 @@
 {
   "name": "@giuice/codewiki",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Markdown-first CodeWiki framework CLI with human-approved wiki proposals.",
   "type": "module",
   "bin": {
