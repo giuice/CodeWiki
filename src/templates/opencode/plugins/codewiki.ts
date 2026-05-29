@@ -1,6 +1,8 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 
+const HOOK_TIMEOUT_MS = 30000;
+
 function toJson(value: unknown): string {
   try {
     return `${JSON.stringify(value ?? {}, null, 2)}\n`;
@@ -14,7 +16,7 @@ async function runHook(root: string, hookName: string, eventName: string, payloa
 
   try {
     return await new Promise<string>((resolve) => {
-      const child = spawn("sh", [hookPath], {
+      const child = spawn(process.execPath, [hookPath], {
         cwd: root,
         env: {
           ...process.env,
@@ -38,7 +40,7 @@ async function runHook(root: string, hookName: string, eventName: string, payloa
       timer = setTimeout(() => {
         child.kill();
         finish("");
-      }, 5000);
+      }, HOOK_TIMEOUT_MS);
 
       child.stdout.on("data", (chunk: Buffer) => {
         stdout += chunk.toString("utf8");
@@ -75,16 +77,16 @@ export const CodeWikiPlugin = async ({
 
   return {
     "tool.execute.before": async (input: unknown, output: unknown) => {
-      return hookContext(await runHook(root, "pre-wiki-context.sh", "tool.execute.before", { input, output }));
+      return hookContext(await runHook(root, "pre-wiki-context.mjs", "tool.execute.before", { input, output }));
     },
 
     "file.edited": async (input: unknown, output: unknown) => {
-      return hookContext(await runHook(root, "post-verify.sh", "file.edited", { input, output }));
+      return hookContext(await runHook(root, "post-verify.mjs", "file.edited", { input, output }));
     },
 
     // `session.idle` is treated as assistant-idle / turn-end, not teardown.
     "session.idle": async (input: unknown) => {
-      return hookContext(await runHook(root, "session-end.sh", "session.idle", input));
+      return hookContext(await runHook(root, "session-end.mjs", "session.idle", input));
     }
   };
 };

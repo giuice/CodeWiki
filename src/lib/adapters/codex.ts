@@ -19,6 +19,11 @@ const CODEX_HOOKS_FILE = ".codex/hooks.json";
 const CODEX_CONFIG_FILE = ".codex/config.toml";
 const CODEX_INSTRUCTIONS_FILE = "AGENTS.md";
 const CODEX_HOOK_EVENT_NAMES = ["UserPromptSubmit", "PostToolUse", "Stop"] as const;
+const LEGACY_CODEX_CODEWIKI_HOOKS = [
+  ".codex/hooks/user-prompt-submit.sh",
+  ".codex/hooks/post-tool-use.sh",
+  ".codex/hooks/stop.sh"
+] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -34,6 +39,11 @@ function toFailure(pathname: string, error: unknown): ReportEntry {
     path: pathname,
     reason: error instanceof Error ? error.message : String(error)
   };
+}
+
+function isLegacyCodeWikiHookEntry(entry: unknown): boolean {
+  const serialized = JSON.stringify(entry) ?? "";
+  return LEGACY_CODEX_CODEWIKI_HOOKS.some((fragment) => serialized.includes(fragment));
 }
 
 function mergeCodexHooksFeature(existingText: string, templateText: string): string {
@@ -155,7 +165,7 @@ export class CodexAdapter implements ToolAdapter {
 
       for (const eventName of CODEX_HOOK_EVENT_NAMES) {
         mergedHooks[eventName] = deduplicateHookEntries([
-          ...toHookEntries(existingHooks[eventName]),
+          ...toHookEntries(existingHooks[eventName]).filter((entry) => !isLegacyCodeWikiHookEntry(entry)),
           ...toHookEntries(templateHooks[eventName])
         ]);
       }

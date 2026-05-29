@@ -125,7 +125,7 @@ flowchart TB
   end
 
   subgraph ToolIntegration[Tool integration layer: installed by init]
-    H1[Hooks<br/>pre-wiki-context.sh · post-verify.sh · session-end.sh]
+    H1[Hooks<br/>pre-wiki-context.mjs · post-verify.mjs · session-end.mjs]
     SK[Skills<br/>flow · ingest · query · lint · absorb · breakdown · prd · tasks · process]
     AG[Agents<br/>wiki-updater · verifier]
     SI[System Instructions<br/>CLAUDE.md / AGENTS.md / copilot-instructions.md]
@@ -155,9 +155,13 @@ project-root/
 │   │   ├── query.md
 │   │   └── source-summary.md
 │   ├── hooks/                        # Shared hook scripts
-│       ├── pre-wiki-context.sh
-│       ├── post-verify.sh
-│       └── session-end.sh
+│       ├── codewiki-hook-lib.mjs
+│       ├── pre-wiki-context.mjs
+│       ├── post-verify.mjs
+│       ├── session-end.mjs
+│       ├── pre-wiki-context.sh      # POSIX fallback
+│       ├── post-verify.sh           # POSIX fallback
+│       └── session-end.sh           # POSIX fallback
 │   ├── state/                        # Hook diagnostics and pending absorb signals
 │   └── tasks/                        # PRDs and phase plans
 ├── wiki/
@@ -274,7 +278,7 @@ npx @giuice/codewiki init --name "My Project" --tool claude-code,codex
 
 | Command | What it does |
 | --- | --- |
-| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs executable shared hook assets under `.codewiki/hooks/`, installs the ten Skills into the canonical skill trees, and applies the shipped tool adapters. The report separates `Wiki scaffold`, `Shared hooks`, and each adapter section. Re-running updates CodeWiki-managed instruction sections and changed copied adapter assets such as skills, hooks, and agents while preserving unrelated user content. Use `--force` to replace protected scaffold files. |
+| `codewiki init [--tool ...] [--name ...] [--force]` | Scaffolds `.codewiki/`, `.codewiki/tasks/`, and `wiki/`, installs shared hook assets under `.codewiki/hooks/`, installs the ten Skills into the canonical skill trees, and applies the shipped tool adapters. The report separates `Wiki scaffold`, `Shared hooks`, and each adapter section. Re-running updates CodeWiki-managed instruction sections and changed copied adapter assets such as skills, hooks, and agents while preserving unrelated user content. Use `--force` to replace protected scaffold files. |
 
 This is the only CLI command. All other intelligence lives in the installed Skill files and shared scripts that your AI tool executes natively.
 
@@ -297,25 +301,27 @@ CodeWiki ships one `SKILL.md` per logical workflow. The invocation UI differs by
 
 ## Hooks
 
-Shared shell scripts live in `.codewiki/hooks/`:
+Shared Node hook scripts live in `.codewiki/hooks/`; POSIX `.sh` fallbacks are still installed for legacy compatibility but are minimal fallbacks, not the canonical behavior surface:
 
 Hooks are normalized as sensors, not workflow engines. Across Claude Code, Codex, Copilot, and OpenCode, the CodeWiki contract is the same even when the host event names differ:
 
 - stdout is quiet by default; visible context is short, advisory, and host-dependent.
-- shared hook scripts are installed for every supported adapter path during `codewiki init`.
+- shared Node hook scripts are installed for every supported adapter path during `codewiki init`.
 - durable signals are written to `.codewiki/state/pending-absorb.jsonl`.
 - pending absorb events include practical routing fields such as `timestamp`, `source`, `host`, `event`, `reason`, `files`, and `topic_candidates`; post-edit entries include `payload_hash`, while lifecycle entries include `diff_stat` and `diff_hash`.
 - duplicate signals are suppressed by host, event, files, and hash; lifecycle hashing ignores `.codewiki/state/**` so the hook does not re-trigger itself when state files are tracked.
 - debug traces are written to `.codewiki/state/hooks-debug.jsonl` only when `CODEWIKI_HOOK_DEBUG=1`.
 - prompt context is filtered to explicit CodeWiki/wiki workflow intent and deduped under `.codewiki/state/`; `CODEWIKI_HOOK_CONTEXT_BYPASS=1` is an opt-in diagnostic bypass.
-- wrappers launch the shared scripts with POSIX `sh` and set `CODEWIKI_HOOK_HOST` / `CODEWIKI_HOOK_EVENT` before dispatch; the OpenCode plugin also bounds hook execution with a short timeout.
+- wrappers launch the shared Node hooks and set `CODEWIKI_HOOK_HOST` / `CODEWIKI_HOOK_EVENT` before dispatch; Codex uses `commandWindows` and Copilot uses `powershell` fields for Windows; the OpenCode plugin also bounds hook execution with the same 30s timeout window.
+- Node hooks bound expensive payload and untracked-file work so advisory hook execution stays small on projects with large tool outputs or untracked trees.
+- POSIX `.sh` fallbacks keep the silent state-recording contract for legacy/manual integrations, but may omit newer Node-only details such as untracked lifecycle hashing.
 - updater/verifier follow-up is invoked by skills such as `codewiki-process`, `codewiki-absorb`, or `codewiki-flow`, not directly by hooks.
 
 | Hook | Purpose |
 | --- | --- |
-| `pre-wiki-context.sh` | Emits short wiki context only for explicit wiki-relevant prompts, with per-context dedupe; host delivery is advisory |
-| `post-verify.sh` | Records small pending absorb signals in `.codewiki/state/pending-absorb.jsonl` |
-| `session-end.sh` | Records current uncommitted-change state without printing a recurring summary |
+| `pre-wiki-context.mjs` | Emits short wiki context only for explicit wiki-relevant prompts, with per-context dedupe; host delivery is advisory |
+| `post-verify.mjs` | Records small pending absorb signals in `.codewiki/state/pending-absorb.jsonl` |
+| `session-end.mjs` | Records current uncommitted-change state, including untracked files, without printing a recurring summary |
 
 Each adapter maps those shared scripts to the host tool's integration model. Hook output processing differs across hosts and runtimes, so CodeWiki treats `.codewiki/state/` as the reliable handoff. Any change to hook semantics must be reflected in the full developer workflow above.
 
@@ -334,10 +340,10 @@ Claude Code, Codex, Copilot, and OpenCode install two supporting agents:
 
 | Tool | Skills | Hook or integration strategy | Agents | Instructions |
 | --- | --- | --- | --- | --- |
-| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` wires `PreToolUse` and `PostToolUse` to shared shell hooks; no lifecycle hook is wired by default | `.claude/agents/` | Appends to `CLAUDE.md` |
-| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` plus `.codex/config.toml`; wires `UserPromptSubmit`, `PostToolUse`, and loop-safe `Stop`. `PreToolUse` wrapper ships but is not default | `.codex/agents/` | Appends to `AGENTS.md` |
-| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; wires `preToolUse`, `postToolUse`, `agentStop`, and cleanup-only `sessionEnd` to the normalized sensor contract | `.github/agents/` | Appends to `.github/copilot-instructions.md` |
-| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` dispatches `tool.execute.before`, `file.edited`, and `session.idle` to shared hooks with `sh` and a bounded child process | `.opencode/agents/` | Appends to `AGENTS.md` |
+| **Claude Code** | `.claude/skills/codewiki-<name>/SKILL.md` | `.claude/settings.json` wires `PreToolUse` and `PostToolUse` to shared Node hooks; no lifecycle hook is wired by default | `.claude/agents/` | Appends to `CLAUDE.md` |
+| **Codex** | `.agents/skills/codewiki-<name>/SKILL.md` | `.codex/hooks.json` plus `.codex/config.toml`; wires `UserPromptSubmit`, `PostToolUse`, and loop-safe `Stop`, with `commandWindows` for Windows. `PreToolUse` wrapper ships but is not default | `.codex/agents/` | Appends to `AGENTS.md` |
+| **Copilot** | `.agents/skills/codewiki-<name>/SKILL.md` | `.github/hooks/codewiki-hooks.json`; wires documented `preToolUse`, `postToolUse`, `agentStop`, and cleanup-only `sessionEnd`, with `bash` and `powershell` commands | `.github/agents/` | Appends to `.github/copilot-instructions.md` |
+| **OpenCode** | `.agents/skills/codewiki-<name>/SKILL.md` | `.opencode/plugins/codewiki.ts` dispatches `tool.execute.before`, `file.edited`, and `session.idle` to shared Node hooks with a bounded child process | `.opencode/agents/` | Appends to `AGENTS.md` |
 
 Dual-tree rule:
 
@@ -362,6 +368,7 @@ The wiki itself is tool-agnostic. The installer keeps the prompt content portabl
 - Added `codewiki-flow` as the tenth CodeWiki skill, with lifecycle routing across ingest, query, planning, task execution, wiki absorption, breakdown, lint, and pending absorb follow-up.
 - Added `codewiki-obsidian`, with Obsidian vault guidance for `raw/assets/`, wikilinks, Dataview-ready frontmatter, graph navigation, and existing-vault migration safety.
 - Changed managed instruction sections and copied adapter assets to update on reinstall without requiring `--force`, so existing installs receive refreshed CodeWiki guidance, skills, hooks, and agents while protected scaffold files and user-owned text outside markers are preserved.
+- Copilot legacy hook migrations now preserve unrelated hook entries while replacing CodeWiki-owned `.sh` entries with the Node hook wiring. Customized non-legacy `.github/hooks/codewiki-hooks.json` files still require `--force` to replace.
 
 ## Development
 

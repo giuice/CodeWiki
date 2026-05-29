@@ -5,7 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); sh \"$ROOT/.codex/hooks/user-prompt-submit.sh\"'"
+            "command": "sh -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.codex/hooks/user-prompt-submit.mjs\"'",
+            "commandWindows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"$root = git rev-parse --show-toplevel 2>$null; if (-not $root) { $root = (Get-Location).Path }; node (Join-Path $root '.codex/hooks/user-prompt-submit.mjs')\""
           }
         ]
       }
@@ -16,7 +17,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); sh \"$ROOT/.codex/hooks/post-tool-use.sh\"'",
+            "command": "sh -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.codex/hooks/post-tool-use.mjs\"'",
+            "commandWindows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"$root = git rev-parse --show-toplevel 2>$null; if (-not $root) { $root = (Get-Location).Path }; node (Join-Path $root '.codex/hooks/post-tool-use.mjs')\"",
             "timeout": 30
           }
         ]
@@ -27,7 +29,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); sh \"$ROOT/.codex/hooks/stop.sh\"'",
+            "command": "sh -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.codex/hooks/stop.mjs\"'",
+            "commandWindows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"$root = git rev-parse --show-toplevel 2>$null; if (-not $root) { $root = (Get-Location).Path }; node (Join-Path $root '.codex/hooks/stop.mjs')\"",
             "timeout": 30
           }
         ]

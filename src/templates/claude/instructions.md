@@ -52,4 +52,4 @@ Claude Code discovers these from `.claude/skills/codewiki-<name>/SKILL.md` and c
 Shared CodeWiki hook scripts are installed under `.codewiki/hooks/`. Claude Code wires them through `.claude/settings.json`.
 
 - `PreToolUse` and `PostToolUse` run on `Write|Edit` for short optional context and persistent pending-absorb signals. Hook output is advisory and may not be delivered by every host/runtime; pending signals are deduped in shared state.
-- `.codewiki/hooks/session-end.sh` ships as a shared asset but is not wired automatically in v1. Use `codewiki-absorb` deliberately at the end of a substantial session.
+- `.codewiki/hooks/session-end.mjs` ships as a shared asset but is not wired automatically in v1. Use `codewiki-absorb` deliberately at the end of a substantial session.

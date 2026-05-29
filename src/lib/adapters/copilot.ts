@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { ensureDir, ensureInsideRoot, exists, readTextIfExists, relativePath } from "../../core/files.js";
 import type { SupportedTool } from "../../core/types.js";
-import { mergeMarkerSection } from "../merge.js";
+import { deduplicateHookEntries, mergeMarkerSection } from "../merge.js";
 import type { ReportEntry } from "../reporter.js";
 import { chmodExecutable, copyTemplateDir, copyTemplateFile } from "./base.js";
 import type { AdapterInstallOptions, ToolAdapter } from "./types.js";
@@ -13,6 +13,12 @@ const COPILOT_CODEWIKI_HOOKS_DIR = ".github/hooks/codewiki";
 const COPILOT_AGENTS_DIR = ".github/agents";
 const COPILOT_HOOKS_FILE = ".github/hooks/codewiki-hooks.json";
 const COPILOT_INSTRUCTIONS_FILE = ".github/copilot-instructions.md";
+const LEGACY_COPILOT_CODEWIKI_HOOKS = [
+  ".github/hooks/codewiki/pre-tool-use.sh",
+  ".github/hooks/codewiki/post-tool-use.sh",
+  ".github/hooks/codewiki/agent-stop.sh",
+  ".codewiki/hooks/session-end.sh"
+] as const;
 
 function toFailure(pathname: string, error: unknown): ReportEntry {
   return {
@@ -22,12 +28,51 @@ function toFailure(pathname: string, error: unknown): ReportEntry {
   };
 }
 
-async function readTemplateScripts(sourceDir: string): Promise<string[]> {
+async function readTemplateHookWrappers(sourceDir: string): Promise<string[]> {
   const entries = await readdir(sourceDir, { withFileTypes: true });
   return entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".sh"))
+    .filter((entry) => entry.isFile() && (entry.name.endsWith(".sh") || entry.name.endsWith(".mjs")))
     .map((entry) => entry.name)
     .sort((left, right) => left.localeCompare(right));
+}
+
+function isLegacyCodeWikiHooksConfig(value: string): boolean {
+  return LEGACY_COPILOT_CODEWIKI_HOOKS.some((fragment) => value.includes(fragment));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function hookCommandText(value: unknown): string {
+  if (!isRecord(value)) return "";
+  return ["bash", "powershell", "command"].map((key) => typeof value[key] === "string" ? value[key] : "").join("\n");
+}
+
+function isLegacyCodeWikiHookEntry(value: unknown): boolean {
+  const commandText = hookCommandText(value);
+  return LEGACY_COPILOT_CODEWIKI_HOOKS.some((fragment) => commandText.includes(fragment));
+}
+
+function mergeLegacyHooksConfig(existingText: string, templateText: string): string {
+  const existing = JSON.parse(existingText) as Record<string, unknown>;
+  const template = JSON.parse(templateText) as Record<string, unknown>;
+  const existingHooks = isRecord(existing.hooks) ? existing.hooks : {};
+  const templateHooks = isRecord(template.hooks) ? template.hooks : {};
+  const mergedHooks: Record<string, unknown> = { ...existingHooks };
+
+  for (const [eventName, existingEntries] of Object.entries(existingHooks)) {
+    if (!Array.isArray(existingEntries)) continue;
+    mergedHooks[eventName] = existingEntries.filter((entry) => !isLegacyCodeWikiHookEntry(entry));
+  }
+
+  for (const [eventName, templateEntries] of Object.entries(templateHooks)) {
+    if (!Array.isArray(templateEntries)) continue;
+    const existingEntries = Array.isArray(mergedHooks[eventName]) ? mergedHooks[eventName] : [];
+    mergedHooks[eventName] = deduplicateHookEntries([...existingEntries, ...templateEntries]);
+  }
+
+  return `${JSON.stringify({ ...existing, version: template.version ?? existing.version, hooks: mergedHooks }, null, 2)}\n`;
 }
 
 export class CopilotAdapter implements ToolAdapter {
@@ -62,7 +107,7 @@ export class CopilotAdapter implements ToolAdapter {
     const sourceDir = path.join(options.templateDir, "copilot", "hooks");
     const targetDir = ensureInsideRoot(options.root, COPILOT_CODEWIKI_HOOKS_DIR);
 
-    for (const filename of await readTemplateScripts(sourceDir)) {
+    for (const filename of await readTemplateHookWrappers(sourceDir)) {
       const templatePath = path.join(sourceDir, filename);
       const targetPath = path.join(targetDir, filename);
       const displayPath = relativePath(options.root, targetPath);
@@ -117,7 +162,7 @@ export class CopilotAdapter implements ToolAdapter {
       const existingText = (await readTextIfExists(hooksPath)) ?? "";
       const templateText = await readFile(templatePath, "utf8");
 
-      if (!options.force && existed) {
+      if (!options.force && existed && !isLegacyCodeWikiHooksConfig(existingText)) {
         return {
           action: "skipped",
           path: displayPath,
@@ -125,7 +170,10 @@ export class CopilotAdapter implements ToolAdapter {
         };
       }
 
-      await writeFile(hooksPath, templateText, "utf8");
+      const nextText = !options.force && existed && isLegacyCodeWikiHooksConfig(existingText)
+        ? mergeLegacyHooksConfig(existingText, templateText)
+        : templateText;
+      await writeFile(hooksPath, nextText, "utf8");
       return { action: existed ? "replaced" : "created", path: displayPath };
     } catch (error) {
       return toFailure(displayPath, error);

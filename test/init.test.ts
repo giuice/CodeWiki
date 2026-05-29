@@ -114,7 +114,7 @@ test("local npm tarball works through npx in a fresh project", () => {
       ".codewiki/config.yml",
       ".codewiki/state",
       ".codewiki/tasks",
-      ".codewiki/hooks/pre-wiki-context.sh",
+      ".codewiki/hooks/pre-wiki-context.mjs",
       "wiki/SCHEMA.md",
       "wiki/_archive",
       "wiki/raw/specs",
@@ -148,6 +148,10 @@ test("init installs the wiki scaffold and Claude assets when the tool is selecte
     ".codewiki/state",
     ".codewiki/tasks",
     ".codewiki/hooks",
+    ".codewiki/hooks/codewiki-hook-lib.mjs",
+    ".codewiki/hooks/post-verify.mjs",
+    ".codewiki/hooks/pre-wiki-context.mjs",
+    ".codewiki/hooks/session-end.mjs",
     ".codewiki/hooks/post-verify.sh",
     ".codewiki/hooks/pre-wiki-context.sh",
     ".codewiki/hooks/session-end.sh",
@@ -272,10 +276,26 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
     JSON.stringify(
       {
         hooks: {
+          UserPromptSubmit: [
+            {
+              hooks: [{ type: "command", command: "sh -c 'ROOT=$(pwd); sh \"$ROOT/.codex/hooks/user-prompt-submit.sh\"'" }]
+            }
+          ],
           PreToolUse: [
             {
               matcher: "Read",
               hooks: [{ type: "command", command: "echo user-codex-hook" }]
+            }
+          ],
+          PostToolUse: [
+            {
+              matcher: "Edit|Write|apply_patch",
+              hooks: [{ type: "command", command: "sh -c 'ROOT=$(pwd); sh \"$ROOT/.codex/hooks/post-tool-use.sh\"'" }]
+            }
+          ],
+          Stop: [
+            {
+              hooks: [{ type: "command", command: "sh -c 'ROOT=$(pwd); sh \"$ROOT/.codex/hooks/stop.sh\"'" }]
             }
           ]
         }
@@ -303,9 +323,14 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
     ".codex/hooks.json",
     ".codex/config.toml",
     ".codex/hooks/user-prompt-submit.sh",
+    ".codex/hooks/user-prompt-submit.mjs",
     ".codex/hooks/pre-tool-use.sh",
+    ".codex/hooks/pre-tool-use.mjs",
     ".codex/hooks/post-tool-use.sh",
+    ".codex/hooks/post-tool-use.mjs",
     ".codex/hooks/stop.sh",
+    ".codex/hooks/stop.mjs",
+    ".codex/hooks/codewiki-wrapper-lib.mjs",
     ".codex/agents/codewiki-wiki-updater.toml",
     ".codex/agents/codewiki-verifier.toml",
     "AGENTS.md"
@@ -326,10 +351,13 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
     firstHooks.hooks.PreToolUse?.some((entry) => entry.matcher === "Edit|Write|apply_patch") ?? false,
     false
   );
-  assert.equal(countHookCommands(firstHooks, ".codex/hooks/user-prompt-submit.sh"), 1);
-  assert.equal(countHookCommands(firstHooks, ".codex/hooks/pre-tool-use.sh"), 0);
-  assert.equal(countHookCommands(firstHooks, ".codex/hooks/post-tool-use.sh"), 1);
-  assert.equal(countHookCommands(firstHooks, ".codex/hooks/stop.sh"), 1);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/user-prompt-submit.mjs"), 1);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/user-prompt-submit.sh"), 0);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/pre-tool-use.mjs"), 0);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/post-tool-use.mjs"), 1);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/post-tool-use.sh"), 0);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/stop.mjs"), 1);
+  assert.equal(countHookCommands(firstHooks, ".codex/hooks/stop.sh"), 0);
 
   const firstConfig = readFileSync(path.join(cwd, ".codex/config.toml"), "utf8");
   assert.match(firstConfig, /other_feature = true/);
@@ -346,10 +374,10 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
   assert.equal(countOccurrences(secondAgents, "<!-- codewiki:start -->"), 1);
 
   const secondHooks = JSON.parse(readFileSync(path.join(cwd, ".codex/hooks.json"), "utf8"));
-  assert.equal(countHookCommands(secondHooks, ".codex/hooks/user-prompt-submit.sh"), 1);
-  assert.equal(countHookCommands(secondHooks, ".codex/hooks/pre-tool-use.sh"), 0);
-  assert.equal(countHookCommands(secondHooks, ".codex/hooks/post-tool-use.sh"), 1);
-  assert.equal(countHookCommands(secondHooks, ".codex/hooks/stop.sh"), 1);
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/user-prompt-submit.mjs"), 1);
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/pre-tool-use.mjs"), 0);
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/post-tool-use.mjs"), 1);
+  assert.equal(countHookCommands(secondHooks, ".codex/hooks/stop.mjs"), 1);
 });
 
 test("init updates stale CodeWiki-managed instruction sections without clobbering user text", () => {
@@ -397,6 +425,10 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   mkdirSync(path.join(cwd, ".github/hooks"), { recursive: true });
   writeFileSync(path.join(cwd, ".github/copilot-instructions.md"), "# Existing Copilot Instructions\n");
   writeFileSync(path.join(cwd, ".github/hooks/existing.json"), "{\"hooks\":{}}\n");
+  writeFileSync(
+    path.join(cwd, ".github/hooks/codewiki-hooks.json"),
+    '{"version":1,"hooks":{"preToolUse":[{"type":"command","bash":"echo user-pre"},{"type":"command","bash":"echo keep .github/hooks/codewiki/custom.sh"},{"type":"command","bash":"sh .github/hooks/codewiki/pre-tool-use.sh"}],"postToolUse":[{"type":"command","bash":"sh .github/hooks/codewiki/post-tool-use.sh"}],"agentStop":[{"type":"command","bash":"sh .github/hooks/codewiki/agent-stop.sh"}],"sessionEnd":[{"type":"command","bash":"CODEWIKI_HOOK_HOST=copilot CODEWIKI_HOOK_EVENT=sessionEnd sh .codewiki/hooks/session-end.sh >/dev/null 2>&1 || true"}]}}\n'
+  );
 
   const first = mustRun(cwd, ["init", "--tool", "copilot"]);
   assert.match(first.stdout, /shared-skills adapter:/);
@@ -410,8 +442,13 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   for (const rel of [
     ".github/hooks/codewiki-hooks.json",
     ".github/hooks/codewiki/pre-tool-use.sh",
+    ".github/hooks/codewiki/pre-tool-use.mjs",
     ".github/hooks/codewiki/post-tool-use.sh",
+    ".github/hooks/codewiki/post-tool-use.mjs",
     ".github/hooks/codewiki/agent-stop.sh",
+    ".github/hooks/codewiki/agent-stop.mjs",
+    ".github/hooks/codewiki/session-end.mjs",
+    ".github/hooks/codewiki/codewiki-wrapper-lib.mjs",
     ".github/agents/codewiki-wiki-updater.agent.md",
     ".github/agents/codewiki-verifier.agent.md",
     ".github/copilot-instructions.md",
@@ -429,6 +466,10 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   assert.equal("postToolUse" in hooks.hooks, true);
   assert.equal("agentStop" in hooks.hooks, true);
   assert.equal("sessionEnd" in hooks.hooks, true);
+  assert.match(JSON.stringify(hooks), /powershell/);
+  assert.match(JSON.stringify(hooks), /echo user-pre/);
+  assert.match(JSON.stringify(hooks), /echo keep \.github\/hooks\/codewiki\/custom\.sh/);
+  assert.doesNotMatch(JSON.stringify(hooks), /pre-tool-use\.sh|post-tool-use\.sh|agent-stop\.sh|session-end\.sh/);
 
   const firstInstructions = readFileSync(path.join(cwd, ".github/copilot-instructions.md"), "utf8");
   assert.match(firstInstructions, /^# Existing Copilot Instructions/m);
@@ -451,6 +492,16 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   const third = mustRun(cwd, ["init", "--tool", "copilot"]);
   assert.match(third.stdout, /\.github\/hooks\/codewiki-hooks\.json \(exists; use --force to replace\)/);
   assert.equal(readFileSync(path.join(cwd, ".github/hooks/codewiki-hooks.json"), "utf8"), userEditedHooks);
+
+  writeFileSync(
+    path.join(cwd, ".github/hooks/codewiki-hooks.json"),
+    '{"version":1,"hooks":{"preToolUse":[{"type":"command","bash":"echo user-pre"},{"type":"command","bash":"sh .github/hooks/codewiki/pre-tool-use.sh"}]}}\n'
+  );
+  const fourth = mustRun(cwd, ["init", "--tool", "copilot", "--force"]);
+  const forcedHooksText = readFileSync(path.join(cwd, ".github/hooks/codewiki-hooks.json"), "utf8");
+  assert.match(fourth.stdout, /↻ replaced \.github\/hooks\/codewiki-hooks\.json/);
+  assert.match(forcedHooksText, /pre-tool-use\.mjs/);
+  assert.doesNotMatch(forcedHooksText, /echo user-pre|pre-tool-use\.sh/);
 });
 
 test("init --tool claude-code,codex installs both skill trees and the real Codex adapter", () => {
@@ -561,6 +612,28 @@ test("init preserves existing Claude settings and instructions without duplicati
             {
               matcher: "Write|Edit",
               hooks: [{ type: "command", command: "echo user", timeout: 5 }]
+            },
+            {
+              matcher: "Write|Edit",
+              hooks: [
+                {
+                  type: "command",
+                  command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PreToolUse sh .codewiki/hooks/pre-wiki-context.sh",
+                  timeout: 10
+                }
+              ]
+            }
+          ],
+          PostToolUse: [
+            {
+              matcher: "Write|Edit",
+              hooks: [
+                {
+                  type: "command",
+                  command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PostToolUse sh .codewiki/hooks/post-verify.sh",
+                  timeout: 10
+                }
+              ]
             }
           ]
         }
@@ -616,6 +689,8 @@ test("init requires --tool when no AI tools are detected in non-tty execution", 
 });
 
 test("init installs hook scripts with executable permissions (mode 755)", () => {
+  if (process.platform === "win32") return;
+
   const cwd = tempProject();
   mustRun(cwd, ["init", "--tool", "claude-code"]);
 

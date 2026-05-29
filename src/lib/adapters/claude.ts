@@ -11,6 +11,7 @@ import type { AdapterInstallOptions, ToolAdapter } from "./types.js";
 interface ClaudeHookCommand {
   type: "command";
   command: string;
+  args?: string[];
   timeout: number;
 }
 
@@ -25,12 +26,26 @@ interface ClaudeSettings extends Record<string, unknown> {
 
 const PRE_TOOL_HOOK: ClaudeHookMatcher = {
   matcher: "Write|Edit",
-  hooks: [{ type: "command", command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PreToolUse sh .codewiki/hooks/pre-wiki-context.sh", timeout: 10 }]
+  hooks: [
+    {
+      type: "command",
+      command: "node",
+      args: [".codewiki/hooks/pre-wiki-context.mjs", "--host", "claude-code", "--event", "PreToolUse"],
+      timeout: 10
+    }
+  ]
 };
 
 const POST_TOOL_HOOK: ClaudeHookMatcher = {
   matcher: "Write|Edit",
-  hooks: [{ type: "command", command: "CODEWIKI_HOOK_HOST=claude-code CODEWIKI_HOOK_EVENT=PostToolUse sh .codewiki/hooks/post-verify.sh", timeout: 10 }]
+  hooks: [
+    {
+      type: "command",
+      command: "node",
+      args: [".codewiki/hooks/post-verify.mjs", "--host", "claude-code", "--event", "PostToolUse"],
+      timeout: 10
+    }
+  ]
 };
 
 const CLAUDE_SETTINGS_PATCH: ClaudeSettings = {
@@ -45,6 +60,7 @@ const CLAUDE_SKILLS_DIR = ".claude/skills";
 const CLAUDE_AGENTS_DIR = ".claude/agents";
 const CLAUDE_SETTINGS_FILE = ".claude/settings.json";
 const CLAUDE_INSTRUCTIONS_FILE = "CLAUDE.md";
+const LEGACY_CLAUDE_CODEWIKI_HOOKS = [".codewiki/hooks/pre-wiki-context.sh", ".codewiki/hooks/post-verify.sh"] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -60,6 +76,10 @@ function toFailure(pathname: string, error: unknown): ReportEntry {
     path: pathname,
     reason: error instanceof Error ? error.message : String(error)
   };
+}
+
+function isLegacyCodeWikiHook(entry: ClaudeHookMatcher): boolean {
+  return entry.hooks.some((hook) => LEGACY_CLAUDE_CODEWIKI_HOOKS.some((fragment) => hook.command.includes(fragment)));
 }
 
 export class ClaudeCodeAdapter implements ToolAdapter {
@@ -117,7 +137,7 @@ export class ClaudeCodeAdapter implements ToolAdapter {
 
       for (const eventName of HOOK_EVENT_NAMES) {
         mergedHooks[eventName] = deduplicateHookEntries([
-          ...toHookEntries(existingHooks[eventName]),
+          ...toHookEntries(existingHooks[eventName]).filter((entry) => !isLegacyCodeWikiHook(entry)),
           ...toHookEntries(CLAUDE_SETTINGS_PATCH.hooks?.[eventName])
         ]);
       }

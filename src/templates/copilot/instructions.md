@@ -41,9 +41,9 @@ CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdo
 
 ### Copilot Hooks
 
-- `.github/hooks/codewiki-hooks.json` wires `preToolUse` to `.codewiki/hooks/pre-wiki-context.sh`
-- `.github/hooks/codewiki-hooks.json` wires `postToolUse` to `.codewiki/hooks/post-verify.sh` to record pending absorb state
-- `.github/hooks/codewiki-hooks.json` wires `agentStop` as a post-turn state recorder protected by shared dedupe, not as required context delivery
+- `.github/hooks/codewiki-hooks.json` wires `preToolUse` to `.codewiki/hooks/pre-wiki-context.mjs`
+- `.github/hooks/codewiki-hooks.json` wires `postToolUse` to `.codewiki/hooks/post-verify.mjs` to record pending absorb state
+- `.github/hooks/codewiki-hooks.json` wires documented `agentStop` as a post-turn state recorder protected by shared dedupe, not as required context delivery. Reference: https://docs.github.com/en/copilot/concepts/agents/hooks
 - `.github/hooks/codewiki-hooks.json` wires `sessionEnd` as cleanup-only lifecycle handling protected by shared dedupe
 - Copilot cloud, VS Code, CLI, and SDK runtimes differ in which hook outputs are processed. Always fall back to reading `.codewiki/state/`.
 

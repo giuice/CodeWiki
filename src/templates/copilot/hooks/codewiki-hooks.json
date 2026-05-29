@@ -4,7 +4,8 @@
     "preToolUse": [
       {
         "type": "command",
-        "bash": "sh .github/hooks/codewiki/pre-tool-use.sh",
+        "bash": "node .github/hooks/codewiki/pre-tool-use.mjs",
+        "powershell": "node .github/hooks/codewiki/pre-tool-use.mjs",
         "cwd": ".",
         "timeoutSec": 30
       }
@@ -12,7 +13,8 @@
     "postToolUse": [
       {
         "type": "command",
-        "bash": "sh .github/hooks/codewiki/post-tool-use.sh",
+        "bash": "node .github/hooks/codewiki/post-tool-use.mjs",
+        "powershell": "node .github/hooks/codewiki/post-tool-use.mjs",
         "cwd": ".",
         "timeoutSec": 30
       }
@@ -20,7 +22,8 @@
     "agentStop": [
       {
         "type": "command",
-        "bash": "sh .github/hooks/codewiki/agent-stop.sh",
+        "bash": "node .github/hooks/codewiki/agent-stop.mjs",
+        "powershell": "node .github/hooks/codewiki/agent-stop.mjs",
         "cwd": ".",
         "timeoutSec": 30
       }
@@ -28,7 +31,8 @@
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "CODEWIKI_HOOK_HOST=copilot CODEWIKI_HOOK_EVENT=sessionEnd sh .codewiki/hooks/session-end.sh >/dev/null 2>&1 || true",
+        "bash": "node .github/hooks/codewiki/session-end.mjs",
+        "powershell": "node .github/hooks/codewiki/session-end.mjs",
         "cwd": ".",
         "timeoutSec": 30
       }

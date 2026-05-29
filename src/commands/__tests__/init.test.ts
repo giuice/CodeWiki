@@ -7,7 +7,15 @@ import { afterEach, expect, test, vi } from "vitest";
 
 const tempRoots: string[] = [];
 const originalIsTTY = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
-const SHARED_HOOK_FILES = ["pre-wiki-context.sh", "post-verify.sh", "session-end.sh"] as const;
+const SHARED_HOOK_FILES = [
+  "codewiki-hook-lib.mjs",
+  "pre-wiki-context.mjs",
+  "post-verify.mjs",
+  "session-end.mjs",
+  "pre-wiki-context.sh",
+  "post-verify.sh",
+  "session-end.sh"
+] as const;
 
 async function makeTempRoot(): Promise<string> {
   const root = await mkdtemp(path.join(tmpdir(), "codewiki-init-"));
@@ -174,7 +182,7 @@ test("--tool all installs one filesystem copy of each shared CodeWiki hook", asy
 
   const files = await listFiles(root);
   for (const filename of SHARED_HOOK_FILES) {
-    expect(files.filter((file) => path.basename(file) === filename)).toHaveLength(1);
     expect(files).toContain(`.codewiki/hooks/${filename}`);
+    expect(files.filter((file) => file === `.codewiki/hooks/${filename}`)).toHaveLength(1);
   }
 });

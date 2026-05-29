@@ -9,7 +9,7 @@ async function readTemplate(relativePath: string): Promise<string> {
   return readFile(path.join(COPILOT_DIR, relativePath), "utf8");
 }
 
-describe("COP-01: Copilot hook templates use agentStop as a post-turn state sensor", () => {
+describe("COP-01: Copilot hook templates use documented agentStop as a post-turn state sensor", () => {
   test("hook config wires CodeWiki wrappers and cleanup-only sessionEnd", async () => {
     const content = await readTemplate("hooks/codewiki-hooks.json");
     const config = JSON.parse(content) as { version: number; hooks: Record<string, unknown> };
@@ -20,35 +20,33 @@ describe("COP-01: Copilot hook templates use agentStop as a post-turn state sens
     expect(config.hooks).toHaveProperty("postToolUse");
     expect(config.hooks).toHaveProperty("agentStop");
     expect(config.hooks).toHaveProperty("sessionEnd");
-    expect(content).toContain(".github/hooks/codewiki/pre-tool-use.sh");
-    expect(content).toContain(".github/hooks/codewiki/post-tool-use.sh");
-    expect(content).toContain(".github/hooks/codewiki/agent-stop.sh");
-    expect(content).toContain("session-end.sh >/dev/null 2>&1 || true");
-    expect(content).toContain("CODEWIKI_HOOK_HOST=copilot");
-    expect(content).toContain("CODEWIKI_HOOK_EVENT=sessionEnd");
-    expect(content).toContain("sh .codewiki/hooks/session-end.sh");
+    expect(content).toContain(".github/hooks/codewiki/pre-tool-use.mjs");
+    expect(content).toContain(".github/hooks/codewiki/post-tool-use.mjs");
+    expect(content).toContain(".github/hooks/codewiki/agent-stop.mjs");
+    expect(content).toContain(".github/hooks/codewiki/session-end.mjs");
+    expect(content).toContain('"powershell"');
+    expect(content).not.toContain("sh .codewiki/hooks/session-end.sh");
   });
 
   test("wrappers dispatch through shared hooks and preserve Copilot JSON contracts", async () => {
-    const preToolUse = await readTemplate("hooks/pre-tool-use.sh");
-    const postToolUse = await readTemplate("hooks/post-tool-use.sh");
-    const agentStop = await readTemplate("hooks/agent-stop.sh");
+    const preToolUse = await readTemplate("hooks/pre-tool-use.mjs");
+    const postToolUse = await readTemplate("hooks/post-tool-use.mjs");
+    const agentStop = await readTemplate("hooks/agent-stop.mjs");
+    const wrapperLib = await readTemplate("hooks/codewiki-wrapper-lib.mjs");
 
-    expect(preToolUse).toContain("#!/bin/sh");
-    expect(postToolUse).toContain("#!/bin/sh");
-    expect(agentStop).toContain("#!/bin/sh");
-    expect(preToolUse).toContain("pre-wiki-context.sh");
-    expect(postToolUse).toContain("post-verify.sh");
-    expect(postToolUse).toContain("CODEWIKI_HOOK_HOST=copilot");
+    expect(preToolUse).toContain("#!/usr/bin/env node");
+    expect(postToolUse).toContain("#!/usr/bin/env node");
+    expect(agentStop).toContain("#!/usr/bin/env node");
+    expect(preToolUse).toContain("pre-wiki-context.mjs");
+    expect(postToolUse).toContain("post-verify.mjs");
     expect(postToolUse).toContain("additionalContext");
     expect(postToolUse).toContain("CODEWIKI_HOOK_DEBUG");
-    expect(agentStop).toContain("session-end.sh");
-    expect(agentStop).toContain("CODEWIKI_HOOK_HOST=copilot");
+    expect(agentStop).toContain("session-end.mjs");
     expect(agentStop).toContain("agentStop");
-    expect(agentStop).toContain("sessionEnd");
     expect(agentStop).toContain("CODEWIKI_HOOK_DEBUG");
-    expect(agentStop).toContain('"decision":"block"');
-    expect(agentStop).toContain('"decision":"allow"');
+    expect(agentStop).toContain('decision: "block"');
+    expect(agentStop).toContain('decision: "allow"');
+    expect(wrapperLib).toContain('CODEWIKI_HOOK_HOST: "copilot"');
 
     for (const content of [postToolUse, agentStop]) {
       expect(content).not.toContain("codewiki-wiki-updater");
@@ -72,6 +70,7 @@ describe("COP-02 and COP-03: Copilot instructions preserve shared skill and wiki
     expect(content).toContain(".github/hooks/codewiki-hooks.json");
     expect(content).toContain("agentStop");
     expect(content).toContain("sessionEnd");
+    expect(content).toContain("https://docs.github.com/en/copilot/concepts/agents/hooks");
     expect(content).toContain("cleanup-only");
     expect(content).toContain("protected by shared dedupe");
     expect(content).toContain("wiki/_backlinks.json");

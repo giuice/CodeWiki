@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
@@ -21,11 +21,10 @@ function makeCodexHookRoot(): string {
 function writeSharedHook(root: string, name: string, content: string): void {
   const hookPath = path.join(root, ".codewiki", "hooks", name);
   writeFileSync(hookPath, content);
-  chmodSync(hookPath, 0o755);
 }
 
 function runCodexWrapper(root: string, wrapper: string, payload: string, env: Record<string, string> = {}): string {
-  return execFileSync("sh", [path.join(CODEX_DIR, "hooks", wrapper)], {
+  return execFileSync(process.execPath, [path.join(CODEX_DIR, "hooks", wrapper)], {
     cwd: root,
     encoding: "utf8",
     env: { ...process.env, ...env },
@@ -45,10 +44,12 @@ describe("CODEX-02: Codex hooks and feature templates follow the current event c
     expect(config.hooks).toHaveProperty("Stop");
     expect(config.hooks).not.toHaveProperty("PreToolUse");
     expect(content).toContain("Edit|Write|apply_patch");
-    expect(content).toContain("user-prompt-submit.sh");
-    expect(content).toContain("post-tool-use.sh");
-    expect(content).toContain("stop.sh");
+    expect(content).toContain("user-prompt-submit.mjs");
+    expect(content).toContain("post-tool-use.mjs");
+    expect(content).toContain("stop.mjs");
     expect(content).toContain("git rev-parse --show-toplevel");
+    expect(content).toContain("commandWindows");
+    expect(content).toContain("powershell.exe");
     expect(content).not.toContain("statusMessage");
     expect(content).not.toContain("bash");
   });
@@ -61,23 +62,22 @@ describe("CODEX-02: Codex hooks and feature templates follow the current event c
   });
 
   test("event wrappers preserve Codex stdout and JSON contracts", async () => {
-    const userPromptSubmit = await readTemplate("hooks/user-prompt-submit.sh");
-    const preToolUse = await readTemplate("hooks/pre-tool-use.sh");
-    const postToolUse = await readTemplate("hooks/post-tool-use.sh");
-    const stop = await readTemplate("hooks/stop.sh");
+    const userPromptSubmit = await readTemplate("hooks/user-prompt-submit.mjs");
+    const preToolUse = await readTemplate("hooks/pre-tool-use.mjs");
+    const postToolUse = await readTemplate("hooks/post-tool-use.mjs");
+    const stop = await readTemplate("hooks/stop.mjs");
+    const wrapperLib = await readTemplate("hooks/codewiki-wrapper-lib.mjs");
 
-    expect(userPromptSubmit).toContain("pre-wiki-context.sh");
-    expect(preToolUse).toContain("plain stdout");
-    expect(preToolUse).toContain("PreToolUse");
-    expect(postToolUse).toContain("post-verify.sh");
-    expect(postToolUse).toContain("CODEWIKI_HOOK_HOST=codex");
+    expect(userPromptSubmit).toContain("pre-wiki-context.mjs");
+    expect(preToolUse).toContain("writeJson({})");
+    expect(postToolUse).toContain("post-verify.mjs");
     expect(postToolUse).toContain("CODEWIKI_HOOK_DEBUG");
     expect(postToolUse).toContain("PostToolUse");
-    expect(stop).toContain("session-end.sh");
-    expect(stop).toContain("CODEWIKI_HOOK_HOST=codex");
-    expect(stop).toContain("stop_hook_active");
+    expect(stop).toContain("session-end.mjs");
+    expect(stop).toContain("hasStopHookActive");
     expect(stop).toContain("CODEWIKI_HOOK_DEBUG");
-    expect(stop).toContain('"decision":"block"');
+    expect(stop).toContain('decision: "block"');
+    expect(wrapperLib).toContain('CODEWIKI_HOOK_HOST: "codex"');
 
     for (const content of [postToolUse, stop]) {
       expect(content).not.toContain("codewiki-wiki-updater");
@@ -92,21 +92,21 @@ describe("CODEX-02: Codex hooks and feature templates follow the current event c
 
   test("post-tool-use.sh returns empty JSON unless debug exposes shared hook stdout", () => {
     const root = makeCodexHookRoot();
-    writeSharedHook(root, "post-verify.sh", "#!/bin/sh\ncat >/dev/null\nprintf 'debug context\\n'\n");
+    writeSharedHook(root, "post-verify.mjs", "import { readFileSync } from 'node:fs';\nreadFileSync(0, 'utf8');\nprocess.stdout.write('debug context\\n');\n");
 
-    expect(runCodexWrapper(root, "post-tool-use.sh", "{}")).toBe("{}\n");
-    expect(runCodexWrapper(root, "post-tool-use.sh", "{}", { CODEWIKI_HOOK_DEBUG: "1" })).toContain("hookSpecificOutput");
+    expect(runCodexWrapper(root, "post-tool-use.mjs", "{}")).toBe("{}\n");
+    expect(runCodexWrapper(root, "post-tool-use.mjs", "{}", { CODEWIKI_HOOK_DEBUG: "1" })).toContain("hookSpecificOutput");
   });
 
   test("stop.sh returns empty JSON by default and respects stop_hook_active", () => {
     const root = makeCodexHookRoot();
     const marker = path.join(root, "stop-ran");
-    writeSharedHook(root, "session-end.sh", "#!/bin/sh\ntouch stop-ran\nprintf 'debug reason\\n'\n");
+    writeSharedHook(root, "session-end.mjs", "import { readFileSync, writeFileSync } from 'node:fs';\nreadFileSync(0, 'utf8');\nwriteFileSync('stop-ran', '1');\nprocess.stdout.write('debug reason\\n');\n");
 
-    expect(runCodexWrapper(root, "stop.sh", '{"stop_hook_active":true}')).toBe("{}\n");
+    expect(runCodexWrapper(root, "stop.mjs", '{"stop_hook_active":true}')).toBe("{}\n");
     expect(existsSync(marker)).toBe(false);
-    expect(runCodexWrapper(root, "stop.sh", "{}")).toBe("{}\n");
-    expect(runCodexWrapper(root, "stop.sh", "{}", { CODEWIKI_HOOK_DEBUG: "1" })).toContain('"decision":"block"');
+    expect(runCodexWrapper(root, "stop.mjs", "{}")).toBe("{}\n");
+    expect(runCodexWrapper(root, "stop.mjs", "{}", { CODEWIKI_HOOK_DEBUG: "1" })).toContain('"decision":"block"');
   });
 });
 

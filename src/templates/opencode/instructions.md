@@ -41,9 +41,9 @@ CodeWiki is not query-time RAG. It maintains a persistent, human-reviewed markdo
 
 ### OpenCode Hooks
 
-- `.opencode/plugins/codewiki.ts` forwards `tool.execute.before` to `.codewiki/hooks/pre-wiki-context.sh`
-- `.opencode/plugins/codewiki.ts` forwards `file.edited` to `.codewiki/hooks/post-verify.sh` to record pending absorb state
-- `.opencode/plugins/codewiki.ts` forwards `session.idle` to `.codewiki/hooks/session-end.sh` as a deduped idle or turn-end state signal, not teardown
+- `.opencode/plugins/codewiki.ts` forwards `tool.execute.before` to `.codewiki/hooks/pre-wiki-context.mjs`
+- `.opencode/plugins/codewiki.ts` forwards `file.edited` to `.codewiki/hooks/post-verify.mjs` to record pending absorb state
+- `.opencode/plugins/codewiki.ts` forwards `session.idle` to `.codewiki/hooks/session-end.mjs` as a deduped idle or turn-end state signal, not teardown
 
 ### Important Paths
 
