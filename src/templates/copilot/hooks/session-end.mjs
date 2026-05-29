@@ -4,5 +4,5 @@ import { readStdin, repositoryRoot, runSharedHook, writeJson } from "./codewiki-
 const payload = readStdin();
 const root = repositoryRoot();
 
-runSharedHook(root, "session-end.mjs", "sessionEnd", payload);
+runSharedHook(root, "session-end.mjs", "sessionEnd", payload, { passInput: false });
 writeJson({});

@@ -7,7 +7,7 @@ const root = repositoryRoot();
 if (hasFollowupMarker(payload)) {
   writeJson({ decision: "allow" });
 } else {
-  const output = runSharedHook(root, "session-end.mjs", "agentStop", payload).trim();
+  const output = runSharedHook(root, "session-end.mjs", "agentStop", payload, { passInput: false }).trim();
 
   if (process.env.CODEWIKI_HOOK_DEBUG === "1" && output) {
     logWrapperDebug(root, { event: "agentStop", stdoutProduced: true, wrapperJson: "true", observableContext: "continuation", message: "wrapped hook stdout as Copilot agentStop block JSON" });

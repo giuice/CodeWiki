@@ -7,7 +7,7 @@ const root = repositoryRoot();
 if (hasStopHookActive(payload)) {
   writeJson({});
 } else {
-  const output = runSharedHook(root, "session-end.mjs", "Stop", payload).trim();
+  const output = runSharedHook(root, "session-end.mjs", "Stop", payload, { passInput: false }).trim();
 
   if (process.env.CODEWIKI_HOOK_DEBUG === "1" && output) {
     logWrapperDebug(root, {

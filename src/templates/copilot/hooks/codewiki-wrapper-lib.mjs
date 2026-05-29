@@ -16,7 +16,8 @@ export function repositoryRoot() {
   return result.status === 0 && result.stdout.trim() ? result.stdout.trim() : process.cwd();
 }
 
-export function runSharedHook(root, hookName, eventName, payload) {
+export function runSharedHook(root, hookName, eventName, payload, options = {}) {
+  const passInput = options.passInput !== false;
   const result = spawnSync(process.execPath, [path.join(root, ".codewiki", "hooks", hookName)], {
     cwd: root,
     encoding: "utf8",
@@ -25,7 +26,7 @@ export function runSharedHook(root, hookName, eventName, payload) {
       CODEWIKI_HOOK_HOST: "copilot",
       CODEWIKI_HOOK_EVENT: eventName
     },
-    input: payload,
+    ...(passInput ? { input: payload } : { stdio: ["ignore", "pipe", "pipe"] }),
     timeout: 30000,
     windowsHide: true
   });
