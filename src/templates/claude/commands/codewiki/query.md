@@ -26,9 +26,11 @@ matched wiki pages. Treat the wiki as the primary knowledge layer between the us
 - Read `_backlinks.json` from the resolved wiki root to identify high-importance pages. Pages with many backlinks are more likely to contain authoritative answers.
 
 ## Step 3: Search for relevant pages
-- Use `Grep` under the resolved wiki root for keywords, aliases, file names, and adjacent concepts from the question.
+- Identify candidate pages from `index.md`, `log.md`, `_backlinks.json`, and page titles/aliases before reading full pages.
+- Read full pages only after they look relevant from candidate metadata or snippets.
+- If the index is sparse or misses likely matches, broaden with `Grep` across wiki markdown for keywords, aliases, file names, and adjacent concepts from the question.
 - Use `Glob` to expand from promising matches into the specific markdown pages that matter.
-- Use `_backlinks.json` from the resolved wiki root to prioritize pages with higher backlink counts when multiple pages match the query.
+- Use `_backlinks.json` to prioritize higher-importance pages when multiple pages match.
 - Prefer a small set of high-signal pages over broad, noisy retrieval.
 
 ## Step 4: Read matched pages

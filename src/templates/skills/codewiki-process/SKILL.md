@@ -41,6 +41,13 @@ change, and works one task at a time by default. Use `--fast` only when the user
 - Identify the next incomplete task under the earliest incomplete phase.
 - Before editing, read every file listed in that task's `read_first`.
 - If a task lacks `read_first`, infer the smallest useful file set from `Relevant Files`, the PRD context, and the task text before making changes.
+- Before implementation, make an explicit wiki-first context pass:
+  - Resolve the wiki root from `.codewiki/config.yml` `wiki.path`, or use `wiki/`.
+  - Read `SCHEMA.md` when present, `index.md`, and recent `log.md` entries.
+  - Derive search terms from the task text, `read_first`, `Relevant Files`, and already-read files.
+  - Use the index and recent log to identify candidate pages before broad search.
+  - Read only a small number of high-signal wiki pages that may affect the task.
+  - Summarize relevant findings before editing, or state that no relevant wiki knowledge was found.
 - Use the task's `acceptance_criteria` as the completion contract.
 - If a task lacks `acceptance_criteria`, add concrete criteria to the phase plan before implementation unless the change is a trivial documentation-only cleanup.
 - Read existing code patterns before making changes.

@@ -21,6 +21,6 @@ describe("ABS-03B: lint.md and query.md use backlinks for ranking", () => {
     expect(matches.length).toBeGreaterThanOrEqual(2);
     expect(content).toContain("Read `_backlinks.json` from the resolved wiki root");
     expect(content).toContain("Use `_backlinks.json` to identify higher-importance pages when multiple candidates look relevant. Pages with many backlinks are more likely to contain authoritative answers.");
-    expect(content).toContain("Use `_backlinks.json` from the resolved wiki root to prioritize pages with higher backlink counts when multiple pages match the query.");
+    expect(content).toContain("Use `_backlinks.json` to prioritize higher-importance pages when multiple pages match.");
   });
 });

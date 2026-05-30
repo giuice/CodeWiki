@@ -22,7 +22,8 @@ const CODEX_HOOK_EVENT_NAMES = ["UserPromptSubmit", "PostToolUse", "Stop"] as co
 const LEGACY_CODEX_CODEWIKI_HOOKS = [
   ".codex/hooks/user-prompt-submit.sh",
   ".codex/hooks/post-tool-use.sh",
-  ".codex/hooks/stop.sh"
+  ".codex/hooks/stop.sh",
+  ".codex\\hooks\\run-hook.ps1"
 ] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -41,9 +42,23 @@ function toFailure(pathname: string, error: unknown): ReportEntry {
   };
 }
 
+function hookCommandText(value: unknown): string {
+  if (!isRecord(value)) return "";
+  return typeof value.command === "string" ? value.command : "";
+}
+
 function isLegacyCodeWikiHookEntry(entry: unknown): boolean {
-  const serialized = JSON.stringify(entry) ?? "";
-  return LEGACY_CODEX_CODEWIKI_HOOKS.some((fragment) => serialized.includes(fragment));
+  const commandText = hookCommandText(entry);
+  return LEGACY_CODEX_CODEWIKI_HOOKS.some((fragment) => commandText.includes(fragment));
+}
+
+function removeLegacyCodeWikiHooks(entry: unknown): unknown | undefined {
+  if (!isRecord(entry) || !Array.isArray(entry.hooks)) {
+    return isLegacyCodeWikiHookEntry(entry) ? undefined : entry;
+  }
+
+  const hooks = entry.hooks.filter((hook) => !isLegacyCodeWikiHookEntry(hook));
+  return hooks.length > 0 ? { ...entry, hooks } : undefined;
 }
 
 function mergeCodexHooksFeature(existingText: string, templateText: string): string {
@@ -165,7 +180,7 @@ export class CodexAdapter implements ToolAdapter {
 
       for (const eventName of CODEX_HOOK_EVENT_NAMES) {
         mergedHooks[eventName] = deduplicateHookEntries([
-          ...toHookEntries(existingHooks[eventName]).filter((entry) => !isLegacyCodeWikiHookEntry(entry)),
+          ...toHookEntries(existingHooks[eventName]).map(removeLegacyCodeWikiHooks).filter((entry) => entry !== undefined),
           ...toHookEntries(templateHooks[eventName])
         ]);
       }

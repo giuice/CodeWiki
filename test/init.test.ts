@@ -290,12 +290,25 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
           PostToolUse: [
             {
               matcher: "Edit|Write|apply_patch",
-              hooks: [{ type: "command", command: "sh -c 'ROOT=$(pwd); sh \"$ROOT/.codex/hooks/post-tool-use.sh\"'" }]
+              hooks: [
+                {
+                  type: "command",
+                  command: "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .codex\\hooks\\run-hook.ps1 post-tool-use"
+                },
+                { type: "command", command: "sh -c 'ROOT=$(pwd); sh \"$ROOT/.codex/hooks/post-tool-use.sh\"'" },
+                { type: "command", command: "echo keep-user-post-hook" }
+              ]
             }
           ],
           Stop: [
             {
-              hooks: [{ type: "command", command: "sh -c 'ROOT=$(pwd); sh \"$ROOT/.codex/hooks/stop.sh\"'" }]
+              hooks: [
+                {
+                  type: "command",
+                  command: "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .codex\\hooks\\run-hook.ps1 stop"
+                },
+                { type: "command", command: "sh -c 'ROOT=$(pwd); sh \"$ROOT/.codex/hooks/stop.sh\"'" }
+              ]
             }
           ]
         }
@@ -356,8 +369,10 @@ test("init --tool codex installs hooks, agents, shared skills, and preserves use
   assert.equal(countHookCommands(firstHooks, ".codex/hooks/pre-tool-use.mjs"), 0);
   assert.equal(countHookCommands(firstHooks, ".codex/hooks/post-tool-use.mjs"), 1);
   assert.equal(countHookCommands(firstHooks, ".codex/hooks/post-tool-use.sh"), 0);
+  assert.equal(countHookCommands(firstHooks, "echo keep-user-post-hook"), 1);
   assert.equal(countHookCommands(firstHooks, ".codex/hooks/stop.mjs"), 1);
   assert.equal(countHookCommands(firstHooks, ".codex/hooks/stop.sh"), 0);
+  assert.equal(countHookCommands(firstHooks, ".codex\\hooks\\run-hook.ps1"), 0);
 
   const firstConfig = readFileSync(path.join(cwd, ".codex/config.toml"), "utf8");
   assert.match(firstConfig, /other_feature = true/);
@@ -427,7 +442,7 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   writeFileSync(path.join(cwd, ".github/hooks/existing.json"), "{\"hooks\":{}}\n");
   writeFileSync(
     path.join(cwd, ".github/hooks/codewiki-hooks.json"),
-    '{"version":1,"hooks":{"preToolUse":[{"type":"command","bash":"echo user-pre"},{"type":"command","bash":"echo keep .github/hooks/codewiki/custom.sh"},{"type":"command","bash":"sh .github/hooks/codewiki/pre-tool-use.sh"}],"postToolUse":[{"type":"command","bash":"sh .github/hooks/codewiki/post-tool-use.sh"}],"agentStop":[{"type":"command","bash":"sh .github/hooks/codewiki/agent-stop.sh"}],"sessionEnd":[{"type":"command","bash":"CODEWIKI_HOOK_HOST=copilot CODEWIKI_HOOK_EVENT=sessionEnd sh .codewiki/hooks/session-end.sh >/dev/null 2>&1 || true"}]}}\n'
+    '{"version":1,"hooks":{"preToolUse":[{"type":"command","bash":"echo user-pre"},{"type":"command","bash":"echo keep .github/hooks/codewiki/custom.sh"},{"type":"command","bash":"sh .github/hooks/codewiki/pre-tool-use.sh"}],"postToolUse":[{"type":"command","bash":"sh .github/hooks/codewiki/post-tool-use.sh"}],"agentStop":[{"type":"command","powershell":"powershell.exe -NoProfile -ExecutionPolicy Bypass -File .github\\\\hooks\\\\codewiki\\\\run-hook.ps1 agent-stop"},{"type":"command","bash":"sh .github/hooks/codewiki/agent-stop.sh"}],"sessionEnd":[{"type":"command","bash":"CODEWIKI_HOOK_HOST=copilot CODEWIKI_HOOK_EVENT=sessionEnd sh .codewiki/hooks/session-end.sh >/dev/null 2>&1 || true"}]}}\n'
   );
 
   const first = mustRun(cwd, ["init", "--tool", "copilot"]);
@@ -469,7 +484,7 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   assert.match(JSON.stringify(hooks), /powershell/);
   assert.match(JSON.stringify(hooks), /echo user-pre/);
   assert.match(JSON.stringify(hooks), /echo keep \.github\/hooks\/codewiki\/custom\.sh/);
-  assert.doesNotMatch(JSON.stringify(hooks), /pre-tool-use\.sh|post-tool-use\.sh|agent-stop\.sh|session-end\.sh/);
+  assert.doesNotMatch(JSON.stringify(hooks), /pre-tool-use\.sh|post-tool-use\.sh|agent-stop\.sh|session-end\.sh|run-hook\.ps1/);
 
   const firstInstructions = readFileSync(path.join(cwd, ".github/copilot-instructions.md"), "utf8");
   assert.match(firstInstructions, /^# Existing Copilot Instructions/m);
@@ -502,6 +517,26 @@ test("init --tool copilot installs hooks, shared skills, and preserves instructi
   assert.match(fourth.stdout, /↻ replaced \.github\/hooks\/codewiki-hooks\.json/);
   assert.match(forcedHooksText, /pre-tool-use\.mjs/);
   assert.doesNotMatch(forcedHooksText, /echo user-pre|pre-tool-use\.sh/);
+});
+
+test("init --tool copilot migrates a Windows-only legacy hooks config", () => {
+  const cwd = tempProject();
+  mkdirSync(path.join(cwd, ".github/hooks"), { recursive: true });
+  writeFileSync(path.join(cwd, ".github/copilot-instructions.md"), "# Existing Copilot Instructions\n");
+  // The only legacy marker is a Windows backslash path. In valid JSON a backslash
+  // is stored as `\\`, so the raw-text gate must not treat this as user-owned.
+  writeFileSync(
+    path.join(cwd, ".github/hooks/codewiki-hooks.json"),
+    '{"version":1,"hooks":{"agentStop":[{"type":"command","powershell":"powershell.exe -NoProfile -ExecutionPolicy Bypass -File .github\\\\hooks\\\\codewiki\\\\run-hook.ps1 agent-stop"}]}}\n'
+  );
+
+  const result = mustRun(cwd, ["init", "--tool", "copilot"]);
+  assert.match(result.stdout, /↻ replaced \.github\/hooks\/codewiki-hooks\.json/);
+
+  const hooksText = readFileSync(path.join(cwd, ".github/hooks/codewiki-hooks.json"), "utf8");
+  assert.doesNotMatch(hooksText, /run-hook\.ps1/);
+  const hooks = JSON.parse(hooksText) as { hooks: Record<string, unknown> };
+  assert.equal("agentStop" in hooks.hooks, true);
 });
 
 test("init --tool claude-code,codex installs both skill trees and the real Codex adapter", () => {

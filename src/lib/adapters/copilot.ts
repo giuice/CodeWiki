@@ -17,7 +17,13 @@ const LEGACY_COPILOT_CODEWIKI_HOOKS = [
   ".github/hooks/codewiki/pre-tool-use.sh",
   ".github/hooks/codewiki/post-tool-use.sh",
   ".github/hooks/codewiki/agent-stop.sh",
-  ".codewiki/hooks/session-end.sh"
+  ".github/hooks/codewiki/run-hook.ps1",
+  ".github\\hooks\\codewiki\\pre-tool-use.sh",
+  ".github\\hooks\\codewiki\\post-tool-use.sh",
+  ".github\\hooks\\codewiki\\agent-stop.sh",
+  ".github\\hooks\\codewiki\\run-hook.ps1",
+  ".codewiki/hooks/session-end.sh",
+  ".codewiki\\hooks\\session-end.sh"
 ] as const;
 
 function toFailure(pathname: string, error: unknown): ReportEntry {
@@ -37,7 +43,26 @@ async function readTemplateHookWrappers(sourceDir: string): Promise<string[]> {
 }
 
 function isLegacyCodeWikiHooksConfig(value: string): boolean {
-  return LEGACY_COPILOT_CODEWIKI_HOOKS.some((fragment) => value.includes(fragment));
+  if (LEGACY_COPILOT_CODEWIKI_HOOKS.some((fragment) => value.includes(fragment))) {
+    return true;
+  }
+
+  // Raw-text matching misses Windows paths: a backslash is stored as `\\` in JSON
+  // but the fragments are single-backslash runtime strings. Parse and inspect the
+  // decoded command strings so backslash-only legacy configs are still detected.
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return false;
+  }
+
+  const hooks = isRecord(parsed) && isRecord(parsed.hooks) ? parsed.hooks : undefined;
+  if (!hooks) return false;
+
+  return Object.values(hooks).some(
+    (entries) => Array.isArray(entries) && entries.some((entry) => isLegacyCodeWikiHookEntry(entry))
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
